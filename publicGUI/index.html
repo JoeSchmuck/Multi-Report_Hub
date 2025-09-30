@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Multi-Report Configuration Editor" />
+    <meta name="theme-color" content="#0d6efd" />
+    <meta property="og:url" content="https://github.com/JoeSchmuck/Multi-Report" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/JoeSchmuck/Multi-Report_Config_HTML/main/assets/HD3aGUI-resized.png" /> 
+
+    <title>Multi-Report Configuration Editor</title>
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>⚙️</text></svg>">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/spectrum-colorpicker2/dist/spectrum.min.css">
+    <link rel="stylesheet" href="mrce.css">
+
+</head>
+<body>
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top border-bottom">
+      <div class="container">
+        <span  class="navbar-brand d-flex align-items-center gap-2" href="#">
+          <span class="fs-5">⚙️</span>
+          <strong>Multi-Report Configuration Editor <small class="text-muted">v3.20 BETA</small></strong>
+        </span >
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="https://github.com/JoeSchmuck/Multi-Report">Go to the Project</a></li>
+          </ul>
+          <div class="ms-lg-3 d-flex gap-2">
+            <div class="btn-group" role="group" aria-label="Theme">
+              <button class="btn btn-outline-secondary btn-sm" data-theme-value="light" title="light Theme">☀️</button>
+              <button class="btn btn-outline-secondary btn-sm" data-theme-value="dark" title="dark Theme">🌙</button>
+              <button class="btn btn-outline-secondary btn-sm" data-theme-value="auto" title="auto Theme">🖥️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <header class="container my-4" id="top"> 
+    <div class="mr-hero">
+        <div class="row justify-content-center align-items-center g-3">
+            <div class="col-auto d-flex flex-wrap justify-content-center">
+                <img src="https://raw.githubusercontent.com/JoeSchmuck/Multi-Report_Config_HTML/main/assets/HD3aGUI-resized.png" alt="Logo Multi-Report">
+            </div>
+            <div class="col d-flex justify-content-center">
+                <p class="lead mb-0 text-center">
+                Build from scratch or update your config file easily 
+                </p>
+            </div>
+            <div class="col-auto d-flex flex-wrap justify-content-center">
+                <img src="https://raw.githubusercontent.com/JoeSchmuck/Multi-Report_Config_HTML/main/assets/HD3aGUI-resized.png" alt="Logo Drive-Selftest">
+            </div>            
+        </div>
+    </div>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="d-flex justify-content-center align-items-center flex-nowrap gap-2 mb-3" id="mr-toolbar">
+        <button type="button" class="btn btn-primary" id="mr-btn-load">
+            <i class="fa-solid fa-folder-open me-1"></i> Load
+        </button>
+        <button type="button" class="btn btn-success" id="mr-btn-save">
+            <i class="fa-solid fa-floppy-disk me-1"></i> Save
+        </button>
+        <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#mr-modal1">
+            <i class="fa-solid fa-circle-question me-1"></i> Help
+        </button>
+        <div id="google_translate_element"></div>
+    </div>    
+
+    <main class="container py-4">
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="mrceTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="mr-tab1-tab" data-bs-toggle="tab" data-bs-target="#mr-tab1" type="button" role="tab" aria-controls="mr-tab1" aria-selected="true">
+            <i class="fa-solid fa-envelope-circle-check"></i> Email Settings
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="mr-tab2-tab" data-bs-toggle="tab" data-bs-target="#mr-tab2" type="button" role="tab" aria-controls="mr-tab2" aria-selected="false">
+            <i class="fa-solid fa-hard-drive"></i> Drive Settings
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="mr-tab3-tab" data-bs-toggle="tab" data-bs-target="#mr-tab3" type="button" role="tab" aria-controls="mr-tab3" aria-selected="false">
+            <i class="fa-solid fa-chart-simple"></i> Report Settings
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="mr-tab4-tab" data-bs-toggle="tab" data-bs-target="#mr-tab4" type="button" role="tab" aria-controls="mr-tab4" aria-selected="false">
+            <i class="fa-solid fa-wrench"></i> Utility Settings
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content border-0 rounded-bottom p-3 bg-body" id="mrceTabsContent">
+
+        <div class="tab-pane fade show active" id="mr-tab1" role="tabpanel" aria-labelledby="mr-tab1-tab" tabindex="0">
+
+            <div class="accordion" id="mr-tab1-acc">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab1-acc1-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab1-acc1" aria-expanded="true" aria-controls="mr-tab1-acc1">
+                            <i class="fa-solid fa-envelope-open me-2"></i> General Settings
+                        </button>
+                    </h2>
+                    <div id="mr-tab1-acc1" class="accordion-collapse collapse show" aria-labelledby="mr-tab1-acc1-header" data-bs-parent="#mr-tab1-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab1-acc2-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab1-acc2" aria-expanded="false" aria-controls="mr-tab1-acc2">
+                            <i class="fa-solid fa-paperclip me-2"></i> Attachments
+                        </button>
+                    </h2>
+                    <div id="mr-tab1-acc2" class="accordion-collapse collapse" aria-labelledby="mr-tab1-acc2-header" data-bs-parent="#mr-tab1-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab1-acc3-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab1-acc3" aria-expanded="false" aria-controls="mr-tab1-acc3">
+                            <i class="fa-solid fa-bell me-2"></i> Alarm Settings
+                        </button>
+                    </h2>
+                    <div id="mr-tab1-acc3" class="accordion-collapse collapse" aria-labelledby="mr-tab1-acc3-header" data-bs-parent="#mr-tab1-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>                
+                
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="mr-tab2" role="tabpanel" aria-labelledby="mr-tab2-tab" tabindex="0">
+            <div class="accordion" id="mr-tab2-acc">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab2-acc1-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab2-acc1" aria-expanded="true" aria-controls="mr-tab2-acc1">
+                            <i class="fa-solid fa-robot me-2"></i> Drive-Selftest - S.M.A.R.T. Testing
+                        </button>
+                    </h2>
+                    <div id="mr-tab2-acc1" class="accordion-collapse collapse show" aria-labelledby="mr-tab2-acc1-header" data-bs-parent="#mr-tab2-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>    
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab2-acc2-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab2-acc2" aria-expanded="false" aria-controls="mr-tab2-acc2">
+                            <i class="fa-solid fa-pen-to-square me-2"></i> Drive Customization
+                        </button>
+                    </h2>
+                    <div id="mr-tab2-acc2" class="accordion-collapse collapse" aria-labelledby="mr-tab2-acc2-header" data-bs-parent="#mr-tab2-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab2-acc3-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab2-acc3" aria-expanded="false" aria-controls="mr-tab2-acc3">
+                            <i class="fa-solid fa-pen-fancy me-2"></i> Other Drive Settings
+                        </button>
+                    </h2>
+                    <div id="mr-tab2-acc3" class="accordion-collapse collapse" aria-labelledby="mr-tab2-acc3-header" data-bs-parent="#mr-tab2-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>      
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab2-acc4-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab2-acc4" aria-expanded="false" aria-controls="mr-tab2-4">
+                            <i class="fa-solid fa-plug me-2"></i> Add-On Features
+                        </button>
+                    </h2>
+                    <div id="mr-tab2-acc4" class="accordion-collapse collapse" aria-labelledby="mr-tab2-acc4-header" data-bs-parent="#mr-tab2-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>                   
+                
+            </div>
+        </div>
+        
+        <div class="tab-pane fade" id="mr-tab3" role="tabpanel" aria-labelledby="mr-tab3-tab" tabindex="0">
+            <div class="accordion" id="mr-tab3-acc">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab3-acc1-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab3-acc1" aria-expanded="true" aria-controls="mr-tab3-acc1">
+                            <i class="fa-solid fa-file-csv me-2"></i> Statistical Data File
+                        </button>
+                    </h2>
+                    <div id="mr-tab3-acc1" class="accordion-collapse collapse show" aria-labelledby="mr-tab3-acc1-header" data-bs-parent="#mr-tab3-acc">
+                        <div class="accordion-body">
+                           
+                        </div>
+                    </div>    
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab3-acc2-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab3-acc2" aria-expanded="false" aria-controls="mr-tab3-acc2">
+                            <i class="fa-solid fa-flag me-2"></i> Report Configuration
+                        </button>
+                    </h2>
+                    <div id="mr-tab3-acc2" class="accordion-collapse collapse" aria-labelledby="mr-tab3-acc2-header" data-bs-parent="#mr-tab3-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab3-acc3-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab3-acc3" aria-expanded="false" aria-controls="mr-tab3-acc3">
+                            <i class="fa-solid fa-chart-pie me-2"></i> Report Chart Configuration - Headers
+                        </button>
+                    </h2>
+                    <div id="mr-tab3-acc3" class="accordion-collapse collapse" aria-labelledby="mr-tab3-acc3-header" data-bs-parent="#mr-tab3-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>      
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab3-acc4-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab3-acc4" aria-expanded="false" aria-controls="mr-tab3-acc4">
+                            <i class="fa-solid fa-puzzle-piece me-2"></i> Custom Report Configuration - Zpool
+                        </button>
+                    </h2>
+                    <div id="mr-tab3-acc4" class="accordion-collapse collapse" aria-labelledby="mr-tab3-acc4-header" data-bs-parent="#mr-tab3-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>                   
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab3-acc5-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab3-acc5" aria-expanded="false" aria-controls="mr-tab3-acc5">
+                            <i class="fa-solid fa-puzzle-piece me-2"></i> Custom Report Configuration - HDD
+                        </button>
+                    </h2>
+                    <div id="mr-tab3-acc5" class="accordion-collapse collapse" aria-labelledby="mr-tab3-acc5-header" data-bs-parent="#mr-tab3-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>  
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab3-acc6-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab3-acc6" aria-expanded="false" aria-controls="mr-tab3-acc6">
+                            <i class="fa-solid fa-puzzle-piece me-2"></i> Custom Report Configuration - SSD
+                        </button>
+                    </h2>
+                    <div id="mr-tab3-acc6" class="accordion-collapse collapse" aria-labelledby="mr-tab3-acc6-header" data-bs-parent="#mr-tab3-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>  
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab3-acc7-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab3-acc7" aria-expanded="false" aria-controls="mr-tab3-acc7">
+                            <i class="fa-solid fa-puzzle-piece me-2"></i> Custom Report Configuration - NVM
+                        </button>
+                    </h2>
+                    <div id="mr-tab3-acc7" class="accordion-collapse collapse" aria-labelledby="mr-tab3-acc7-header" data-bs-parent="#mr-tab3-acc">
+                        <div class="accordion-body">
+                           
+                        </div>
+                    </div>
+                </div>                  
+
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="mr-tab4" role="tabpanel" aria-labelledby="mr-tab4-tab" tabindex="0">
+            <div class="accordion" id="mr-tab4-acc">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab4-acc1-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab4-acc1" aria-expanded="true" aria-controls="mr-tab4-acc1">
+                            <i class="fa-solid fa-download me-2"></i> Script Updates
+                        </button>
+                    </h2>
+                    <div id="mr-tab4-acc1" class="accordion-collapse collapse show" aria-labelledby="mr-tab4-acc1-header" data-bs-parent="#mr-tab4-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>          
+ 
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mr-tab4-acc2-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#mr-tab4-acc2" aria-expanded="true" aria-controls="mr-tab4-acc2">
+                            <i class="fa-solid fa-eye-dropper me-2"></i></i> Global table of colors
+                        </button>
+                    </h2>
+                    <div id="mr-tab4-acc2" class="accordion-collapse collapse" aria-labelledby="mr-tab4-acc2-header" data-bs-parent="#mr-tab4-acc">
+                        <div class="accordion-body">
+                            
+                        </div>
+                    </div>
+                </div>                   
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+    </main>
+
+    <!-- Main modal - help -->
+    <div class="modal fade" id="mr-modal1" tabindex="-1" aria-labelledby="mr-modal1-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mr-modal1-label">Multi-Report Configuration Editor — Help</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="vstack gap-3 text-body lh-base">
+                        <p>
+                            This editor helps you configure your Multi-Report script settings. Make sure you understand what each setting does before changing it.
+                            The <code>-config</code> is likely a better option where you just answer questions, however some of the advanced configurations are missed by people. This will expose these settings.
+                        </p>
+
+                        <p><strong>Load:</strong> Click this to load settings from a <code>multi_report_config.txt</code> file. This is useful for editing existing configurations.</p>
+                        <p><strong>Save:</strong> Click this to save your current settings to a <code>multi_report_config.txt</code> file. This file will be downloaded to your computer, typically your downloads folder.</p>
+
+                        <p>
+                            <strong>Directions:</strong> A Checkbox with a check = “enable”, No check = “disable”.<br>
+                            The minimum configuration is to enter a TO Email address. You may need to configure your From Email address.<br>
+                            All other default settings should be sufficient to run Multi-Report. You should then run Multi-Report to ensure it works.<br>
+                            This configuration page will not completely replace the <code>-config</code> operations built into Multi-Report. You will still need to use it for Automatic Drive Compensation and Custom Drive setup.
+                        </p>
+
+                        <hr class="my-1">
+
+                        <p>The collapsible sections organize the settings. Click on a header to expand or collapse it.</p>
+                        <p><strong>Section Specific Help:</strong> Below is additional help in order to configure the <strong>Drive Customization</strong> section.</p>
+
+                        <p>
+                            The data provided will identify the specific format the data is to be formatted. If this seems complicated, use the <code>-config</code> option of the Multi-Report script.
+                            <strong>Ignore Drives List:</strong> This will have the script ignore any matching drive serial number. Format: This is a simple comma delimited format.
+                            List each drive serial number separated by a comma. Example: (<strong>KV5T8G,OU812,TESTME</strong>).
+                        </p>
+
+                        <p>
+                            The following all have the same format: <strong>ATA Errors List, CRC Errors List, MultiZone List, ReAllowcated Sector List, ReAlocated Sector Events List, and Media Errors List.</strong>
+                            Format is drive serial number, colon, compensation number, comma, repeat.
+                            Example: (<strong>KV5T8G:6,OU812:1,TESTME:3</strong>).
+                        </p>
+
+                        <p>
+                            The <strong>Drive Locations</strong> format is a simple comma delimited format.
+                            Example: (<strong>KV5T8G:"Tray 1",OU812:"Removable Rack 3B",TESTME:"Died and went to heaven"</strong>).
+                        </p>
+
+                        <p>
+                            The <strong>Drive Warranty</strong> is nice to have if for example you have a drive with a 3 year warranty, you enter the warranty expiration date and the report tells you how long until the warranty expires.
+                            Once you have exceeded the warranty date it counts up and you get to see how many years, months, days your drive has lasted.
+                            The format: serial number:YYYY-MM-DD,serial number:YYYY-MM-DD.
+                            Example: (<strong>KV5T8G:2023-06-15,OU812:2025-09-23,TESTME:2024-03-12</strong>).
+                        </p>
+
+                        <p>
+                            The most complex format has been saved for last <strong>Custom Drive List</strong>. You are better to use the <code>-config</code> option built into the script, however here is the format is one continuous line, broken into pieces for your viewing pleasure:
+                        </p>
+
+                        <pre class="bg-dark text-success small p-3 rounded overflow-auto shadow-sm mb-0"><code>serial:tempwarn:tempcrit:sectorswarn:sectorscrit:
+    reallocwarn:multizonewarn:multizonecrit:rawreadwarn:rawreadcrit:
+    seekerrorswarn:seekerrorscrit:testage:testAgeOvrd:heliummin:
+    wearleveladj:farmoffset</code></pre>
+
+                        <p class="mb-0"><strong>(testAgeOvrd 0=Default, 1=Ignore, wearleveladj d=Default r=Reverse value n=Normalized i=Ignore, farmoffset d or i)</strong></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <footer class="container py-4">
+      <div class="d-flex flex-column flex-md-row align-items-center gap-2 justify-content-between">
+        <small class="text-muted">© <span id="year"></span> <b>Multi-Report Configuration Editor</b> 
+            <br>Credits: <a href="https://github.com/JoeSchmuck" target="_blank">JoeSchmuck</a>, <a href="https://github.com/oxyde1989" target="_blank">Oxyde</a>
+        </small>
+        <a href="#" id="scrollTopBtn" class="btn btn-outline-secondary btn-sm">Back to top ↑</a>
+      </div>
+    </footer>    
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/spectrum-colorpicker2/dist/spectrum.min.js"></script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script src="mrce.config.js"></script>
+<script src="mrce.app.js"></script>
+
+<script>
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'en',
+      includedLanguages: 'en,fr,de,es,pt,ru,it',
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+
+
+
+</body>
+</html>
