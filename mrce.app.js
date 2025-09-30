@@ -70,7 +70,7 @@
         } else if (type === "colorpicker") {
             const val = def || "#ffffff";
             return `
-                    <input type="text" class="form-control mr-color" id="${id}" data-key="${fieldKey}" value="${val}" ${reqAttr}>
+                    <input type="text" class="form-control mr-color notranslate" id="${id}" data-key="${fieldKey}" value="${val}" ${reqAttr}>
             `;            
         } else if (type === "select") {
             const items = Array.isArray(opt.options)
@@ -93,7 +93,7 @@
                 })
                 .join("");
             return `
-        <select class="form-select" id="${id}" data-key="${fieldKey}"${reqAttr}>
+        <select class="form-select notranslate" id="${id}" data-key="${fieldKey}"${reqAttr}>
           ${optionsHtml}
         </select>`;
         } else if (type === "number") {
@@ -101,10 +101,10 @@
             const max = (opt.max ?? "") !== "" ? ` max="${opt.max}"` : "";
             const step = (opt.step ?? "") !== "" ? ` step="${opt.step}"` : "";
             return `
-        <input type="number" class="form-control" id="${id}" data-key="${fieldKey}" value="${def}"${min}${max}${step}${reqAttr}>`;
+        <input type="number" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${min}${max}${step}${reqAttr}>`;
         } else if (type === "email" || fieldKey.toLowerCase().includes("email")) {
             return `
-        <input type="email" class="form-control" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}>`;
+        <input type="email" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}>`;
         } else if (type === "dayscheckbox") {
             const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
             const selected = (opt.default || "").split(",").map((v) => v.trim());
@@ -115,7 +115,7 @@
                     const checked = selected.includes(dayNum) ? " checked" : "";
                     return `
             <label class="form-check form-check-inline me-2">
-              <input class="form-check-input" type="checkbox"
+              <input class="form-check-input notranslate" type="checkbox"
                 id="${id}-${dayNum}" name="${fieldKey}" data-key="${fieldKey}"
                 value="${dayNum}"${checked}>
               <span class="form-check-label">${day}</span>
@@ -125,7 +125,7 @@
             return `<div class="d-flex flex-wrap"${groupReq}>${boxes}</div>`;
         } else {
             return `
-        <input type="text" class="form-control" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}>`;
+        <input type="text" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}>`;
         }
     }
 
