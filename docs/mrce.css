@@ -27,12 +27,26 @@ input[type="text"]:disabled, input[type="number"]:disabled, input[type="email"]:
 .sp-colorize-container.sp-add-on { min-width: 38px !important; } /* fix spectrum initialized on hidden accordion */
 
 /* google plugin */
-#mr-toolbar .goog-te-gadget-simple { display: inline-flex; align-items: center; gap: .5rem; }
-#mr-toolbar .goog-te-gadget-simple {
+#google_translate_element .goog-te-gadget-simple { display: inline-flex; align-items: center; gap: .5rem; }
+#google_translate_element .goog-te-gadget-simple {
   font-size: 14px;                 
   padding: .5rem .75rem;
-  border-radius: .5rem;         
   line-height: 1.25;
   background-color: #ffffff;
   transition: box-shadow .15s, background-color .15s, border-color .15s;
+}
+
+/* start effect */
+main.container.hidden {  opacity: 0;  transform: translateY(20px); }
+main.container.animate-in {  opacity: 1;  transform: translateY(0);  transition: opacity 2.0s ease, transform 2.0s ease; }
+
+
+header.container.hidden {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+header.container.animate-in {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
