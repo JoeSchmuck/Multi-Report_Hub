@@ -157,7 +157,7 @@ window.MRCE.CONFIG = {
 					"Enable_Text_Section": { "label": "Enable the Text Section below the CHART", "type": "checkbox", "default": "enable"},
 					"font": { "label": "Font Type for Text Section", "type": "text", "default": "courier new" },
 					"font_size": { "label": "Font Size for Text Section", "type": "number", "default": 16 },
-					"Total_Data_Written_Month": { "label": "Total Data Written", "type": "select", "default": "30Days", "options": [ { "value": "1", "label": "Use a rolling 30 day average for TDW/TDR metrics" }, { "value": "Month", "label": "Use the current calendar month for TDW/TDR metrics" }]},
+					"Total_Data_Written_Month": { "label": "Total Data Written", "type": "select", "default": "30Days", "options": [ { "value": "30Days", "label": "Use a rolling 30 day average for TDW/TDR metrics" }, { "value": "Month", "label": "Use the current calendar month for TDW/TDR metrics" }]},
 					"Enable_Messages": { "label": "Enable Warning/Caution Text Messages", "type": "checkbox", "default": "enable" },
 					"Enable_Zpool_Messages": { "label": "Enable Zpool Status and GPTID section", "type": "checkbox", "default": "enable" },
                     "Enable_SMART_Messages": { "label": "Enable SMART data in report", "type": "checkbox", "default": "enable" },

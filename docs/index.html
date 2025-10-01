@@ -27,7 +27,7 @@
       <div class="container">
         <span  class="navbar-brand d-flex align-items-center gap-2" href="#">
           <span class="fs-5">⚙️</span>
-          <strong>Multi-Report Configuration Editor <small class="text-muted">v3.20 BETA</small></strong>
+          <strong>Multi-Report Configuration Editor <small class="text-muted">v3.22 BETA</small></strong>
         </span >
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -41,13 +41,14 @@
               <button class="btn btn-outline-secondary btn-sm" data-theme-value="light" title="light Theme">☀️</button>
               <button class="btn btn-outline-secondary btn-sm" data-theme-value="dark" title="dark Theme">🌙</button>
               <button class="btn btn-outline-secondary btn-sm" data-theme-value="auto" title="auto Theme">🖥️</button>
+              <div id="google_translate_element"></div>
             </div>
           </div>
         </div>
       </div>
     </nav>
 
-    <header class="container my-4" id="top"> 
+    <header class="container my-4 hidden" id="top"> 
     <div class="mr-hero">
         <div class="row justify-content-center align-items-center g-3">
             <div class="col-auto d-flex flex-wrap justify-content-center">
@@ -67,19 +68,23 @@
 
     <!-- Toolbar -->
     <div class="d-flex justify-content-center align-items-center flex-nowrap gap-2 mb-3" id="mr-toolbar">
-        <button type="button" class="btn btn-primary" id="mr-btn-load">
+        <button type="button" class="btn btn-primary" id="mr-btn-load" title="load your configuration file">
             <i class="fa-solid fa-folder-open me-1"></i> Load
         </button>
-        <button type="button" class="btn btn-success" id="mr-btn-save">
+        <button type="button" class="btn btn-success" id="mr-btn-save" title="save your new configuration file">
             <i class="fa-solid fa-floppy-disk me-1"></i> Save
         </button>
-        <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#mr-modal1">
+        <button type="button" class="btn btn-warning" id="mr-btn-restart" title="restart from scratch">
+            <i class="fa-solid fa-recycle"></i> Restart
+        </button>          
+        <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#mr-modal1" title="click here if you need some help">
             <i class="fa-solid fa-circle-question me-1"></i> Help
         </button>
-        <div id="google_translate_element"></div>
+      
+        
     </div>    
 
-    <main class="container py-4">
+    <main class="container py-4 hidden">
 
     <!-- Tabs -->
     <ul class="nav nav-tabs" id="mrceTabs" role="tablist">
@@ -434,6 +439,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/spectrum-colorpicker2/dist/spectrum.min.js"></script>
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="mrce.config.js"></script>
 <script src="mrce.app.js"></script>

@@ -16,6 +16,7 @@
         toolbar: "#mr-toolbar",
         btnLoad: "#mr-btn-load",
         btnSave: "#mr-btn-save",
+        btnRestart: "#mr-btn-restart"
     };
 
 
@@ -666,6 +667,27 @@
         }
     }
 
+    // restart -> reload default
+    function restartData() {
+        //window.location.reload();
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Confirm to reload all defaults settings",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                resetTabsAndAccordions();
+                window.location.reload();
+            }
+        });        
+    }
+
+
     //  Toggle short long test mode
     function toggleByMode(modeKey, relatedKeys) {
         const modeEl = document.querySelector(`[data-key="${modeKey}"]`);
@@ -702,6 +724,7 @@
     function bindToolbar() {
         $(SEL.btnLoad).off("click").on("click", loadData);
         $(SEL.btnSave).off("click").on("click", saveData);
+        $(SEL.btnRestart).off("click").on("click", restartData);
     }
 
     // Year
@@ -778,22 +801,67 @@
         });
     }
 
+    // Tabs & Accordions RESET 
+    function resetTabsAndAccordions(options = {}) {
+        const {
+            resetTabsToFirst = true,
+            collapseAccordions = true, 
+            storageOnly = false
+        } = options;
+
+        // clean local storage
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (!k) continue;
+            if (k === "mrce.activeTab" || k.startsWith("mrce.acc.")) {
+                localStorage.removeItem(k);
+            }
+        }
+
+        if (storageOnly) return;
+
+        // only visual reset
+        try {
+            if (resetTabsToFirst) {
+                const firstTabTrigger = document.querySelector('#mrceTabs [data-bs-toggle="tab"]');
+                if (firstTabTrigger && window.bootstrap?.Tab) {
+                    new bootstrap.Tab(firstTabTrigger).show();
+                }
+            }
+        } catch (e) {
+            console.warn("Tab reset skipped:", e);
+        }
+        try {
+            if (collapseAccordions && window.bootstrap?.Collapse) {
+                document.querySelectorAll('.accordion .accordion-collapse.show').forEach(panel => {
+                    new bootstrap.Collapse(panel, { toggle: true });
+                });
+            }
+        } catch (e) {
+            console.warn("Accordion reset skipped:", e);
+        }
+    }
+
+
 
     //  Init 
-    function init() {
+    function init() {   
         renderConfig();
         tooltipInit();
         updateYear('#year');
         initTheme();
         rememberTabsAndAccordions();
         bindModeToggles();
-        bindToolbar();
+        bindToolbar(); 
+        $("header.container").removeClass("hidden").addClass("animate-in");
+        $("main.container").removeClass("hidden").addClass("animate-in");
     }
 
     // expose
     MRCE.init = init;
     MRCE.loadData = loadData;
     MRCE.saveData = saveData;
+    MRCE.restartData = restartData;
 
     $(init);
 
