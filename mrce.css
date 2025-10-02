@@ -1,35 +1,74 @@
 [data-bs-theme="dark"] {
-    --mr-hero-gradient: linear-gradient(135deg, #7E57C2 0%, #26C6DA 100%);
-    --mr-hero-color:  #ffffff;
-    --mr-tsc: #ffffff;
-    --mr-body-bg: #332D2D;
-    --mr-body-cl: #ffffff;
-    --mr-disabled-color: #ffffff;
-    --mr-disabled-bg-color: #9FA6B2;
+  --mr-hero-gradient: linear-gradient(135deg, #7E57C2 0%, #26C6DA 100%);
+  --mr-hero-color: #ffffff;
+  --mr-tsc: #ffffff;
+  --mr-body-bg: #332D2D;
+  --mr-body-cl: #ffffff;
+  --mr-disabled-color: #ffffff;
+  --mr-disabled-bg-color: #9FA6B2;
 }
 
 [data-bs-theme="light"] {
-    --mr-hero-gradient: linear-gradient(135deg, #42A5F5 0%, #66BB6A 100%);
-    --mr-hero-color: #ffffff;
-    --mr-tsc: #000000;
-    --mr-body-bg: #cbcfd6;
-    --mr-body-cl: #000000;    
-    --mr-disabled-color: #9ca3af;
-    --mr-disabled-bg-color: #f3f4f6;        
-}		
-        
-Body { background-color: var(--mr-body-bg); }
-input[type="text"]:disabled, input[type="number"]:disabled, input[type="email"]:disabled, .form-select:disabled,  .form-check-input:disabled { background-color: var(--mr-disabled-bg-color); color: var(--mr-disabled-color); cursor: not-allowed; }  
-.mr-hero { background: var(--mr-hero-gradient); color: var(--mr-hero-color); border-radius: 1.25rem; padding: 1.5rem 0.7rem;}
-.mr-hero .btn { box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15); }
-.mr-hero img { max-height: 80px; width: auto; border-radius: 1.25rem; margin: 0 0.25rem;}  
-.mr-title-section {border-top: 1px dashed var(--mr-tsc)} 
-.sp-colorize-container.sp-add-on { min-width: 38px !important; } /* fix spectrum initialized on hidden accordion */
+  --mr-hero-gradient: linear-gradient(135deg, #42A5F5 0%, #66BB6A 100%);
+  --mr-hero-color: #ffffff;
+  --mr-tsc: #000000;
+  --mr-body-bg: #cbcfd6;
+  --mr-body-cl: #000000;
+  --mr-disabled-color: #9ca3af;
+  --mr-disabled-bg-color: #f3f4f6;
+}
+
+Body {
+  background-color: var(--mr-body-bg);
+}
+
+input[type="text"]:disabled,
+input[type="number"]:disabled,
+input[type="email"]:disabled,
+.form-select:disabled,
+.form-check-input:disabled {
+  background-color: var(--mr-disabled-bg-color);
+  color: var(--mr-disabled-color);
+  cursor: not-allowed;
+}
+
+.mr-hero {
+  background: var(--mr-hero-gradient);
+  color: var(--mr-hero-color);
+  border-radius: 1.25rem;
+  padding: 1.5rem 0.7rem;
+}
+
+.mr-hero .btn {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .15);
+}
+
+.mr-hero img {
+  max-height: 80px;
+  width: auto;
+  border-radius: 1.25rem;
+  margin: 0 0.25rem;
+}
+
+.mr-title-section {
+  border-top: 1px dashed var(--mr-tsc)
+}
+
+.sp-colorize-container.sp-add-on {
+  min-width: 38px !important;
+}
+
+/* fix spectrum initialized on hidden accordion */
 
 /* google plugin */
-#google_translate_element .goog-te-gadget-simple { display: inline-flex; align-items: center; gap: .5rem; }
 #google_translate_element .goog-te-gadget-simple {
-  font-size: 14px;                 
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+#google_translate_element .goog-te-gadget-simple {
+  font-size: 14px;
   padding: .5rem .75rem;
   line-height: 1.25;
   background-color: #ffffff;
@@ -37,16 +76,45 @@ input[type="text"]:disabled, input[type="number"]:disabled, input[type="email"]:
 }
 
 /* start effect */
-main.container.hidden {  opacity: 0;  transform: translateY(20px); }
-main.container.animate-in {  opacity: 1;  transform: translateY(0);  transition: opacity 2.0s ease, transform 2.0s ease; }
+main.container.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+}
 
+main.container.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 2.0s ease, transform 2.0s ease;
+}
 
 header.container.hidden {
   opacity: 0;
   transform: translateX(-50px);
 }
+
 header.container.animate-in {
   opacity: 1;
   transform: translateX(0);
   transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+
+/* media query */
+
+/* breakpoint bs xs */
+@media (max-width: 576px) { 
+  .mr-hide-mobile {
+    display: none !important;
+  }
+
+  #top-menu {
+    font-size: 0.9rem;
+  }
+}
+
+/* breakpoint 360px */
+@media (max-width: 360px) { 
+  #top-menu {
+    font-size: 0.7rem;
+  }
 }
