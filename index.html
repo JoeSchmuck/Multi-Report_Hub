@@ -25,9 +25,9 @@
     <!-- Top Navbar -->
     <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top border-bottom">
       <div class="container">
-        <span  class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <span class="navbar-brand d-flex align-items-center gap-2" id="top-menu" href="#">
           <span class="fs-5">⚙️</span>
-          <strong>Multi-Report Configuration Editor <small class="text-muted">v3.22 BETA</small></strong>
+          <strong>Multi-Report Configuration Editor <small class="text-muted d-block d-sm-inline">v3.22 BETA</small></strong>
         </span >
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -59,7 +59,7 @@
                 Build from scratch or update your config file easily 
                 </p>
             </div>
-            <div class="col-auto d-flex flex-wrap justify-content-center">
+            <div class="col-auto d-flex flex-wrap justify-content-center mr-hide-mobile">
                 <img src="https://raw.githubusercontent.com/JoeSchmuck/Multi-Report_Config_HTML/main/assets/HD3aGUI-resized.png" alt="Logo Drive-Selftest">
             </div>            
         </div>
@@ -67,7 +67,7 @@
     </header>
 
     <!-- Toolbar -->
-    <div class="d-flex justify-content-center align-items-center flex-nowrap gap-2 mb-3" id="mr-toolbar">
+    <div class="d-flex justify-content-center align-items-center flex-nowrap gap-2 mb-3 m-2" id="mr-toolbar">
         <button type="button" class="btn btn-primary" id="mr-btn-load" title="load your configuration file">
             <i class="fa-solid fa-folder-open me-1"></i> Load
         </button>
