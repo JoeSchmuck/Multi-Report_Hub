@@ -47,7 +47,14 @@
     }
     function normalizeHex(val) {
         let hex = String(val || "").trim();
-        if (hex && !/^#/.test(hex) && /^[0-9a-f]{3,8}$/i.test(hex)) hex = "#" + hex;
+        if (hex && !/^#/.test(hex) && /^[0-9a-f]{3,8}$/i.test(hex)) hex = "#" + hex.toLowerCase();
+        else {
+            const ctx = document.createElement("canvas").getContext("2d");
+            ctx.fillStyle = hex;
+            const resolved = ctx.fillStyle;
+            if (/^#[0-9a-f]{6}$/i.test(resolved))  hex = resolved.toLowerCase(); 
+        }
+        //console.log(hex);
         return hex;
     }
 
@@ -69,7 +76,7 @@
           <label class="form-check-label" for="${id}"></label>
         </div>`;
         } else if (type === "colorpicker") {
-            const val = def || "#ffffff";
+            const val = normalizeHex(def) || "#ffffff";
             return `
                     <input type="text" class="form-control mr-color notranslate" id="${id}" data-key="${fieldKey}" value="${val}" ${reqAttr}>
             `;            
@@ -222,7 +229,6 @@
                 change: c => $input.val(c ? c.toHexString() : ""),
                 move: c => $input.val(c ? c.toHexString() : "")
             });
-
          
             $input.data("hasSpectrum", true);
         });
@@ -286,7 +292,7 @@
                     } else {
                         const el = document.querySelector(`[data-key="${key}"]`);
                         if (!el) continue;
-                        if (el.type === "checkbox") data[key] = !!el.checked;
+                        else if (el.type === "checkbox") data[key] = !!el.checked;
                         else data[key] = el.value ?? "";
                     }
                 }
@@ -496,7 +502,7 @@
         try {
             const data = collectData();
 
-            // required
+            // check required fields
             const check = validateRequired(data);
             if (!check.ok) {
                 toastr.error(check.message);
@@ -507,6 +513,7 @@
             // email warning
             const $emailEl = $('[data-key="Email"]');
             const emailVal = String(($emailEl.val() ?? "")).trim();
+            const emailOpt = findOptionInConfigData("Email");
             if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
                 toastr.warning(
                     "File will be generated but email address format looks invalid.",
@@ -514,16 +521,16 @@
                     { preventDuplicates: false }
                 );
             }
+            else if (emailOpt && emailOpt.default && emailVal === emailOpt.default) {
+                toastr.error(
+                    "Please load a configuration file first, or change the default email address."
+                );
+                return;
+            }            
+            
 
             // init lineStore
-            if (!window.lineStore) {
-                const emailOpt = findOptionInConfigData("Email");
-                if (emailOpt && emailOpt.default && emailVal === emailOpt.default) {
-                    toastr.error(
-                        "Please load a configuration file first, or change the default email address."
-                    );
-                    return;
-                }
+            if (!window.lineStore) {                
                 window.lineStore = [];
                 const today = new Date();
                 const yyyy = today.getFullYear();
@@ -592,7 +599,11 @@
                         const checked = !!el?.checked;
                         const orig = String(item.originalValue ?? "").toLowerCase();
                         if (checked) {
-                            out = `${key}="${item.originalValue}"`;
+                            //out = `${key}="${item.originalValue}"`;
+                            if (orig === "false") out = `${key}="true"`;
+                            else if (orig === "no") out = `${key}="yes"`;
+                            else if (orig === "disable") out = `${key}="enable"`;
+                            else out = `${key}="${item.originalValue}"`;
                         } else {
                             if (orig === "true") out = `${key}="false"`;
                             else if (orig === "yes") out = `${key}="no"`;
@@ -631,7 +642,13 @@
                             const el = document.querySelector(`[data-key="${key}"]`);
                             const checked = !!el?.checked;
                             const defLower = String(opt.default ?? "").toLowerCase();
-                            if (checked) out = `${key}="${opt.default}"`;
+                            //if (checked) out = `${key}="${opt.default}"`;
+                            if(checked) {
+                                if (defLower === "false") out = `${key}="true"`;
+                                else if (defLower === "no") out = `${key}="yes"`;
+                                else if (defLower === "disable") out = `${key}="enable"`;
+                                else out = `${key}="${opt.originalValue}"`;                                
+                            }
                             else {
                                 if (defLower === "true") out = `${key}="false"`;
                                 else if (defLower === "yes") out = `${key}="no"`;
