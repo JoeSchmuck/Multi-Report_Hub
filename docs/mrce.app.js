@@ -815,7 +815,7 @@
         const el = document.querySelector('#year');
         if (el) el.textContent = new Date().getFullYear();
         const vel = document.querySelector('#mr-v');
-        if (vel) vel.textContent = `${MRV}`;
+        if (vel) vel.textContent = `v ${MRV}`;
     }
 
     // Theme
