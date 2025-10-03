@@ -9,7 +9,8 @@ window.MRCE.CONFIG = {
                 "label": "Email Address Settings",
                 "options": {
                     "Email": { "label": "Email", "type": "email", "default": "YourEmail@Address.com", "required": true },
-                    "From": { "label": "From", "type": "text", "default": "" }
+                    "From": { "label": "From", "type": "text", "default": "" },
+					"FromName": { "label": "From Name", "type": "text", "default": "" }
                }
             },
             "General Email Settings 3": {
@@ -157,7 +158,7 @@ window.MRCE.CONFIG = {
 					"Enable_Text_Section": { "label": "Enable the Text Section below the CHART", "type": "checkbox", "default": "enable"},
 					"font": { "label": "Font Type for Text Section", "type": "text", "default": "courier new" },
 					"font_size": { "label": "Font Size for Text Section", "type": "number", "default": 16 },
-					"Total_Data_Written_Month": { "label": "Total Data Written", "type": "select", "default": "30Days", "options": [ { "value": "30Days", "label": "Use a rolling 30 day average for TDW/TDR metrics" }, { "value": "Month", "label": "Use the current calendar month for TDW/TDR metrics" }]},
+					"Total_Data_Written_Month": { "label": "Total Data Written", "type": "select", "default": "30Days", "options": [ { "value": "30Days", "label": "Use a rolling 30 day average for TDW/TDR metrics" }, { "value": "month", "label": "Use the current calendar month for TDW/TDR metrics" }]},
 					"Enable_Messages": { "label": "Enable Warning/Caution Text Messages", "type": "checkbox", "default": "enable" },
 					"Enable_Zpool_Messages": { "label": "Enable Zpool Status and GPTID section", "type": "checkbox", "default": "enable" },
                     "Enable_SMART_Messages": { "label": "Enable SMART data in report", "type": "checkbox", "default": "enable" },
@@ -524,8 +525,8 @@ window.MRCE.CONFIG = {
                     "blueColor": { "label": "Hex code for Sky Blue, used for the SCRUB/SMART Test In Progress/background", "type": "colorpicker", "default": "#87ceeb" },
                     "yellowColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "default": "#f1ffad" },
                     "pohColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "default": "#ffffcc" },   
-                    "tdrcolor": { "label": "Color for 30-Day Read Percentage Value", "type": "text", "default": "green" },
-                    "tdwcolor": { "label": "Color for 30-Day Write Percentage Value", "type": "text", "default": "blue" }                                     
+                    "tdrcolor": { "label": "Hex code for 30-Day Read Percentage Value", "type": "colorpicker", "default": "#008000" },
+                    "tdwcolor": { "label": "Hex code for 30-Day Write Percentage Value", "type": "colorpicker", "default": "#0000FF" }                                     
 				}
 			}
         }
@@ -536,7 +537,8 @@ window.MRCE.CONFIG = {
 window.MRCE.TOOLTIPS = {
         "Email Address Settings": {
             "Email": "Normal email address to send report.",
-            "From": "From address (default works for many).   If using Outlook OAuth, try = blank."
+            "From": "From address (default works for many). Use only address accepted by your provider, if using Outlook OAuth, try = blank.",
+			"FromName": "From Name. This will not impact delivery"
         },			
         "Alert Email Configuration (-m switch)": {
             "AlertEmail": "Email address to send report when using the `-m` switch.",
