@@ -2,6 +2,10 @@
 (function (window, $) {
     "use strict";
 
+    // MR latest version
+    const MRV = "3.22";
+    const startdtd = "2025-08-25";    
+
     //  Namespace 
     const MRCE = (window.MRCE = window.MRCE || {});
     const CONFIG = MRCE.CONFIG || {};
@@ -389,8 +393,8 @@
 
     //  LOAD main function
     function loadData() {
-        const startdtd = "2025-08-25";
-        const enddtd = "2025-09-28";
+        
+        const enddtd = new Date().toISOString().slice(0, 10);//const enddtd = "2025-09-28";
 
         const fileInput = document.createElement("input");
         fileInput.type = "file";
@@ -399,6 +403,10 @@
         fileInput.addEventListener("change", (event) => {
             const file = event.target.files[0];
             if (!file) return;
+            if (!file.name.toLowerCase().endsWith(".txt")) {
+                toastr.error("Only .txt files are accepted. Try again");
+                return;
+            }            
 
             const reader = new FileReader();
             reader.onload = async (e) => {
@@ -420,18 +428,33 @@
                     if (dtdMatch) {
                         const fileDate = new Date(dtdMatch);
                         const startDate = new Date(startdtd);
-                        const endDate = new Date(enddtd);
-                        if (fileDate < startDate || fileDate > endDate) {
-                            const ok = window.confirm(
-                                "Your configuration file is not for Multi-Report v3.20.\n" +
-                                "Please locate the correct version on GitHub: https://github.com/JoeSchmuck/Multi-Report.\n\n" +
-                                "Do you want to continue loading it?"
-                            );
-                            if (!ok) {
+                        //const endDate = new Date(enddtd);
+                        if (fileDate < startDate) { // || fileDate > endDate
+                            const result = await Swal.fire({
+                                title: "Wrong configuration version",
+                                html: `
+                                    The file you uploaded appears to come from an older version of Multi-Report. The resulting configuration may not be compatible with your current version.<br>
+                                    Please locate the correct version on GitHub:<br>
+                                    <a href="https://github.com/JoeSchmuck/Multi-Report" target="_blank">
+                                    https://github.com/JoeSchmuck/Multi-Report
+                                    </a><br><br>
+                                    Would you like to continue loading it and proceed??
+                                `,
+                                icon: "warning",
+                                showCancelButton: true,
+                                confirmButtonText: "Yes, continue",
+                                cancelButtonText: "Cancel"
+                            });
+
+                            if (!result.isConfirmed) {
                                 toastr.info("Configuration load cancelled.");
                                 return;
                             }
                         }
+                    }
+                    else {
+                        toastr.error("Configuration load cancelled. File is not a valid MR config");
+                        return;
                     }
 
                     lines.forEach((line, index) => {
@@ -744,10 +767,12 @@
         $(SEL.btnRestart).off("click").on("click", restartData);
     }
 
-    // Year
-    function updateYear(selector = '#year') {
-        const el = document.querySelector(selector);
+    // Year and Version
+    function updateInitValue() {
+        const el = document.querySelector('#year');
         if (el) el.textContent = new Date().getFullYear();
+        const vel = document.querySelector('#mr-v');
+        if (vel) vel.textContent = `${MRV}`;
     }
 
     // Theme
@@ -865,7 +890,7 @@
     function init() {   
         renderConfig();
         tooltipInit();
-        updateYear('#year');
+        updateInitValue('#year');
         initTheme();
         rememberTabsAndAccordions();
         bindModeToggles();
