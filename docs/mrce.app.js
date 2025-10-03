@@ -520,6 +520,49 @@
         fileInput.click();
     }
 
+
+    // hightlight missing fields
+    function revealAndHighlight(selector) {
+        const el = document.querySelector(selector);
+        if (!el) return;
+
+        const tabPane = el.closest('.tab-pane[id]');
+        if (tabPane) {
+            const tabTrigger = document.querySelector(`[data-bs-target="#${tabPane.id}"], a[href="#${tabPane.id}"]`);
+            if (tabTrigger) {
+                if (window.bootstrap?.Tab) {
+                    new bootstrap.Tab(tabTrigger).show();
+                } else {
+                    tabTrigger.click();
+                }
+            }
+        }
+
+        el.closestAll = function(sel){
+            const arr=[]; let n=this;
+            while (n) { if (n.matches?.(sel)) arr.push(n); n=n.parentElement; }
+            return arr;
+        };
+        el.closestAll('.accordion-collapse').forEach(acc => {
+            if (!acc.classList.contains('show')) {
+                if (window.bootstrap?.Collapse) {
+                    new bootstrap.Collapse(acc, { toggle: true });
+                } else {
+                    acc.classList.add('show');
+                }
+            }
+        });
+
+        setTimeout(() => {
+            el.focus?.({ preventScroll: true });
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
+
+        el.classList.add('mr-required-missing');
+        setTimeout(() => el.classList.remove('mr-required-missing'), 2000);
+    }
+
+
     //  SAVE main function
     function saveData() {
         try {
@@ -529,7 +572,7 @@
             const check = validateRequired(data);
             if (!check.ok) {
                 toastr.error(check.message);
-                if (check.focusSelector) document.querySelector(check.focusSelector)?.focus();
+                if (check.focusSelector) revealAndHighlight(check.focusSelector); //document.querySelector(check.focusSelector)?.focus();
                 return;
             }
 

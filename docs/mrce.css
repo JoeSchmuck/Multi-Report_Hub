@@ -118,3 +118,16 @@ header.container.animate-in {
     font-size: 0.7rem;
   }
 }
+
+
+/* required fields animation */
+.mr-required-missing {
+  outline: 2px solid #dc3545 !important;
+  border-color: #dc3545 !important;
+  animation: mr-shake .3s linear 2;
+}
+@keyframes mr-shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
