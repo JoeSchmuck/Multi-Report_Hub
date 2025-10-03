@@ -116,7 +116,7 @@
         <input type="number" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${min}${max}${step}${reqAttr}>`;
         } else if (type === "email" || fieldKey.toLowerCase().includes("email")) {
             return `
-        <input type="email" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}>`;
+        <input type="email" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr} placeholder="______@___" >`;
         } else if (type === "dayscheckbox") {
             const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
             const selected = (opt.default || "").split(",").map((v) => v.trim());
@@ -563,8 +563,8 @@
     }
 
 
-    //  SAVE main function
-    function saveData() {
+    //  SAVE main function now async 
+    async function saveData() {
         try {
             const data = collectData();
 
@@ -576,24 +576,38 @@
                 return;
             }
 
-            // email warning
-            const $emailEl = $('[data-key="Email"]');
-            const emailVal = String(($emailEl.val() ?? "")).trim();
-            const emailOpt = findOptionInConfigData("Email");
-            if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-                toastr.warning(
-                    "File will be generated but email address format looks invalid.",
-                    "",
-                    { preventDuplicates: false }
-                );
-            }
-            else if (emailOpt && emailOpt.default && emailVal === emailOpt.default) {
-                toastr.error(
-                    "Please load a configuration file first, or change the default email address."
-                );
-                return;
-            }            
+            // validotor for emails fields
+            const $emailEls = $('input[type="email"][data-key]');
+            for (const el of $emailEls) {
+                const $el = $(el);
+                const emailVal = String(($el.val() ?? "")).trim();
+                const key = $el.data("key");
+                const emailOpt = findOptionInConfigData(key);
+                
+                if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+                    const result = await Swal.fire({
+                        title: "Invalid email format",
+                        html: `The email address entered in <b>${key}</b> (<code>${emailVal}</code>) doesn't look correct.<br><br>Do you want to proceed anyway?`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, continue",
+                        cancelButtonText: "Cancel"
+                    });
+
+                    if (!result.isConfirmed) {
+                    toastr.info("Operation cancelled.");
+                    return;
+                    }   
+                }
+                else if (emailOpt && emailOpt.default && emailVal === emailOpt.default) {
+                    toastr.error(
+                        "Please load a configuration file first, or change the default email address."
+                    );
+                    revealAndHighlight(`[data-key="${key}"]`);
+                    return;
+                } 
             
+            }
 
             // init lineStore
             if (!window.lineStore) {                

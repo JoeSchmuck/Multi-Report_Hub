@@ -9,7 +9,7 @@ window.MRCE.CONFIG = {
                 "label": "Email Address Settings",
                 "options": {
                     "Email": { "label": "Email", "type": "email", "default": "YourEmail@Address.com", "required": true },
-                    "From": { "label": "From", "type": "text", "default": "" },
+                    "From": { "label": "From", "type": "email", "default": "" },
 					"FromName": { "label": "From Name", "type": "text", "default": "" }
                }
             },
