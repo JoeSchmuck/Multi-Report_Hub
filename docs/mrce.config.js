@@ -8,7 +8,7 @@ window.MRCE.CONFIG = {
             "General Email Settings 2": {
                 "label": "Email Address Settings",
                 "options": {
-                    "Email": { "label": "Email", "type": "email", "default": "YourEmail@Address.com", "required": true },
+                    "Email": { "label": "Email **", "type": "email", "default": "", "required": true },
                     "From": { "label": "From", "type": "email", "default": "" },
 					"FromName": { "label": "From Name", "type": "text", "default": "" }
                }
@@ -16,7 +16,7 @@ window.MRCE.CONFIG = {
             "General Email Settings 3": {
                 "label": "Alert Email Configuration (-m switch)",
                 "options": {
-					"AlertEmail": { "label": "Address to send Alerts listed below, typically used to send alarm condition emails such as drive temp alarms.", "type": "email", "default": "YourEmail@Address.com" },
+					"AlertEmail": { "label": "Address to send Alerts listed below, typically used to send alarm condition emails such as drive temp alarms.", "type": "email", "default": "" },
                     "AlertOnWarningTemp": { "label": "Drive Temperature Warning", "type": "checkbox", "default": "enable" },
                     "AlertOnWarningError": { "label": "Drive Warning Error", "type": "checkbox", "default": "enable" },					
                     "AlertOnCriticalError": { "label": "Drive Critical Error", "type": "checkbox", "default": "enable" }
@@ -36,11 +36,11 @@ window.MRCE.CONFIG = {
 			"label": "General Configuration",
 			"options": {
 				"External_SMART_Testing": { "label": "Do you want to run SMART Testing?", "type": "checkbox", "default": "enable"},
-				"External_Script_Name": { "label": "Path to drive_selftest.sh", "type": "text", "default": "$SCRIPT_DIR/drive_selftest.sh"},
+				"External_Script_Name": { "label": "Path to drive_selftest.sh", "type": "text", "default": "$SCRIPT_DIR/drive_selftest.sh", "required": true},
 				"Use_multi_report_config_values": { "label": "Use the multi_report_config.txt file for Drive-Selftest?", "type": "checkbox", "default": "enable"},
 				"Test_ONLY_NVMe_Drives": { "label": "ONLY test NVMe drives", "type": "checkbox", "default": "disable"},
 				"Track_Drive_Testing_Dates": { "label": "Enable Drive Testing Tracking", "type": "checkbox", "default": "enable"},
-				"selftest_data_file": { "label": "Path and file name for tracking the selftest drive dates.", "type": "text", "default": "$SCRIPT_DIR/drive_selftest_tracking.csv"},
+				"selftest_data_file": { "label": "Path and file name for tracking the selftest drive dates.", "type": "text", "default": "$SCRIPT_DIR/drive_selftest_tracking.csv", "required": true},
 				"Enable_Logging": { "label": "Create a Drive Selftest Report", "type": "checkbox", "default": "enable"},
 				"LOG_DIR": { "label": "Drive Selftest (DS) Logs directory.", "type": "text", "default": "$SCRIPT_DIR/DS_Logs" },
 				"Silent": { "label": "Only error messages will be output to the stdout. (Silent Mode)", "type": "checkbox", "default": "enable"},			
@@ -51,27 +51,27 @@ window.MRCE.CONFIG = {
 			"SCRUB and RESILVER (with respect to this testing)": {
 			"label": "SCRUB and RESILVER (with respect to this testing)",
 			"options": {
-				"SCRUB_Minutes_Remaining": { "label": "Set the remaining minutes threshold to allow a SCRUB to start?", "type": "number", "default": 60},
+				"SCRUB_Minutes_Remaining": { "label": "Set the remaining minutes threshold to allow a SCRUB to start?", "type": "number", "required": true, "min":0, "default": 60},
 				"SCRUB_RESILVER_OVERRIDE": { "label": "Override SCRUB and RESILVER restrictions?", "type": "checkbox", "default": "disable"},
-				"Maximum_Catchup_Drive_Count": { "label": "Maximum Drive Catchup", "type": "number", "default": 1}
+				"Maximum_Catchup_Drive_Count": { "label": "Maximum Drive Catchup", "type": "number", "required": true, "min":0, "max":100, "default": 1}
 				}
 			},
 			
 			"Short Tests1":{
 			"label": "Short Tests Group 1",
 			"options": {
-				"Short_Test_Mode": { "label": "Select the Test Mode", "type": "select", "default": "2", "options": [ { "value": "1", "label": "Use Test Mode 1 settings to determine the drives to be tested" }, { "value": "2", "label": "All drives are tested" }, { "value": "3", "label": "No drives tested" }]},
-				"Short_Time_Delay_Between_Drives": { "label": "Delay between SMART test starting for Short tests.", "type": "number", "default": 1 },
-				"Short_Drives_Test_Delay": { "label": "Delay after starting the last Short test before continuing.", "type": "number", "default": 130 }
+				"Short_Test_Mode": { "label": "Select the Test Mode", "type": "select", "required": true, "default": "2", "options": [ { "value": "1", "label": "Use Test Mode 1 settings to determine the drives to be tested" }, { "value": "2", "label": "All drives are tested" }, { "value": "3", "label": "No drives tested" }]},
+				"Short_Time_Delay_Between_Drives": { "label": "Delay between SMART test starting for Short tests.", "type": "number", "required": true, "min":0, "default": 1 },
+				"Short_Drives_Test_Delay": { "label": "Delay after starting the last Short test before continuing.", "type": "number", "required": true, "min":0, "default": 130 }
 				}
 			},
 			
 			"Short Tests2":{
 			"label": "Short Tests Group (Test Mode 1 only)",
 			"options": {
-				"Short_SMART_Testing_Order": { "label": "Testing Sort Order", "type": "select", "default": "DriveID", "options": [ { "value": "DriveID", "label": "Use the Drive ID (sda, sdb, sdc...) to sort the drives for testing" }, { "value": "Serial", "label": "Use the Drive Serial Number to sort the drives for testing" }]},
-				"Short_Drives_to_Test_Per_Day": { "label": "Minimum number of drives tested.", "type": "number", "default": 1 },
-				"Short_Drives_Test_Period": { "label": "Test all drives in a week or month.", "type": "select", "default": "Week", "options": [ "Week", "Month"]},
+				"Short_SMART_Testing_Order": { "label": "Testing Sort Order", "type": "select", "required": true, "default": "DriveID", "options": [ { "value": "DriveID", "label": "Use the Drive ID (sda, sdb, sdc...) to sort the drives for testing" }, { "value": "Serial", "label": "Use the Drive Serial Number to sort the drives for testing" }]},
+				"Short_Drives_to_Test_Per_Day": { "label": "Minimum number of drives tested.", "type": "number", "required": true, "min":0, "max":100, "default": 1 },
+				"Short_Drives_Test_Period": { "label": "Test all drives in a week or month.", "type": "select", "required": true, "default": "Week", "options": [ "Week", "Month"]},
 				"Short_Drives_Tested_Days_of_the_Week": { "label": "Days of the week testing is allowed.", "type": "dayscheckbox", "default": "1,2,3,4,5,6,7"}
 				}
 			},
@@ -79,17 +79,17 @@ window.MRCE.CONFIG = {
 			"Long Tests1": {
 			"label": "Long Tests Group 1",
 			"options": {
-				"Long_Test_Mode": { "label": "Select the Test Mode", "type": "select", "default": "1", "options": [ { "value": "1", "label": "Use Test Mode 1 settings to determine the drives to be tested" }, { "value": "2", "label": "All drives tested" }, { "value": "3", "label": "No drives tested" }]},
-				"Long_Time_Delay_Between_Drives": { "label": "Delay between SMART test starting for Long tests.", "type": "number", "default": 1 }
+				"Long_Test_Mode": { "label": "Select the Test Mode", "type": "select", "required": true, "default": "1", "options": [ { "value": "1", "label": "Use Test Mode 1 settings to determine the drives to be tested" }, { "value": "2", "label": "All drives tested" }, { "value": "3", "label": "No drives tested" }]},
+				"Long_Time_Delay_Between_Drives": { "label": "Delay between SMART test starting for Long tests.", "type": "number", "required": true, "min":0, "default": 1 }
 				}
 			},
 			
 			"Long Tests2":{
 			"label": "Long Tests Group (Test Mode 1 only)",
 			"options": {
-				"Long_SMART_Testing_Order": { "label": "Testing Sort Order", "type": "select", "default": "Serial", "options": [ { "value": "DriveID", "label": "Use the Drive ID (sda, sdb, sdc...) to sort the drives for testing" }, { "value": "Serial", "label": "Use the Drive Serial Number to sort the drives for testing" }]},
-				"Long_Drives_to_Test_Per_Day": { "label": "Minimum number of drives tested.", "type": "number", "default": 1 },
-				"Long_Drives_Test_Period": { "label": "Test all drives in a week or month.", "type": "select", "default": "Week", "options": [ "Week", "Month"]},
+				"Long_SMART_Testing_Order": { "label": "Testing Sort Order", "type": "select", "required": true, "default": "Serial", "options": [ { "value": "DriveID", "label": "Use the Drive ID (sda, sdb, sdc...) to sort the drives for testing" }, { "value": "Serial", "label": "Use the Drive Serial Number to sort the drives for testing" }]},
+				"Long_Drives_to_Test_Per_Day": { "label": "Minimum number of drives tested.", "type": "number", "required": true, "min":0, "max":100, "default": 1 },
+				"Long_Drives_Test_Period": { "label": "Test all drives in a week or month.", "type": "select", "required": true, "default": "Week", "options": [ "Week", "Month"]},
 				"Long_Drives_Tested_Days_of_the_Week": { "label": "Days of the week testing is allowed.", "type": "dayscheckbox", "default": "1,2,3,4,5,6,7"}
 				}
 			},
@@ -106,7 +106,7 @@ window.MRCE.CONFIG = {
                 "label": "Attach multi_report_config.txt to Email",
                 "options": {
                     "MRConfigEmailEnable": { "label": "Attach Multi-Report Config file to the Email:", "type": "checkbox", "default": "enable" },
-                    "MRConfigEmailDay": { "label": "What day do you want the Multi-Report configuration file attached?:", "type": "select", "default": "Mon", "options": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Month", "Never"] },
+                    "MRConfigEmailDay": { "label": "What day do you want the Multi-Report configuration file attached?:", "type": "select", "required": true, "default": "Mon", "options": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Month", "Never"] },
 					"MRChangedEmailSend": { "label": "Do you want thr Original and NEW Config files sent as an attachment if the file is updated?:", "type": "checkbox", "default": "enable" }
                 }
             },
@@ -114,14 +114,14 @@ window.MRCE.CONFIG = {
 				"label": "Attach TrueNAS Configuration files to Email",
 				"options": {
 					"TrueNASConfigEmailEnable": { "label": "Attach TrueNAS Config file to the Email:", "type": "checkbox", "default": "enable" },
-					"TrueNASConfigEmailDay": { "label": "What day do you want the TrueNAS configuration file attached?:", "type": "select", "default": "Mon", "options": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Month"] }
+					"TrueNASConfigEmailDay": { "label": "What day do you want the TrueNAS configuration file attached?:", "type": "select", "required": true, "default": "Mon", "options": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Month"] }
 				}
 			},
 			"SDF file attachment": {
 				"label": "Statistical Data File",
 				"options": {
 			        "SDF_DataEmail": { "label": "Enable SDF Data Email:", "type": "checkbox", "default": "enable" },
-                    "SDF_DataEmailDay": { "label": "SDF Data Email Day:", "type": "select", "default": "Mon", "options": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Month"] }
+                    "SDF_DataEmailDay": { "label": "SDF Data Email Day:", "type": "select", "required": true, "default": "Mon", "options": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Month"] }
 				}
 			},
 		},
@@ -142,10 +142,10 @@ window.MRCE.CONFIG = {
             "SDF_Report": {
                 "label": "Statistical Data File (SDF)",
                 "options": {
-                    "statistical_data_file": { "label": "Statistical Data File:", "type": "text", "default": "$SCRIPT_DIR/statisticalsmartdata.csv" },
+                    "statistical_data_file": { "label": "Statistical Data File:", "type": "text", "default": "$SCRIPT_DIR/statisticalsmartdata.csv", "required": true },
                     "SDF_DataRecordEnable": { "label": "Enable SDF Data Record:", "type": "checkbox", "default": "enable" },
-                    "SDF_DataPurgeDays": { "label": "SDF Data Purge Days:", "type": "number", "default": 720},
-				"add_new_drive_factor": { "label": "Add New Drive Factor", "type": "select", "default": "actual", "options": [ { "value": "actual", "label": "When adding a new drive, use the drive Power On Hours for metrics" }, { "value": "Serial", "label": "When adding a new drive, do not use the drive Power On Hours for metrics, start at a zero value." }]}
+                    "SDF_DataPurgeDays": { "label": "SDF Data Purge Days:", "type": "number", "required": true, "min":0, "default": 720},
+				"add_new_drive_factor": { "label": "Add New Drive Factor", "type": "select", "required": true, "default": "actual", "options": [ { "value": "actual", "label": "When adding a new drive, use the drive Power On Hours for metrics" }, { "value": "Serial", "label": "When adding a new drive, do not use the drive Power On Hours for metrics, start at a zero value." }]}
                 }
             },
 			
@@ -157,8 +157,8 @@ window.MRCE.CONFIG = {
                 "options": {
 					"Enable_Text_Section": { "label": "Enable the Text Section below the CHART", "type": "checkbox", "default": "enable"},
 					"font": { "label": "Font Type for Text Section", "type": "text", "default": "courier new" },
-					"font_size": { "label": "Font Size for Text Section", "type": "number", "default": 16 },
-					"Total_Data_Written_Month": { "label": "Total Data Written", "type": "select", "default": "30Days", "options": [ { "value": "30Days", "label": "Use a rolling 30 day average for TDW/TDR metrics" }, { "value": "month", "label": "Use the current calendar month for TDW/TDR metrics" }]},
+					"font_size": { "label": "Font Size for Text Section", "type": "number", "required": true, "min":0, "max":32, "default": 16 },
+					"Total_Data_Written_Month": { "label": "Total Data Written", "type": "select", "required": true, "default": "30Days", "options": [ { "value": "30Days", "label": "Use a rolling 30 day average for TDW/TDR metrics" }, { "value": "month", "label": "Use the current calendar month for TDW/TDR metrics" }]},
 					"Enable_Messages": { "label": "Enable Warning/Caution Text Messages", "type": "checkbox", "default": "enable" },
 					"Enable_Zpool_Messages": { "label": "Enable Zpool Status and GPTID section", "type": "checkbox", "default": "enable" },
                     "Enable_SMART_Messages": { "label": "Enable SMART data in report", "type": "checkbox", "default": "enable" },
@@ -180,7 +180,7 @@ window.MRCE.CONFIG = {
                 "label": "Report Chart Configuration",
                 "options": {
 					"chartfont": { "label": "Font Type for Chart Section", "type": "text", "default": "times new roman" },
-					"chart_font_size": { "label": "Font Size for Chart Section", "type": "number", "default": 15 },
+					"chart_font_size": { "label": "Font Size for Chart Section", "type": "number", "required": true, "min":0, "max":30, "default": 15 },
                     "Subject_Line_Normal": { "label": "Email Subject Line - Normal:", "type": "text", "default": "SMART Testing Results for ${host} - All is Good" },
 					"Subject_Line_Warning": { "label": "Email Subject Line - Warning:", "type": "text", "default": "*WARNING*  SMART Testing Results for ${host}  *WARNING*" },
 					"Subject_Line_Critical": { "label": "Email Subject Line - Critical:", "type": "text", "default": "*CRITICAL ERROR*  SMART Testing Results for ${host}  *CRITICAL ERROR*" },
@@ -195,17 +195,17 @@ window.MRCE.CONFIG = {
 			"Alarm Thresholds - Temperature": {
 				"label": "Alarm Thresholds - Temperature",
 				"options": {
-					"PoolUsedWarn": { "label": "Pool percentage Warning", "type": "number", "default": 80 },
-					"ScrubAgeWarn": { "label": "Pool SCRUB Age (days) Warning", "type": "number", "default": 37 },
-					"ZpoolFragWarn": { "label": "Pool fragmentation Warning", "type": "number", "default": 80 },
-					"HDDtempWarn": { "label": "HDD Warning Temperature", "type": "number", "default": 45 },
-					"HDDtempCrit": { "label": "HDD Critical Temperature", "type": "number", "default": 50 },
+					"PoolUsedWarn": { "label": "Pool percentage Warning", "type": "number", "required": true, "min":0, "max":100, "default": 80 },
+					"ScrubAgeWarn": { "label": "Pool SCRUB Age (days) Warning", "type": "number", "required": true, "min":0, "default": 37 },
+					"ZpoolFragWarn": { "label": "Pool fragmentation Warning", "type": "number", "required": true, "min":0, "max":100, "default": 80 },
+					"HDDtempWarn": { "label": "HDD Warning Temperature", "type": "number", "required": true, "min":0, "max":100, "default": 45 },
+					"HDDtempCrit": { "label": "HDD Critical Temperature", "type": "number", "required": true, "min":0, "max":100, "default": 50 },
 					"HDD_Cur_Pwr_Max_Temp_Ovrd": { "label": "HDD Maximum Temperature Override - Current Cycle", "type": "checkbox", "default": "disable" },
-					"SSDtempWarn": { "label": "SSD Warning Temperature", "type": "number", "default": 50 },
-					"SSDtempCrit": { "label": "SSD Critical Temperature", "type": "number", "default": 60 },
+					"SSDtempWarn": { "label": "SSD Warning Temperature", "type": "number", "required": true, "min":0, "max":100, "default": 50 },
+					"SSDtempCrit": { "label": "SSD Critical Temperature", "type": "number", "required": true, "min":0, "max":100, "default": 60 },
 					"SSD_Cur_Pwr_Max_Temp_Ovrd": { "label": "SSD Maximum Temperature Override - Current Cycle", "type": "checkbox", "default": "disable" },
-					"NVMtempWarn": { "label": "NVMe Warning Temperature", "type": "number", "default": 55 },
-					"NVMtempCrit": { "label": "NVMe Critical Temperature", "type": "number", "default": 65 },
+					"NVMtempWarn": { "label": "NVMe Warning Temperature", "type": "number", "required": true, "min":0, "max":100, "default": 55 },
+					"NVMtempCrit": { "label": "NVMe Critical Temperature", "type": "number", "required": true, "min":0, "max":100, "default": 65 },
 					"NVM_Cur_Pwr_Max_Temp_Ovrd": { "label": "NVMe Maximum Temperature Override - Current Cycle", "type": "checkbox", "default": "disable" }
 				}
 			},
@@ -213,21 +213,21 @@ window.MRCE.CONFIG = {
 			"Alarm Thresholds - Media": {
 				"label": "Alarm Thresholds - Media",
 				"options": {
-					"SectorsWarn": { "label": "How many sector errors before Warning message", "type": "number", "default": 0 },
-					"SectorsCrit": { "label": "How many sector errors before Critical message", "type": "number", "default": 9 },
-					"ReAllocWarn": { "label": "How many Reallocated sectors before WARNING message", "type": "number", "default": 0 },
-					"MultiZoneWarn": { "label": "How many MultiZone errors before WARNING message", "type": "number", "default": 0 },
-					"MultiZoneCrit": { "label": "How many MultiZone errors before Critical message", "type": "number", "default": 5 },
+					"SectorsWarn": { "label": "How many sector errors before Warning message", "type": "number", "required": true, "min":0, "default": 0 },
+					"SectorsCrit": { "label": "How many sector errors before Critical message", "type": "number", "required": true, "min":0, "default": 9 },
+					"ReAllocWarn": { "label": "How many Reallocated sectors before WARNING message", "type": "number", "required": true, "min":0, "default": 0 },
+					"MultiZoneWarn": { "label": "How many MultiZone errors before WARNING message", "type": "number", "required": true, "min":0, "default": 0 },
+					"MultiZoneCrit": { "label": "How many MultiZone errors before Critical message", "type": "number", "required": true, "min":0, "default": 5 },
 					"DeviceRedFlag": { "label": "Device Column will indicate RED for ANY alarm condition by drive row", "type": "checkbox", "default": "enable" },
 					"HeliumAlarm": { "label": "Enable the Helium Alarm", "type": "checkbox", "default": "enable" },
-					"HeliumMin": { "label": "Percent Low Helium Level before alarm", "type": "number", "default": 100 },
-					"RawReadWarn": { "label": "Read errors allowable before WARNING message", "type": "number", "default": 5 },
-					"RawReadCrit": { "label": "Read errors allowable before Critical message", "type": "number", "default": 100 },
-					"SeekErrorsWarn": { "label": "Seek errors allowable before WARNING message", "type": "number", "default": 5 },
-					"SeekErrorsCrit": { "label": "Seek errors allowable before Critical message", "type": "number", "default": 100 },
-					"NVM_Media_Errors": { "label": "NVMe Media Errors allowable before alarm", "type": "number", "default": 1 },
-					"WearLevelCrit": { "label": "Wear Level setpoint for a CRITICAL message", "type": "number", "default": 9 },
-					"TestWarnAge": { "label": "Test Age Days allowedable before WARNING message", "type": "number", "default": 2 },
+					"HeliumMin": { "label": "Percent Low Helium Level before alarm", "type": "number", "required": true, "min":0, "default": 100 },
+					"RawReadWarn": { "label": "Read errors allowable before WARNING message", "type": "number", "required": true, "min":0, "default": 5 },
+					"RawReadCrit": { "label": "Read errors allowable before Critical message", "type": "number", "required": true, "min":0, "default": 100 },
+					"SeekErrorsWarn": { "label": "Seek errors allowable before WARNING message", "type": "number", "required": true, "min":0, "default": 5 },
+					"SeekErrorsCrit": { "label": "Seek errors allowable before Critical message", "type": "number", "required": true, "min":0, "default": 100 },
+					"NVM_Media_Errors": { "label": "NVMe Media Errors allowable before alarm", "type": "number", "required": true, "min":0, "max":100, "default": 1 },
+					"WearLevelCrit": { "label": "Wear Level setpoint for a CRITICAL message", "type": "number", "required": true, "min":0, "max":100, "default": 9 },
+					"TestWarnAge": { "label": "Test Age Days allowedable before WARNING message", "type": "number", "required": true, "min":0, "default": 2 },
 					"NVMe_Ignore_Invalid_Errors": { "label": "NVMe Ignore Invalid Field in Command messages", "type": "checkbox", "default": "disable" }
 				}
 			},
@@ -249,9 +249,9 @@ window.MRCE.CONFIG = {
 				"label": "Spencer Integration",
 				"options": {
 					"spencer_enable": { "label": "Spencer Enable", "type": "checkbox", "default": "enable" },
-					"spencer_script_name": { "label": "Path and file name to Spencer script", "type": "text", "default": "$SCRIPT_DIR/spencer.py"},
-					"spencer_existing_warning_level": { "label": "Existing Warning Level", "type": "select", "default": "None", "options": [ { "value": "None", "label": "Do not display a Warning for already KNOWN errors" }, { "value": "Warning", "label": "Display Warning and Critical messages for KNOWN errors" },{ "value": "Critical", "label": "Display Critical messages for KNOWN errors" }]},
-					"spencer_new_warning_level": { "label": "New Warning Level", "type": "select", "default": "Warning", "options": [ { "value": "None", "label": "Do not display a Warning for any NEW errors" }, { "value": "Warning", "label": "Display Warning and Critical messages when a NEW error occurs" },{ "value": "Critical", "label": "Display Critical messages when a NEW error occurs" }]},	
+					"spencer_script_name": { "label": "Path and file name to Spencer script", "type": "text", "default": "$SCRIPT_DIR/spencer.py", "required": true},
+					"spencer_existing_warning_level": { "label": "Existing Warning Level", "type": "select", "required": true, "default": "None", "options": [ { "value": "None", "label": "Do not display a Warning for already KNOWN errors" }, { "value": "Warning", "label": "Display Warning and Critical messages for KNOWN errors" },{ "value": "Critical", "label": "Display Critical messages for KNOWN errors" }]},
+					"spencer_new_warning_level": { "label": "New Warning Level", "type": "select", "required": true, "default": "Warning", "options": [ { "value": "None", "label": "Do not display a Warning for any NEW errors" }, { "value": "Warning", "label": "Display Warning and Critical messages when a NEW error occurs" },{ "value": "Critical", "label": "Display Critical messages when a NEW error occurs" }]},	
 					}
 			},
 
@@ -261,7 +261,7 @@ window.MRCE.CONFIG = {
 					"SMR_Enable": { "label": "SMR Check Enable", "type": "checkbox", "default": "enable" },
 					"SMR_Update": { "label": "SMR Download", "type": "checkbox", "default": "enable"},
 					"SMR_Ignore_Alarm": { "label": "Do not generate an SMR Alarm", "type": "checkbox", "default": "disable" },
-					"SMR_New_Drive_Det_Count": { "label": "Number of times to generate an alarm before ignoring it", "type": "number", "default": 14 }
+					"SMR_New_Drive_Det_Count": { "label": "Number of times to generate an alarm before ignoring it", "type": "number", "required": true, "min":0, "max":100, "default": 14 }
 				}
 			},
 					
@@ -280,14 +280,14 @@ window.MRCE.CONFIG = {
 				"options": {
 					"Ignore_Lock": { "label": "Do Not check for multiple instances of Multi-Report", "type": "checkbox", "default": "disable" },
 					"NVM_Low_Power": { "label": "Set NVMe drives to lowest power level", "type": "checkbox", "default": "enable" },
-					"Multipath": { "label": "Multipath Setting", "type": "select", "default": "off", "options": [ "off", "normal", "Exos2x", "serial"] },
+					"Multipath": { "label": "Multipath Setting", "type": "select", "required": true, "default": "off", "options": [ "off", "normal", "Exos2x", "serial"] },
 					"Run_SMART_No_power_on_time": { "label": "Set Alternate methode for Power_On_Hours for SCSI drives?", "type": "checkbox", "default": "no" },
 					"TrueNASConfigBackupSave": { "label": "Save a copy of the TrueNAS config backup file?", "type": "checkbox", "default": "no" },
 					"TrueNASConfigBackupLocation": { "label": "Location of extra TrueNAS config file:", "type": "text", "default": "/tmp/" },
-					"PowerTimeFormat": { "label": "Format for power-on hours string", "type": "select", "default": "h", "options": [ "ymdh", "ymd", "ym", "y", "h"] },
-					"TempDisplay":  { "label": "Format you desire the temperature to be displayed", "type": "select", "default": "&deg; C", "options": [ "&deg; C", "*C", "^C", "^c"] },
+					"PowerTimeFormat": { "label": "Format for power-on hours string", "type": "select", "required": true, "default": "h", "options": [ "ymdh", "ymd", "ym", "y", "h"] },
+					"TempDisplay":  { "label": "Format you desire the temperature to be displayed", "type": "select", "required": true, "default": "&deg; C", "options": [ "&deg; C", "*C", "^C", "^c"] },
 					"Non_Exist_Value":  { "label": "Format you desire non-existent data to be displayed", "type": "text", "default": "---" },
-					"Pool_Capacity_Type":  { "label": "Zpool Status Report - Pool Size and Free Space capacities", "type": "select", "default": "zfs", "options": [ "zfs", "zpool"] },
+					"Pool_Capacity_Type":  { "label": "Zpool Status Report - Pool Size and Free Space capacities", "type": "select", "required": true, "default": "zfs", "options": [ "zfs", "zpool"] },
 					"Last_Test_Type_poh": { "label": "Include the Last Test Power On Hours", "type": "checkbox", "default": "enable" },
 					"lastTestTypeHoursIdent": { "label": "Test to follow power on hours numbers.  Default=hrs", "type": "text", "default": "hrs" }
 				}
@@ -297,16 +297,16 @@ window.MRCE.CONFIG = {
 				"label": "Time-Limited Error Recovery",
 				"options": {
 					"SCT_Enable": { "label": "Set to enable to send a command to enable SCT on your drives for user defined timeout.", "type": "checkbox", "default": "disable" },
-					"SCT_Warning_Level": { "label": "TLER Warning Level", "type": "select", "default": "TLER_No_Msg", "options": [ "TLER_No_Msg", "all", "TLER"] },
-					"SCT_Read_Timeout": { "label": "Set to the read threshold. Default = 70 = 7.0 seconds.", "type": "number", "default": 70 },
-					"SCT_Write_Timeout": { "label": "Set to the write threshold. Default = 70 = 7.0 seconds.", "type": "number", "default": 70 }			
+					"SCT_Warning_Level": { "label": "TLER Warning Level", "type": "select", "required": true, "default": "TLER_No_Msg", "options": [ "TLER_No_Msg", "all", "TLER"] },
+					"SCT_Read_Timeout": { "label": "Set to the read threshold. Default = 70 = 7.0 seconds.", "type": "number", "required": true, "min":0, "default": 70 },
+					"SCT_Write_Timeout": { "label": "Set to the write threshold. Default = 70 = 7.0 seconds.", "type": "number", "required": true, "min":0, "default": 70 }			
 				}
 			},
 			"F.A.R.M.": {
 				"label": "F.A.R.M.",
 				"options": {
 					"DriveFARMCheck": { "label": "Enable F.A.R.M. checks", "type": "checkbox", "default": "enable" },
-					"DriveFARMCheckHours": { "label": "F.A.R.M. - Maximum number of days different from S.M.A.R.T.", "type": "number", "default": 30 }
+					"DriveFARMCheckHours": { "label": "F.A.R.M. - Maximum number of days different from S.M.A.R.T.", "type": "number", "required": true, "min":0, "default": 30 }
 				}
 			}
 		},
@@ -514,19 +514,19 @@ window.MRCE.CONFIG = {
 			"Color customization": {
 				"label": "Variable list",
 				"options": {
-					"expiredWarrantyBoxColor": { "label": "\"black\" = normal box perimeter color.", "type": "colorpicker", "default": "#000000" },
-                    "WarrantyBackgndColor": { "label": "Background color for expired drives. \"none\" = normal background", "type": "colorpicker", "default": "#f1ffad" },
-                    "okColor": { "label": "Hex code for color to use in SMART Status column if drives pass (default is darker light green, #b5fcb9)", "type": "colorpicker", "default": "#F38B16" },
-                    "warnColor": { "label": "Hex code for WARN color (default is orange, #F38B16)", "type": "colorpicker", "default": "#F38B16" },
-                    "critColor": { "label": "Hex code for CRITICAL color (default is red, #f44336)", "type": "colorpicker", "default": "#f44336" },
-                    "altColor": { "label": "Table background alternates row colors between white and this color (default is light gray, #f4f4f4)", "type": "colorpicker", "default": "#f4f4f4" },
-                    "whtColor": { "label": "Hex for White background", "type": "colorpicker", "default": "#ffffff" },
-                    "ovrdColor": { "label": "Hex code for Override Yellow", "type": "colorpicker", "default": "#ffffe4" },
-                    "blueColor": { "label": "Hex code for Sky Blue, used for the SCRUB/SMART Test In Progress/background", "type": "colorpicker", "default": "#87ceeb" },
-                    "yellowColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "default": "#f1ffad" },
-                    "pohColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "default": "#ffffcc" },   
-                    "tdrcolor": { "label": "Hex code for 30-Day Read Percentage Value", "type": "colorpicker", "default": "#008000" },
-                    "tdwcolor": { "label": "Hex code for 30-Day Write Percentage Value", "type": "colorpicker", "default": "#0000FF" }                                     
+					"expiredWarrantyBoxColor": { "label": "\"black\" = normal box perimeter color.", "type": "colorpicker", "required": true, "default": "#000000" },
+                    "WarrantyBackgndColor": { "label": "Background color for expired drives. \"none\" = normal background", "type": "colorpicker", "required": true, "default": "#f1ffad" },
+                    "okColor": { "label": "Hex code for color to use in SMART Status column if drives pass (default is darker light green, #b5fcb9)", "type": "colorpicker", "required": true, "default": "#F38B16" },
+                    "warnColor": { "label": "Hex code for WARN color (default is orange, #F38B16)", "type": "colorpicker", "required": true, "default": "#F38B16" },
+                    "critColor": { "label": "Hex code for CRITICAL color (default is red, #f44336)", "type": "colorpicker", "required": true, "default": "#f44336" },
+                    "altColor": { "label": "Table background alternates row colors between white and this color (default is light gray, #f4f4f4)", "type": "colorpicker", "required": true, "default": "#f4f4f4" },
+                    "whtColor": { "label": "Hex for White background", "type": "colorpicker", "required": true, "default": "#ffffff" },
+                    "ovrdColor": { "label": "Hex code for Override Yellow", "type": "colorpicker", "required": true, "default": "#ffffe4" },
+                    "blueColor": { "label": "Hex code for Sky Blue, used for the SCRUB/SMART Test In Progress/background", "type": "colorpicker", "required": true, "default": "#87ceeb" },
+                    "yellowColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "required": true, "default": "#f1ffad" },
+                    "pohColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "required": true, "default": "#ffffcc" },   
+                    "tdrcolor": { "label": "Hex code for 30-Day Read Percentage Value", "type": "colorpicker", "required": true, "default": "#008000" },
+                    "tdwcolor": { "label": "Hex code for 30-Day Write Percentage Value", "type": "colorpicker", "required": true, "default": "#0000FF" }                                     
 				}
 			}
         }
