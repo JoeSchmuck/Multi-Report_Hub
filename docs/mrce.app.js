@@ -327,6 +327,7 @@
                                 ok: false,
                                 message: `Missing required ${label} field`,
                                 focusSelector: `input[name="${key}"]`,
+                                key
                             };
                     } else {
                         const el = document.querySelector(`[data-key="${key}"]`);
@@ -337,6 +338,7 @@
                                     ok: false,
                                     message: `Missing required ${label} field`,
                                     focusSelector: `#${el.id}`,
+                                    key
                                 };
                         } else {
                             const val = (data[key] ?? "").toString().trim();
@@ -345,6 +347,7 @@
                                     ok: false,
                                     message: `Missing required ${label} field`,
                                     focusSelector: `#${el.id}`,
+                                    key
                                 };
                         }
                     }
@@ -571,9 +574,52 @@
             // check required fields
             const check = validateRequired(data);
             if (!check.ok) {
-                toastr.error(check.message);
-                if (check.focusSelector) revealAndHighlight(check.focusSelector); //document.querySelector(check.focusSelector)?.focus();
-                return;
+                const defOpt = findOptionInConfigData(check.key);
+                const defVal = defOpt?.default;
+
+                if (!defVal) {
+                    toastr.error(check.message);
+                    if (check.focusSelector) revealAndHighlight(check.focusSelector); //document.querySelector(check.focusSelector)?.focus();
+                    return;                    
+                }
+                
+                const btn = defVal !== undefined 
+                    ? `<br><button type="button" class="btn btn-sm btn-success mt-2 apply-default text-white" data-key="${check.key}">
+                        Apply default
+                    </button>` 
+                    : "";
+
+                toastr.error(check.message + btn, "", { timeOut: 7500, extendedTimeOut: 2000 });
+                if (check.focusSelector) revealAndHighlight(check.focusSelector);
+                $(document).off("click", ".apply-default").on("click", ".apply-default", function() {
+                    const key = $(this).data("key");
+                    const opt = findOptionInConfigData(key);
+                    if (!opt) return;
+
+                    const el = document.querySelector(`[data-key="${key}"]`);
+                    if (!el) return;
+
+                    const defVal = opt.default ?? "";
+
+                    if (el.type === "checkbox") {
+                    el.checked = String(defVal).toLowerCase() === "true" 
+                                || String(defVal).toLowerCase() === "yes" 
+                                || String(defVal).toLowerCase() === "enable"
+                                || String(defVal).toLowerCase() === "false" 
+                                || String(defVal).toLowerCase() === "no" 
+                                || String(defVal).toLowerCase() === "disable";                                
+                    } else if (opt.type === "colorpicker") {
+                        el.value = defVal;
+                        $(el).spectrum("set", defVal);
+                    } else {
+                        el.value = defVal;
+                    }
+
+                    toastr.success(`Applied default value!`);
+                    //document.getElementById('mr-btn-save')?.focus();
+                });
+
+                return;                
             }
 
             // validotor for emails fields
@@ -582,7 +628,7 @@
                 const $el = $(el);
                 const emailVal = String(($el.val() ?? "")).trim();
                 const key = $el.data("key");
-                const emailOpt = findOptionInConfigData(key);
+                //const emailOpt = findOptionInConfigData(key);
                 
                 if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
                     const result = await Swal.fire({
@@ -599,13 +645,13 @@
                     return;
                     }   
                 }
-                else if (emailOpt && emailOpt.default && emailVal === emailOpt.default) {
-                    toastr.error(
-                        "Please load a configuration file first, or change the default email address."
-                    );
-                    revealAndHighlight(`[data-key="${key}"]`);
-                    return;
-                } 
+                //else if (emailOpt && emailOpt.default && emailVal === emailOpt.default) {
+                //    toastr.error(
+                //        "Please load a configuration file first, or change the default email address."
+                //    );
+                //    revealAndHighlight(`[data-key="${key}"]`);
+                //    return;
+                //} 
             
             }
 
