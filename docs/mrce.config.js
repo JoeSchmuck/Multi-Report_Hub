@@ -410,8 +410,10 @@ window.MRCE.CONFIG = {
 					"HDD_Last_Test_Type_Title": { "label": "HDD Last Test Type Title", "type": "text", "default": "Last Test Type (time conducted)" },
 					"HDD_Total_Data_Written": { "label": "HDD Total Data Written", "type": "checkbox", "default": "enable" },
 					"HDD_Total_Data_Written_Title": { "label": "HDD Total Data Written Title", "type": "text", "default": "Lifetime Data Read<br>/ Written" },
-					"HDD_Total_Data_Written_Month": { "label": "HDD Total Data Written_Month", "type": "checkbox", "default": "enable" },
-					"HDD_Total_Data_Written_Month_Title": { "label": "HDD Total Data Written Month Title", "type": "text", "default": "Total Data Written 30 Days" }
+					"HDD_Total_Data_Written_Month": { "label": "HDD Total Data Written Month", "type": "checkbox", "default": "enable" },
+					"HDD_Total_Data_Written_Month_Title": { "label": "HDD Total Data Written Month Title", "type": "text", "default": "Current Month Read<br>/ Written" },
+					"HDD_Total_Data_Written_30day": { "label": "HDD Total Data Written 30 Days", "type": "checkbox", "default": "enable" },
+					"HDD_Total_Data_Written_30day_Title": { "label": "HDD Total Data Written 30 Days Title", "type": "text", "default": "Total Data Written 30 Days" }
                 }
             }
         },		
@@ -461,7 +463,9 @@ window.MRCE.CONFIG = {
 					"SSD_Total_Data_Written": { "label": "SSD Total Data Written", "type": "checkbox", "default": "enable" },
 					"SSD_Total_Data_Written_Title": { "label": "SSD Total Data Written Title", "type": "text", "default": "Lifetime Data Read<br>/ Written" },
 					"SSD_Total_Data_Written_Month": { "label": "SSD Total Data Written_Month", "type": "checkbox", "default": "enable" },
-					"SSD_Total_Data_Written_Month_Title": { "label": "SSD Total Data Written Month Title", "type": "text", "default": "Total Data Written 30 Days" }
+					"SSD_Total_Data_Written_Month_Title": { "label": "SSD Total Data Written Month Title", "type": "text", "default": "Current Month Read<br>/ Written" },
+					"SSD_Total_Data_Written_30day": { "label": "SSD Total Data Written 30 Days", "type": "checkbox", "default": "enable" },
+					"SSD_Total_Data_Written_30day_Title": { "label": "SSD Total Data Written 30 Days Title", "type": "text", "default": "Total Data Written 30 Days" }
                 }
             }
         },
@@ -505,7 +509,9 @@ window.MRCE.CONFIG = {
 					"NVM_Total_Data_Written": { "label": "NVM Total Data Written", "type": "checkbox", "default": "enable" },
 					"NVM_Total_Data_Written_Title": { "label": "NVM Total Data Written Title", "type": "text", "default": "Lifetime Data Read<br>/ Written" },
 					"NVM_Total_Data_Written_Month": { "label": "NVM Total Data Written_Month", "type": "checkbox", "default": "enable" },
-					"NVM_Total_Data_Written_Month_Title": { "label": "NVM Total Data Written Month Title", "type": "text", "default": "Total Data Written 30 Days" }
+					"NVM_Total_Data_Written_Month_Title": { "label": "NVM Total Data Written Month Title", "type": "text", "default": "Current Month Read<br>/ Written" },
+					"NVM_Total_Data_Written_30day": { "label": "NVM Total Data Written 30 Days", "type": "checkbox", "default": "enable" },
+					"NVM_Total_Data_Written_30day_Title": { "label": "NVM Total Data Written 30 Days Title", "type": "text", "default": "Total Data Written 30 Days" }
                 }
             }
         },
@@ -825,7 +831,9 @@ window.MRCE.TOOLTIPS = {
 			"HDD_Total_Data_Written": "Check to Show",
 			"HDD_Total_Data_Written_Title": "Title of Column",
 			"HDD_Total_Data_Written_Month": "Check to Show",
-			"HDD_Total_Data_Written_Month_Title": "Title of Column"
+			"HDD_Total_Data_Written_Month_Title": "Title of Column",
+			"HDD_Total_Data_Written_30day": "Check to Show",
+			"HDD_Total_Data_Written_30day_Title": "Title of Column"
 		},
 		"Custom Report Configuration - SSD": {
 			"SSD_Device_ID": "Check to Show",
@@ -869,7 +877,9 @@ window.MRCE.TOOLTIPS = {
 			"SSD_Total_Data_Written": "Check to Show",
 			"SSD_Total_Data_Written_Title": "Title of Column",
 			"SSD_Total_Data_Written_Month": "Check to Show",
-			"SSD_Total_Data_Written_Month_Title": "Title of Column"
+			"SSD_Total_Data_Written_Month_Title": "Title of Column",
+			"SSD_Total_Data_Written_30day": "Check to Show",
+			"SSD_Total_Data_Written_30day_Title": "Title of Column"
 		},
 		"Custom Report Configuration - NVM": {
 			"NVM_Device_ID": "Check to Show",
@@ -913,7 +923,9 @@ window.MRCE.TOOLTIPS = {
 			"NVM_Total_Data_Written": "Check to Show",
 			"NVM_Total_Data_Written_Title": "Title of Column",
 			"NVM_Total_Data_Written_Month": "Check to Show",
-			"NVM_Total_Data_Written_Month_Title": "Title of Column"
+			"NVM_Total_Data_Written_Month_Title": "Title of Column",
+			"NVM_Total_Data_Written_30day": "Check to Show",
+			"NVM_Total_Data_Written_30day_Title": "Title of Column"
 		},
 };
 
