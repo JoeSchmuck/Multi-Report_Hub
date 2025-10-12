@@ -8,8 +8,8 @@
 
 Build and configure Multi-Report easily.
 
-- run it direclty from the [WEB](https://joeschmuck.github.io/Multi-Report_Config_HTML/)
-- run it locally: download the files and open with your favourite browser!
+- run it directly from the [WEB](https://joeschmuck.github.io/Multi-Report_Config_HTML/)
+- run it locally: download the files and open with your favorite browser!
 
 ## 🙋‍♂️ For any problem or improvements let us know!
 

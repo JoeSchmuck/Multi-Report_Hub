@@ -16,7 +16,7 @@ window.MRCE.CONFIG = {
             "General Email Settings 3": {
                 "label": "Alert Email Configuration (-m switch)",
                 "options": {
-					"AlertEmail": { "label": "Address to send Alerts listed below, typically used to send alarm condition emails such as drive temp alarms.", "type": "email", "default": "" },
+					"AlertEmail": { "label": "Address to send Alerts listed below, typically used to send alarm condition emails such as drive temp alarms. This is good to setup a CRONJOB every 15 minutes (example) to check for the items listed below and send you an email (not full report) if true. You MUST use the '-m' switch.", "type": "email", "default": "" },
                     "AlertOnWarningTemp": { "label": "Drive Temperature Warning", "type": "checkbox", "default": "enable" },
                     "AlertOnWarningError": { "label": "Drive Warning Error", "type": "checkbox", "default": "enable" },					
                     "AlertOnCriticalError": { "label": "Drive Critical Error", "type": "checkbox", "default": "enable" }
@@ -60,7 +60,7 @@ window.MRCE.CONFIG = {
 			"Short Tests1":{
 			"label": "Short Tests Group 1",
 			"options": {
-				"Short_Test_Mode": { "label": "Select the Test Mode", "type": "select", "required": true, "default": "2", "options": [ { "value": "1", "label": "Use Test Mode 1 settings to determine the drives to be tested" }, { "value": "2", "label": "All drives are tested" }, { "value": "3", "label": "No drives tested" }]},
+				"Short_Test_Mode": { "label": "Select the Test Mode", "type": "select", "required": true, "default": "2", "options": [ { "value": "1", "label": "Use Test Mode 1 settings to determine the drives to be tested" }, { "value": "2", "label": "Test Mode 2 All drives are tested" }, { "value": "3", "label": "Test Mode 3 No drives tested" }]},
 				"Short_Time_Delay_Between_Drives": { "label": "Delay between SMART test starting for Short tests.", "type": "number", "required": true, "min":0, "default": 1 },
 				"Short_Drives_Test_Delay": { "label": "Delay after starting the last Short test before continuing.", "type": "number", "required": true, "min":0, "default": 130 }
 				}
@@ -79,7 +79,7 @@ window.MRCE.CONFIG = {
 			"Long Tests1": {
 			"label": "Long Tests Group 1",
 			"options": {
-				"Long_Test_Mode": { "label": "Select the Test Mode", "type": "select", "required": true, "default": "1", "options": [ { "value": "1", "label": "Use Test Mode 1 settings to determine the drives to be tested" }, { "value": "2", "label": "All drives tested" }, { "value": "3", "label": "No drives tested" }]},
+				"Long_Test_Mode": { "label": "Select the Test Mode", "type": "select", "required": true, "default": "1", "options": [ { "value": "1", "label": "Use Test Mode 1 settings to determine the drives to be tested" }, { "value": "2", "label": "Test Mode 2 All drives tested" }, { "value": "3", "label": "Test Mod 3 No drives tested" }]},
 				"Long_Time_Delay_Between_Drives": { "label": "Delay between SMART test starting for Long tests.", "type": "number", "required": true, "min":0, "default": 1 }
 				}
 			},
@@ -107,7 +107,7 @@ window.MRCE.CONFIG = {
                 "options": {
                     "MRConfigEmailEnable": { "label": "Attach Multi-Report Config file to the Email:", "type": "checkbox", "default": "enable" },
                     "MRConfigEmailDay": { "label": "What day do you want the Multi-Report configuration file attached?:", "type": "select", "required": true, "default": "Mon", "options": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Month", "Never"] },
-					"MRChangedEmailSend": { "label": "Do you want thr Original and NEW Config files sent as an attachment if the file is updated?:", "type": "checkbox", "default": "enable" }
+					"MRChangedEmailSend": { "label": "Do you want the Original and NEW configuration files sent as attachments if the file is updated?:", "type": "checkbox", "default": "enable" }
                 }
             },
 			"TrueNAS config backup settings": {
@@ -145,7 +145,7 @@ window.MRCE.CONFIG = {
                     "statistical_data_file": { "label": "Statistical Data File:", "type": "text", "default": "$SCRIPT_DIR/statisticalsmartdata.csv", "required": true },
                     "SDF_DataRecordEnable": { "label": "Enable SDF Data Record:", "type": "checkbox", "default": "enable" },
                     "SDF_DataPurgeDays": { "label": "SDF Data Purge Days:", "type": "number", "required": true, "min":0, "default": 720},
-				"add_new_drive_factor": { "label": "Add New Drive Factor", "type": "select", "required": true, "default": "actual", "options": [ { "value": "actual", "label": "When adding a new drive, use the drive Power On Hours for metrics" }, { "value": "Serial", "label": "When adding a new drive, do not use the drive Power On Hours for metrics, start at a zero value." }]}
+					"add_new_drive_factor": { "label": "Add New Drive Factor", "type": "select", "required": true, "default": "actual", "options": [ { "value": "actual", "label": "Drive metrics use the date the script recognized the drive." }, { "value": "Serial", "label": "Use the entire life of the drive data." }]}
                 }
             },
 			
@@ -227,7 +227,7 @@ window.MRCE.CONFIG = {
 					"SeekErrorsCrit": { "label": "Seek errors allowable before Critical message", "type": "number", "required": true, "min":0, "default": 100 },
 					"NVM_Media_Errors": { "label": "NVMe Media Errors allowable before alarm", "type": "number", "required": true, "min":0, "max":100, "default": 1 },
 					"WearLevelCrit": { "label": "Wear Level setpoint for a CRITICAL message", "type": "number", "required": true, "min":0, "max":100, "default": 9 },
-					"TestWarnAge": { "label": "Test Age Days allowedable before WARNING message", "type": "number", "required": true, "min":0, "default": 2 },
+					"TestWarnAge": { "label": "Test Age Days allowable before WARNING message", "type": "number", "required": true, "min":0, "default": 2 },
 					"NVMe_Ignore_Invalid_Errors": { "label": "NVMe Ignore Invalid Field in Command messages", "type": "checkbox", "default": "disable" }
 				}
 			},
@@ -281,7 +281,7 @@ window.MRCE.CONFIG = {
 					"Ignore_Lock": { "label": "Do Not check for multiple instances of Multi-Report", "type": "checkbox", "default": "disable" },
 					"NVM_Low_Power": { "label": "Set NVMe drives to lowest power level", "type": "checkbox", "default": "enable" },
 					"Multipath": { "label": "Multipath Setting", "type": "select", "required": true, "default": "off", "options": [ "off", "normal", "Exos2x", "serial"] },
-					"Run_SMART_No_power_on_time": { "label": "Set Alternate methode for Power_On_Hours for SCSI drives?", "type": "checkbox", "default": "no" },
+					"Run_SMART_No_power_on_time": { "label": "Set Alternate method for Power_On_Hours for SCSI drives?", "type": "checkbox", "default": "no" },
 					"TrueNASConfigBackupSave": { "label": "Save a copy of the TrueNAS config backup file?", "type": "checkbox", "default": "no" },
 					"TrueNASConfigBackupLocation": { "label": "Location of extra TrueNAS config file:", "type": "text", "default": "/tmp/" },
 					"PowerTimeFormat": { "label": "Format for power-on hours string", "type": "select", "required": true, "default": "h", "options": [ "ymdh", "ymd", "ym", "y", "h"] },
@@ -289,7 +289,7 @@ window.MRCE.CONFIG = {
 					"Non_Exist_Value":  { "label": "Format you desire non-existent data to be displayed", "type": "text", "default": "---" },
 					"Pool_Capacity_Type":  { "label": "Zpool Status Report - Pool Size and Free Space capacities", "type": "select", "required": true, "default": "zfs", "options": [ "zfs", "zpool"] },
 					"Last_Test_Type_poh": { "label": "Include the Last Test Power On Hours", "type": "checkbox", "default": "enable" },
-					"lastTestTypeHoursIdent": { "label": "Test to follow power on hours numbers.  Default=hrs", "type": "text", "default": "hrs" }
+					"lastTestTypeHoursIdent": { "label": "Text to follow power on hours numbers.  Default=hrs", "type": "text", "default": "hrs" }
 				}
 			},
 
@@ -315,6 +315,7 @@ window.MRCE.CONFIG = {
 			"Drive Customization": {
 				"label": "Drive Customization",
 				"options": {
+					"READ_ME_FIRST": { "label": "NOTES (READ ME!)  There is a very specific format that each value must use below.  You are better to use the built-in Multi-Report -config option the establish these values.","type": "text", "default": "YOU HAVE BEEN WARNED"},
 					"Ignore_Drives_List": { "label": "Ignore Drives List", "type": "text", "default": "" },
 					"ATA_Errors_List": { "label": "ATA Errors List", "type": "text", "default": "" },
 					"CRC_Errors_List": { "label": "CRC Errors List", "type": "text", "default": "" },
@@ -542,34 +543,33 @@ window.MRCE.CONFIG = {
 // fields tooltip
 window.MRCE.TOOLTIPS = {
         "Email Address Settings": {
-            "Email": "Normal email address to send report.",
-            "From": "From address (default works for many). Use only address accepted by your provider, if using Outlook OAuth, try = blank.",
-			"FromName": "From Name. This will not impact delivery"
+            "Email": "Your normal email address to send the report.",
+            "From": "Your email service account address or leave empty, this works for some accounts.",
+			"FromName": "From Name. This will not impact delivery."
         },			
         "Alert Email Configuration (-m switch)": {
             "AlertEmail": "Email address to send report when using the `-m` switch.",
-            "AlertOnWarningTemp": "Send alert on Warning Temp. Default=enable",
-            "AlertOnWarningError": "Send alert on Warning Error.  Default=enable",			
-            "AlertOnCriticalError": "Send alert on Critical Error.  Default=enable"
+            "AlertOnWarningTemp": "Send alert email on Warning Temp. Default=enable/checked",
+            "AlertOnWarningError": "Send alert email on Warning Error.  Default=enable/checked",			
+            "AlertOnCriticalError": "Send alert email on Critical Error.  Default=enable/checked"
         },
 		"Email On Alarm ONLY": {
-			"Email_On_Alarm_Only": "When enable, an email will only be sent if an alarm condition exists.  Default=disable",
-			"Email_On_Alarm_Only_And_Attachments": "When enable, email attachments will be sent even when no alarm condition exists.  Default=enable"
+			"Email_On_Alarm_Only": "When enable/checked, an email WILL ONLY be sent if an alarm condition exists. No alarm condition, no emails. Default=disable/unchecked",
+			"Email_On_Alarm_Only_And_Attachments": "When enable, email attachments will be sent even when no alarm condition exists.  Default=enable/checked"
         },
         "Attach multi_report_config.txt to Email": {
-            "MRConfigEmailEnable": "Enable attaching the multi_report_config.txt configuration file to email.",
-            "MRConfigEmailDay": "Day of the week to email the configuration file.",
-			"MRChangedEmailSend": "If enable will attach the updated/changed configuration file to the email.  This would happen during an update. Default=enable"
+            "MRConfigEmailEnable": "Enable attaching the multi_report_config.txt configuration file to email.  Default=enable/checked",
+            "MRConfigEmailDay": "Day of the week to email the configuration file.  Default=Mon",
+			"MRChangedEmailSend": "If enable will attach the updated/changed configuration file to the email.  This would happen during an update. Default=enable/checked"
+        },
+        "Attach TrueNAS Configuration files to Email": {
+            "TrueNASConfigEmailEnable": "Enable emailing of TrueNAS configuration backups.  Default=enable/checked",
+            "TrueNASConfigEmailDay": "Day of the week to email the configuration backup.  Default=Mon"
         },
 		"Statistical Data File": {
-			"SDF_DataPurgeDays": "Set to the number of day you wish to keep in the data.  Older data will be purged. Default is 730 days (2 years). 0=Disable.",
-			"SDF_DataEmail": "Do you want a copy of the Statistical Data File emailed to you?",
-			"SDF_DataEmailDay": "Set to the day of the week the statistical report is emailed."
+			"SDF_DataEmail": "Do you want a copy of the Statistical Data File emailed to you?  Default=enable/checked",
+			"SDF_DataEmailDay": "Set to the day of the week the statistical report is emailed.  Default=Mon"
 		},
-        "Attach TrueNAS Configuration files to Email": {
-            "TrueNASConfigEmailEnable": "Enable emailing of TrueNAS configuration backups.",
-            "TrueNASConfigEmailDay": "Day of the week to email the configuration backup."
-        },		
 		"Backup File Locations": {
             "TrueNASConfigBackupSave": "Save a copy of the TrueNAS configuration backup.",
             "TrueNASConfigBackupLocation": "Location to save the TrueNAS configuration backup."		
@@ -579,40 +579,39 @@ window.MRCE.TOOLTIPS = {
             "TrueNASConfigBackupLocation": "Location to save the TrueNAS configuration backup."		
 		},
         "Statistical Data File (SDF)": {
-            "statistical_data_file": "The file path and name for the Statistical Data File.",
-            "SDF_DataRecordEnable": "Enable recording of statistical data.",
-			"SDF_DataPurgeDays": "Set the number of days the statistical data file should retain.",
-			"SDF_DataEmail": "Set to enable to have an attachment of the file emailed to you.",
-            "add_new_drive_factor": "Factor for adding new drives to the statistical data."
+            "statistical_data_file": "The file path and name for the Statistical Data File.  Default=$SCRIPT_DIR/statisticalsmartdata.csv",
+            "SDF_DataRecordEnable": "Enable recording of statistical data.  Default=enable/checked",
+			"SDF_DataPurgeDays": "Set the number of days the statistical data file should retain.  Default=720 (2 years)",
+			"SDF_DataEmail": "Set to enable to have an attachment of the file emailed to you.  Default=enable/checked",
+            "add_new_drive_factor": "When adding an older used drive to the system, use the current values in factoring statistics or pretend the drive is new and use all previous data for the statistics.  Default=actual/Used Drive (also work when installing a new drive)"
         },
         "Report Chart Configuration": {
 			"chartfont": "Typical options are: courier new, times new roman, Cascadia Code, stencil, OCR A Extended, etc.  NOTE: Chart fonts look better if they are a proportional font.",
 			"chart_font_size":"Typical options are: 14, 16, 18.  This only affects the Chart fonts, not the Text fonts.",
-			"Subject_Line_Normal": "Email Subject Line for normal good reports.  ${host} is the name of the server.",
-			"Subject_Line_Warning": "Email Subject Line for warning error reports.  ${host} is the name of the server.",
-            "Subject_Line_Critical": "Email Subject Line for critical error reports.  ${host} is the name of the server.",
-			"HDDreportTitle": "This is the title of the HDD report.",
-			"SSDreportTitle": "This is the title of the SSD report.",
-			"NVMreportTitle": "This is the title of the NVMe report."
-
+			"Subject_Line_Normal": "Email Subject Line for normal good reports.  ${host} is the name of the server.  Default=SMART Testing Results for ${host} - All is Good",
+			"Subject_Line_Warning": "Email Subject Line for warning error reports.  ${host} is the name of the server.  Default=*WARNING*  SMART Testing Results for ${host}  *WARNING*",
+            "Subject_Line_Critical": "Email Subject Line for critical error reports.  ${host} is the name of the server.  Default=*CRITICAL ERROR*  SMART Testing Results for ${host}  *CRITICAL ERROR*",
+			"HDDreportTitle": "This is the title of the HDD report.  Default=Spinning Rust Summary Report",
+			"SSDreportTitle": "This is the title of the SSD report.  Default=SSD Summary Report",
+			"NVMreportTitle": "This is the title of the NVMe report.  Default=NVMe Summary Report"
         },
         "Report Configuration": {
-			"Enable_Text_Section": "This will display the Text Section below the CHART.  Default=enable",
+			"Enable_Text_Section": "This will display the Text Section below the CHART.  Default=enable/checked",
 			"font": "Typical options are: courier new, times new roman, Cascadia Code, stencil, OCR A Extended, etc.  NOTE: Text fonts look better if they are a monospace font.",
 			"font_size":"Typical options are: 14, 16, 18.  This only affects the Text Section fonts, not the Chart fonts.",
-			"Total_Data_Written_Month": "Options are: month for Current Month, or 30Days for the previous rolling 30 days.",
-			"Enable_Messages": "This will enable the Warning/Caution type messages. Default=enable",
-			"Enable_Zpool_Messages": "This will list all zpool -v status and identify drives by gptid to drive ident.  Default=enable",
-            "Enable_SMART_Messages": "This will output SMART data if available.  Default=enable",
-			"ReportNonSMART": "Will force even non-SMART devices to be reported.  Default=enable",
-			"DisableRAWdata": "Remove the smartctl -a data and non-smart data appended to the normal report. Default=disable",
-			"ATA_Auto_Enable": "Automatically update Log Error count to only display a log error when a new one occurs.  Default=disable",
-			"zfs_report_enable": "Enable the ZFS report section.",
-            "zfs_report_only_on_error": "Only send the ZFS report if an error is found.",
-			"smart_report_enable": "Enable the SMART report section.",
-            "send_smart_report_only_on_error": "Only send the SMART report if an error is found.",
-			"scrub_report_enable": "Enable the scrub report section.",
-            "scrub_report_only_on_error": "Only send the scrub report if an error is found."
+			"Total_Data_Written_Month": "Options are: month for Current Month, or 30Days for the previous rolling 30 days.  Default=rolling 30 days",
+			"Enable_Messages": "This will enable the Warning/Caution type messages. Default=enable/checked",
+			"Enable_Zpool_Messages": "This will list all zpool -v status and identify drives by gptid to drive ident.  Default=enable/checked",
+            "Enable_SMART_Messages": "This will output SMART data if available.  Default=enable/checked",
+			"ReportNonSMART": "Will force even non-SMART devices to be reported.  Default=enable/checked",
+			"DisableRAWdata": "Remove the smartctl -a data and non-smart data appended to the normal report. Default=disable/unchecked",
+			"ATA_Auto_Enable": "Automatically update Log Error count to only display a log error when a new one occurs.  Default=disable/unchecked",
+			"zfs_report_enable": "Enable the ZFS report section.  Default=enable/checked",
+            "zfs_report_only_on_error": "Only send the ZFS report if an error is found.  Default=disable/unchecked",
+			"smart_report_enable": "Enable the SMART report section.  Default=enable/checked",
+            "send_smart_report_only_on_error": "Only send the SMART report if an error is found.  Default=disable/unchecked",
+			"scrub_report_enable": "Enable the scrub report section.  Default=enable/checked",
+            "scrub_report_only_on_error": "Only send the scrub report if an error is found.  Default=disable/unchecked"
 
         },
 		"Alarm Thresholds - Temperature": {
@@ -625,126 +624,124 @@ window.MRCE.TOOLTIPS = {
 			"SSDtempCrit": "SSD Drive Critical Temp (in C) when a CRITICAL message will be used.  Default=60",
 			"NVMtempWarn": "NVM Drive Warning Temp (in C) when a WARNING message will be used.  Default=55",
 			"NVMtempCrit": "NVM Drive Critical Temp (in C) when a CRITICAL message will be used.  Default=65",
-			"HDD_Cur_Pwr_Max_Temp_Ovrd": "HDD Max Drive Temp Override. This value when enable will NOT alarm on any Current Power Cycle Max Temperature Limit.  Default=disabled",
-			"SSD_Cur_Pwr_Max_Temp_Ovrd": "SSD Max Drive Temp Override. This value when enable will NOT alarm on any Current Power Cycle Max Temperature Limit.  Default=disabled",
-			"NVM_Cur_Pwr_Max_Temp_Ovrd": "NVMe Max Drive Temp Override. This value when enable will NOT alarm on any Current Power Cycle Max Temperature Limit.  Default=disabled"
+			"HDD_Cur_Pwr_Max_Temp_Ovrd": "HDD Max Drive Temp Override. This value when enable will NOT alarm on any Current Power Cycle Max Temperature Limit.  Default=disabled/unchecked",
+			"SSD_Cur_Pwr_Max_Temp_Ovrd": "SSD Max Drive Temp Override. This value when enable will NOT alarm on any Current Power Cycle Max Temperature Limit.  Default=disabled/unchecked",
+			"NVM_Cur_Pwr_Max_Temp_Ovrd": "NVMe Max Drive Temp Override. This value when enable will NOT alarm on any Current Power Cycle Max Temperature Limit.  Default=disabled/unchecked"
 		},		
 		"Alarm Thresholds - Media":{
-			"SectorsWarn": "How many sector errors before a Warning message.",
-			"SectorsCrit": "How many sector errors before a Critical message.",
-			"ReAllocWarn": "How many Reallocated sectors before a WARNING message.",
+			"SectorsWarn": "How many sector errors before a Warning message.  Default=0",
+			"SectorsCrit": "How many sector errors before a Critical message.  Default=9",
+			"ReAllocWarn": "How many Reallocated sectors before a WARNING message. Default=0",
 			"MultiZoneWarn": "How many MultiZone errors before WARNING message.  Default is 0.",
 			"MultiZoneCrit": "How many MultiZone errors before Critical message.  Default is 5.",
-			"DeviceRedFlag": "Set to enable to have the Device Column indicate RED for ANY alarm condition.  Default is enable.",
-			"HeliumAlarm": "Set to enable to set for a critical alarm any He value below HeliumMin value.  Default is enable.",
-			"HeliumMin": "Set to 100 for a zero leak helium result.  An alert will occur below this value.",
-			"RawReadWarn": "Read errors allowable before WARNING message.",
-			"RawReadCrit": "Read errors allowable before Critical message.",
-			"SeekErrorsWarn": "Seek errors allowable before WARNING message.",
-			"SeekErrorsCrit": "Seek errors allowable before Critical message.",
-			"NVM_Media_Errors": "Number of NVMe Media Errors before alarm with a CRITICAL message.",
-			"WearLevelCrit": "Wear Level Alarm Setpoint when a WARNING message. 9% is the default.",
-			"TestWarnAge": "Maximum age (in days) of last SMART test before CRITICAL color/message will be used.",
-			"NVMe_Ignore_Invalid_Errors": "NVMe Ignore Invalid Field in Command messages.  Default is disabled."
+			"DeviceRedFlag": "Set to enable to have the Device Column indicate RED for ANY alarm condition.  Default is enable/checked",
+			"HeliumAlarm": "Set to enable to set for a critical alarm any He value below HeliumMin value.  Default is enable/checked",
+			"HeliumMin": "Set to 100 for a zero leak helium result.  An alert will occur below this value.  Default=100",
+			"RawReadWarn": "Read errors allowable before WARNING message.  Default=5",
+			"RawReadCrit": "Read errors allowable before Critical message.  Default=100",
+			"SeekErrorsWarn": "Seek errors allowable before WARNING message.  Default=5",
+			"SeekErrorsCrit": "Seek errors allowable before Critical message.  Default=100",
+			"NVM_Media_Errors": "Number of NVMe Media Errors before alarm with a CRITICAL message.  Default=1",
+			"WearLevelCrit": "Wear Level Alarm Setpoint when a WARNING message. 9% is the default.  Default=9",
+			"TestWarnAge": "Maximum age (in days) of last SMART test before CRITICAL color/message will be used.  Default=2",
+			"NVMe_Ignore_Invalid_Errors": "NVMe Ignore Invalid Field in Command messages.  Default is disable/unchecked"
 		},		
 		"Time-Limited Error Recovery": {
-			"SCT_Enable": "Enable to send a command to enable SCT on your drives for user defined timeout.",
+			"SCT_Enable": "Enable to send a command to enable SCT on your drives for user defined timeout.  Default=disable/unchecked",
 			"SCT_Warning_Level": "All=Will generate a Warning Message for all devices not reporting SCT enabled. TLER=Reports only drive which support TLER. TLER_No_Msg=Will only report for TLER drives and not report a Warning Message if the drive can set TLER on. Default=TLER_No_Msg",
 			"SCT_Read_Timeout": "Set to the read threshold. Default = 70 = 7.0 seconds.",
 			"SCT_Write_Timeout": "Set to the write threshold. Default = 70 = 7.0 seconds."
 		},
 		"Updates": {
-			"Check_For_Updates": "Will check GitHub for updates and include message in next email.",
-			"Automatic_MR_Update": "# WARNING !!!  This option will automatically update the Multi-Report script if a newer version exists on GitHub.",
-			"Automatic_Selftest_Update": "# WARNING !!!  This option will automatically update the Drive_Selftest script if a newer version exists on GitHub.",
-			"Automatic_Sendemail_Update": "# WARNING !!!  This option will automatically update the Sendermail.py script if a newer version exists on GitHub."
+			"Check_For_Updates": "Will check GitHub for updates and include message in next email.  Default=enable/checked",
+			"Automatic_MR_Update": "# WARNING !!!  This option will automatically update the Multi-Report script if a newer version exists on GitHub.  Default=disable/unchecked",
+			"Automatic_Selftest_Update": "# WARNING !!!  This option will automatically update the Drive_Selftest script if a newer version exists on GitHub.  Default=disable/unchecked",
+			"Automatic_Sendemail_Update": "# WARNING !!!  This option will automatically update the Sendermail.py script if a newer version exists on GitHub.  Default=disable/unchecked"
 		},
 		"General Configuration": {
-			"Use_multi_report_config_values": "An enable value here will use the multi_report_config.txt file values to override the values defined within the Drive_Selftest script.  Default = enable",
-			"Test_ONLY_NVMe_Drives": "ONLY test NVMe drives.",
-			"Track_Drive_Testing_Dates": "Enable Drive Testing Tracking which will generate a small CSV file which recordes the most recent SMART Short and Long tests for each drive.",
-			"Enable_Logging": "Generate a text file that records how the S.M.A.R.T. testing performed.",
+			"Use_multi_report_config_values": "An enable value here will use the multi_report_config.txt file values to override the values defined within the Drive_Selftest script.  Default=enable/checked",
+			"Test_ONLY_NVMe_Drives": "This will ONLY test NVMe drives, no other drives will be tested by drive_selftest.sh  Default=disable/unchecked",
+			"Track_Drive_Testing_Dates": "Enable Drive Testing Tracking which will generate a small CSV file which records the most recent SMART Short and Long tests for each drive.  Default=enable/checked",
+			"Enable_Logging": "Generate a text file that records how the S.M.A.R.T. testing performed.  Default=enable/checked",
 			"LOG_DIR": "DS Logs directory.  Default=$SCRIPT_DIR/DS_Logs",
-			"Silent": "Only a few status messages and error messages will be output to the stdout.",
-			"selftest_data_file": "Location and file name for tracking the selftest drive dates.",
-			"External_SMART_Testing": "When set to enable it will check if drive_selftest.sh is present and run it.",
+			"Silent": "Only a few status messages and error messages will be output to the stdout.  Disable for troubleshooting if needed.  Default=enable/checked",
+			"selftest_data_file": "Location and file name for tracking the selftest drive dates.  Default=$SCRIPT_DIR/drive_selftest_tracking.csv",
+			"External_SMART_Testing": "When set to enable it will check if drive_selftest.sh is present and run it.  Default=enable/checked",
 			"External_Script_Name": "Default setting is $SCRIPT_DIR/drive_selftest.sh",
-			"Override_SMART_Disabled": "This will enable S.M.A.R.T. for any drive which supports S.M.A.R.T. but was Disabled due to the user disabling S.M.A.R.T.  It will return the drive to its previous state once the testing has completed."
-
+			"Override_SMART_Disabled": "This will enable S.M.A.R.T. for any drive which supports S.M.A.R.T. but was Disabled due to the user disabling S.M.A.R.T.  It will return the drive to its previous state once the testing has completed.  Default=disable/unchecked"
 		},
 		"SCRUB and RESILVER (with respect to this testing)": {
-			"SCRUB_Minutes_Remaining": "This option when set between 1 and 9999 (in minutes) will not run a SMART LONG test on a pool if a SCRUB has longer than xx minutes remaining, and a SMART SHORT test will be run instead to provide minimal impact to the SCRUB operation. A value of 0 (zero) will disable all SMART test(s) on the affected pool during a SCRUB operation.  Default=60",
-			"SCRUB_RESILVER_OVERRIDE": "Allow all SCRUB/RESILVER actions to occur regardless of the SCRUB_Minutes_Remaining.",
-			"Maximum_Catchup_Drive_Count": "Maximum number of drives to add to the Long testing list if some drives were not tested before by thier due date. NOTE: Enable Drive Testing Tracking must be enabled."
+			"SCRUB_Minutes_Remaining": "This option when set between 1 and 9999 minutes will not run a SMART LONG test on a pool if a SCRUB has longer than set minutes remaining, and a SMART SHORT test will be run instead to provide minimal impact to the SCRUB operation. A value of 0 (zero) will disable all SMART test(s) on the affected pool during a SCRUB operation.  Default=60",
+			"SCRUB_RESILVER_OVERRIDE": "Allow all SCRUB/RESILVER actions to occur regardless of the SCRUB_Minutes_Remaining.  Default=disable/unchecked",
+			"Maximum_Catchup_Drive_Count": "Maximum number of drives to add to the Long testing list if some drives were not tested before by their due date. NOTE: Enable Drive Testing Tracking must be enabled.  Default=1"
 		},
 		"Short Tests Group 1": {
-			"Short_Test_Mode": "Test Modes are: 1=Used the Test Mode 1 settings to determine drives to test, 2=All drives are tested, 3=No drives tested.",
-			"Short_Time_Delay_Between_Drives": "XX second delay between the drives starting testing.",
-			"Short_Drives_Test_Delay": "Delay when running Short tests, before exiting to controlling procedure."
+			"Short_Test_Mode": "Test Modes are: 1=Used the Test Mode 1 settings to determine drives to test, 2=All drives are tested, 3=No drives tested.  Default=All drives are tested",
+			"Short_Time_Delay_Between_Drives": "XX second delay between the drives starting testing.  Default=1",
+			"Short_Drives_Test_Delay": "Delay in seconds when running Short tests, before exiting to controlling procedure.  Use this to ensure all Short tests are completed before the report is generated.  Default=130"
 		},
 		"Short Tests Group (Test Mode 1 only)": {
-			"Short_SMART_Testing_Order": "Sorting order",
-			"Short_Drives_to_Test_Per_Day": "How many drives to run each day minimum, for Test Mode 1 ONLY.",
-			"Short_Drives_Test_Period": "Testing Period: Week=(7 days) or Month=(28 days)",
-			"Short_Drives_Tested_Days_of_the_Week": "Days of the week testing is allowed."
+			"Short_SMART_Testing_Order": "Sorting order.  Default=Use Drive ID",
+			"Short_Drives_to_Test_Per_Day": "How many drives to run each day minimum, for Test Mode 1 ONLY.  Default=1",
+			"Short_Drives_Test_Period": "Testing Period: Week=(7 days) or Month=(28 days).  Default=Week",
+			"Short_Drives_Tested_Days_of_the_Week": "Days of the week testing is allowed.  Check the boxes you want the test to be allowed to run if a drive is scheduled to be tested.  Default=All checked"
 		},
 		"Long Tests Group 1": {
-			"Long_Test_Mode": "Test Modes are: 1=Used the Test Mode 1 settings to determine drives to test, 2=All drives are tested, 3=No drives tested.",
-			"Long_Time_Delay_Between_Drives": "XX second delay between the drives starting testing.",
-			"Long_Drives_Test_Delay": "Delay when running Long tests, before exiting to controlling procedure."
+			"Long_Test_Mode": "Test Modes are: 1=Used the Test Mode 1 settings to determine drives to test, 2=All drives are tested, 3=No drives tested.  Default=Use Test Mode 1",
+			"Long_Time_Delay_Between_Drives": "XX second delay between the drives starting testing.  Default=1"
 		},
 		"Long Tests Group (Test Mode 1 only)": {
-			"Long_SMART_Testing_Order": "Test Sort Order",
-			"Long_Drives_to_Test_Per_Day": "How many drives to run each day minimum, for Test Mode 1 ONLY.",
-			"Long_Drives_Test_Period": "Testing Period: Week=(7 days) or Month=(28 days)",
-			"Long_Drives_Tested_Days_of_the_Week": "Days of the week testing is allowed."
+			"Long_SMART_Testing_Order": "Sorting order. Default=Drive Serial Number",
+			"Long_Drives_to_Test_Per_Day": "How many drives to run each day minimum, for Test Mode 1 ONLY.  Default=1",
+			"Long_Drives_Test_Period": "Testing Period: Week=(7 days) or Month=(28 days).  Default=Week",
+			"Long_Drives_Tested_Days_of_the_Week": "Days of the week testing is allowed.   Check the boxes you want the test to be allowed to run if a drive is scheduled to be tested.  Default=All checked"
 		},				
 		"SMARTCTL Interface Options": {
-			"SMARTCTL_Interface_Options": "This allows you to enter other possible interface values in order to typically get a USB connected drive to talk.  Default=auto,sat,atacam,scsi,nvme"
+			"SMARTCTL_Interface_Options": "This allows you to enter other possible interface values in order to typically get a USB connected drive to talk.  Default=auto,sat,atacam,scsi,nvme  (Experimental)"
 		},				
 		"Partition Check and Backup": {
-			"Partition_Check": "Run a partition check on each drive using sgdisk utility. Default=disable.",
-			"Partition_Backup": "Include a copy of every partition table with the TrueNAS configuration backup. NOTE: Multi-Report does not restore partition data."
+			"Partition_Check": "Run a partition check on each drive using sgdisk utility. Default=disable/unchecked.",
+			"Partition_Backup": "Include a copy of every partition table with the TrueNAS configuration backup. NOTE: Multi-Report does not restore partition data.  Default=disable/unchecked"
 		},		
 		"Spencer Integration": {
-			"spencer_enable": "Run the Spencer.py script if installed and enable.  Default = enable",
-			"spencer_script_name": "The default is spencer.py located in the default script directory.",
-			"spencer_existing_warning_level": "What to do for an existing error.  Default = None",
-			"spencer_new_warning_level": "What to do if a new error occurs.  Default = Warning"
+			"spencer_enable": "Run the Spencer.py script if installed and enable.  Default=enable/checked",
+			"spencer_script_name": "The default is spencer.py located in the default script directory.  Default=$SCRIPT_DIR/spencer.py",
+			"spencer_existing_warning_level": "What to do for an existing error.  Default=None/Do not display...",
+			"spencer_new_warning_level": "What to do if a new error occurs.  Default=Warning/Display Warning and Critical..."
 		},				
 		"SMR Checks": {
-			"SMR_Enable": "Enable for if you want SMR operations.  Default = enable",
-			"SMR_Update": "Will download smr-check.sh file from Github if the file does not exist (will not update to newer version automatically).  Default = enable",
-			"SMR_Ignore_Alarm": "When enable, will not generate an alarm condition, however the Drive ID will still change the background color.  Default = disable",
-			"SMR_New_Drive_Det_Count": "How many times a drive is checked before being ignored.  Default=14, Disable=0"
+			"SMR_Enable": "Enable for if you want SMR operations.  Default = enable/checked",
+			"SMR_Update": "Will download smr-check.sh file from Github if the file does not exist (will not update to newer version automatically).  Default = enable/checked",
+			"SMR_Ignore_Alarm": "When enable, will not generate an alarm condition, however the Drive ID will still change the background color.  Default = disable/unchecked",
+			"SMR_New_Drive_Det_Count": "How many times a drive is checked before being ignored as a new drive.  Default=14, Disable=0"
 		},
 		"Other Settings": {
-			"Ignore_Lock": "When CHECKED (set to enable), the script will not check for multiple instances of multi_report.sh running. Default=disable",
-			"NVM_Low_Power": "Set the NVMe power level to the minimum setting. This does not mean the NVMe will remain at this power level. Only valid in CORE.",
+			"Ignore_Lock": "When CHECKED (set to enable), the script will not check for multiple instances of multi_report.sh running. Default=disable/unchecked",
+			"NVM_Low_Power": "Set the NVMe power level to the minimum setting. This does not mean the NVMe will remain at this power level. Only valid in CORE.  Default-enable/checked",
 			"Multipath": "off=No processing of serial numbers, normal=Automatically remove duplicate serial numbers, Exos2x=Remove duplicate serial numbers ONLY IF the gptid matches, serial=Sort by serial numbers. Default=off",
-			"Run_SMART_No_power_on_time": "Some SCSI drives do not report power_on_time, yet they report SMART Self-test times. This option will attempt to obtain the power on hours differently.",
-			"TrueNASConfigBackupSave": "Set: no=to delete TrueNAS config backup after mail is sent; yes= keep it in dir in next option.",
-			"TrueNASConfigBackupLocation": "Directory in which to store the backup FreeNAS config files.",
-			"PowerTimeFormat": "Format for power-on hours string, valid options are ymdh, ymd, ym, y, or h (year month day hour).",
-			"TempDisplay": "Format for the temperature to be displayed. Common formats are: &deg; C, *C, ^C, or ^c. Choose your own.",
+			"Run_SMART_No_power_on_time": "Some SCSI drives do not report power_on_time, yet they report SMART Self-test times. This option will attempt to obtain the power on hours differently. (Experimental)  Default=disable/unchecked",
+			"TrueNASConfigBackupSave": "Set: no=to delete TrueNAS config backup after mail is sent; yes= keep it in dir in next option.  Default=no/unchecked",
+			"TrueNASConfigBackupLocation": "Directory in which to store the backup FreeNAS config files, by default we do not retain.  Default=/tmp/",
+			"PowerTimeFormat": "Format for power-on hours string, valid options are ymdh, ymd, ym, y, or h (year month day hour).  Default=h",
+			"TempDisplay": "Format for the temperature to be displayed. Common formats are: &deg; C, *C, ^C, or ^c. Choose your own.  Default=&deg; C",
 			"Non_Exist_Value": "How do you desire non-existent data to be displayed.  The Default is ---, popular options are N/A, or blank.",
-			"Pool_Capacity_Type": "Select zfs or zpool for Zpool Status Report - Pool Size and Free Space capacities.  Default=zfs.",
-			"Last_Test_Type_poh": "Include the Last Test Power On Hours.",
+			"Pool_Capacity_Type": "Select zfs or zpool for Zpool Status Report - Pool Size and Free Space capacities.  Default=zfs",
+			"Last_Test_Type_poh": "Include the Last Test Power On Hours.  Default=enable/checked",
 			"lastTestTypeHoursIdent": "Text to follow power on hours numbers.  Default=hrs."
 		},		
 		"F.A.R.M.": {
-			"DriveFARMCheck": "Check all drives with F.A.R.M. data with S.M.A.R.T. data.  Default=enable",
+			"DriveFARMCheck": "Check all drives with F.A.R.M. data with S.M.A.R.T. data.  Default=enable/checked",
 			"DriveFARMCheckHours": "Maximum difference in days that FARM can be greater than SMART Power On Hours. Default=30"		
 		},		
 		"Ignore or Activate Alarms": {
-			"IgnoreUDMA": "Ignore all UltraDMA CRC Errors for the summary alarm (Email Header) only, errors will appear in the graphical chart. Default=disable",
-			"IgnoreSeekError": "Ignore all Seek Error Rate/Health errors.  Default=enable",
-			"IgnoreReadError": "Ignore all Read Error Rate/Health errors.  Default=enable",
-			"IgnoreMultiZone": "Ignore all MultiZone Errors. Default=disable",
-			"DisableWarranty": "Disable Email Subject line alerts for any expired warranty alert. The Email body will still report the alert. Default=enable"
-		
+			"IgnoreUDMA": "Ignore all UltraDMA CRC Errors for the summary alarm (Email Header) only, errors will appear in the graphical chart. Default=disable/unchecked",
+			"IgnoreSeekError": "Ignore all Seek Error Rate/Health errors.  Default=disable/unchecked",
+			"IgnoreReadError": "Ignore all Read Error Rate/Health errors.  Default=disable/unchecked",
+			"IgnoreMultiZone": "Ignore all MultiZone Errors. Default=disable/unchecked",
+			"DisableWarranty": "Disable Email Subject line alerts for any expired warranty alert. The Email body will still report the alert. Default=enable/checked"
 		},		
 		"Drive Customization": {
+			"READ_ME_FIRST": "MODIFY AT OWN RISK.",
 			"Ignore_Drives_List": "Use this to list any drives to ignore and remove from the report.",
 			"ATA_Errors_List": "Offset ATA Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
 			"CRC_Errors_List": "Offset CRC Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
@@ -757,7 +754,6 @@ window.MRCE.TOOLTIPS = {
 			"Drive_Warranty_List": "Specify the drive warranty date.  Format: Drive S/N:YYYY-MM-DD,Drive S/N:YYYY-MM-DD"
 		},
 		"Custom Report Configuration - Zpool": {
-		
 			"Zpool_Pool_Name_Title": "Title of Column",
 			"Zpool_Status_Title": "Title of Column",
 			"Zpool_Pool_Size_Title": "Title of Column",
@@ -775,7 +771,6 @@ window.MRCE.TOOLTIPS = {
 			"Zpool_Scrub_Age_Title": "Title of Column",
 			"Zpool_Scrub_Duration_Title": "Title of Column",
 			"Zpool_Total_Data_Written_Title": "Title of Column"
-		
 		},		
         "Custom Report Configuration - HDD": {
 			"HDD_Device_ID": "Check to Show",
@@ -830,9 +825,9 @@ window.MRCE.TOOLTIPS = {
 			"HDD_Last_Test_Type_Title": "Title of Column",
 			"HDD_Total_Data_Written": "Check to Show",
 			"HDD_Total_Data_Written_Title": "Title of Column",
-			"HDD_Total_Data_Written_Month": "Check to Show",
+			"HDD_Total_Data_Written_Month": "Check to Show.  This shows up if you choose Month Data",
 			"HDD_Total_Data_Written_Month_Title": "Title of Column",
-			"HDD_Total_Data_Written_30day": "Check to Show",
+			"HDD_Total_Data_Written_30day": "Check to Show.  This shows up if you choose 30Days Data",
 			"HDD_Total_Data_Written_30day_Title": "Title of Column"
 		},
 		"Custom Report Configuration - SSD": {
@@ -876,9 +871,9 @@ window.MRCE.TOOLTIPS = {
 			"SSD_Last_Test_Type_Title": "Title of Column",
 			"SSD_Total_Data_Written": "Check to Show",
 			"SSD_Total_Data_Written_Title": "Title of Column",
-			"SSD_Total_Data_Written_Month": "Check to Show",
+			"SSD_Total_Data_Written_Month": "Check to Show.  This shows up if you choose Month Data",
 			"SSD_Total_Data_Written_Month_Title": "Title of Column",
-			"SSD_Total_Data_Written_30day": "Check to Show",
+			"SSD_Total_Data_Written_30day": "Check to Show.  This shows up if you choose 30Days Data",
 			"SSD_Total_Data_Written_30day_Title": "Title of Column"
 		},
 		"Custom Report Configuration - NVM": {
@@ -890,7 +885,6 @@ window.MRCE.TOOLTIPS = {
 			"NVM_Model_Number_Title": "Title of Column",
 			"NVM_Capacity": "Check to Show",
 			"NVM_Capacity_Title": "Title of Column",
-
 			"NVM_SMART_Status": "Check to Show",
 			"NVM_SMART_Status_Title": "Title of Column",
 			"NVM_Warranty": "Check to Show",
@@ -903,28 +897,23 @@ window.MRCE.TOOLTIPS = {
 //			"NVM_Drive_Temp_Min_Title": "Title of Column",
 //			"NVM_Drive_Temp_Max": "Check to Show",
 //			"NVM_Drive_Temp_Max_Title": "Title of Column",
-
 			"NVM_Power_Level": "Check to Show",
-			"NVM_Power_Level_Title": "Title of Column",
-			
+			"NVM_Power_Level_Title": "Title of Column",			
 			"NVM_Power_On_Hours": "Check to Show",
 			"NVM_Power_On_Hours_Title": "Title of Column",
 			"NVM_Wear_Level": "Check to Show",
 			"NVM_Wear_Level_Title": "Title of Column",
-			
-
 			"NVM_Media_Error": "Check to Show",
-			"NVM_Media_Error_Title": "Title of Column",
-			
+			"NVM_Media_Error_Title": "Title of Column",			
 			"NVM_Last_Test_Age": "Check to Show",
 			"NVM_Last_Test_Age_Title": "Title of Column",
 			"NVM_Last_Test_Type": "Check to Show",
 			"NVM_Last_Test_Type_Title": "Title of Column",
 			"NVM_Total_Data_Written": "Check to Show",
 			"NVM_Total_Data_Written_Title": "Title of Column",
-			"NVM_Total_Data_Written_Month": "Check to Show",
+			"NVM_Total_Data_Written_Month": "Check to Show.  This shows up if you choose Month Data",
 			"NVM_Total_Data_Written_Month_Title": "Title of Column",
-			"NVM_Total_Data_Written_30day": "Check to Show",
+			"NVM_Total_Data_Written_30day": "Check to Show.  This shows up if you choose 30Days Data",
 			"NVM_Total_Data_Written_30day_Title": "Title of Column"
 		},
 };
@@ -944,6 +933,3 @@ window.MRCE.longRelated = [
     "Long_Drives_Test_Period",
     "Long_Drives_Tested_Days_of_the_Week",
 ];  
-
-
-
