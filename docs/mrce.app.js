@@ -73,7 +73,7 @@
         const reqAttr = opt.required ? ' required aria-required="true" data-required="true"' : "";
 
         if (type === "checkbox") {
-            const checkedAttr = String(def).toLowerCase() === "enable" ? " checked" : "";
+            const checkedAttr = ["enable", "true", "yes", "1"].includes(String(def).toLowerCase()) ? " checked" : "";
             return `
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="${id}" data-key="${fieldKey}"${checkedAttr}${reqAttr}>
@@ -379,10 +379,7 @@
 
         const type = ($el.attr("type") || $el.prop("tagName")).toLowerCase();
         if (type === "checkbox") {
-            const norm = String(val).toLowerCase();
-            const checked =
-                norm === "true" || norm === "enable" || norm === "yes" || norm === "1";
-            $el.prop("checked", checked);
+            $el.prop("checked", ["true", "enable", "yes", "1"].includes(String(val).toLowerCase()));
         } else if ($el.is("select") || $el.is("textarea")) {
             $el.val(val);
         } else if ($el.hasClass("mr-color") && typeof $el.spectrum === "function") {
@@ -602,12 +599,13 @@
                     const defVal = opt.default ?? "";
 
                     if (el.type === "checkbox") {
-                    el.checked = String(defVal).toLowerCase() === "true" 
-                                || String(defVal).toLowerCase() === "yes" 
-                                || String(defVal).toLowerCase() === "enable"
-                                || String(defVal).toLowerCase() === "false" 
-                                || String(defVal).toLowerCase() === "no" 
-                                || String(defVal).toLowerCase() === "disable";                                
+                    //el.checked = String(defVal).toLowerCase() === "true" 
+                    //            || String(defVal).toLowerCase() === "yes" 
+                    //            || String(defVal).toLowerCase() === "enable"
+                    //            || String(defVal).toLowerCase() === "false" 
+                    //            || String(defVal).toLowerCase() === "no" 
+                    //            || String(defVal).toLowerCase() === "disable";     
+                        el.checked = ["true", "yes", "enable", "1"].includes(String(defVal).toLowerCase());                           
                     } else if (opt.type === "colorpicker") {
                         el.value = defVal;
                         $(el).spectrum("set", defVal);
@@ -645,14 +643,6 @@
                     return;
                     }   
                 }
-                //else if (emailOpt && emailOpt.default && emailVal === emailOpt.default) {
-                //    toastr.error(
-                //        "Please load a configuration file first, or change the default email address."
-                //    );
-                //    revealAndHighlight(`[data-key="${key}"]`);
-                //    return;
-                //} 
-            
             }
 
             // init lineStore
@@ -724,18 +714,10 @@
                         const el = document.querySelector(`[data-key="${key}"]`);
                         const checked = !!el?.checked;
                         const orig = String(item.originalValue ?? "").toLowerCase();
-                        if (checked) {
-                            //out = `${key}="${item.originalValue}"`;
-                            if (orig === "false") out = `${key}="true"`;
-                            else if (orig === "no") out = `${key}="yes"`;
-                            else if (orig === "disable") out = `${key}="enable"`;
-                            else out = `${key}="${item.originalValue}"`;
-                        } else {
-                            if (orig === "true") out = `${key}="false"`;
-                            else if (orig === "yes") out = `${key}="no"`;
-                            else if (orig === "enable") out = `${key}="disable"`;
-                            else out = `${key}="${item.originalValue}"`;
-                        }
+                        const toTrue  = { "false": "true", "no": "yes", "disable": "enable", "0": "1" };
+                        const toFalse = { "true": "false", "yes": "no", "enable": "disable", "1": "0" };   
+                        const next = checked ? (toTrue[orig] ?? item.originalValue) : (toFalse[orig] ?? item.originalValue);                     
+                        out = `${key}="${next}"`;
                     } else if (t === "dayscheckbox") {
                         const val = data[key] || "";
                         out = `${key}="${val}"`;
@@ -768,19 +750,10 @@
                             const el = document.querySelector(`[data-key="${key}"]`);
                             const checked = !!el?.checked;
                             const defLower = String(opt.default ?? "").toLowerCase();
-                            //if (checked) out = `${key}="${opt.default}"`;
-                            if(checked) {
-                                if (defLower === "false") out = `${key}="true"`;
-                                else if (defLower === "no") out = `${key}="yes"`;
-                                else if (defLower === "disable") out = `${key}="enable"`;
-                                else out = `${key}="${opt.originalValue}"`;                                
-                            }
-                            else {
-                                if (defLower === "true") out = `${key}="false"`;
-                                else if (defLower === "yes") out = `${key}="no"`;
-                                else if (defLower === "enable") out = `${key}="disable"`;
-                                else out = `${key}="${opt.default}"`;
-                            }
+                            const toTrue  = { "false": "true", "no": "yes", "disable": "enable", "0": "1" };
+                            const toFalse = { "true": "false", "yes": "no", "enable": "disable", "1": "0" };
+                            const next = checked ? (toTrue[defLower] ?? opt.originalValue) : (toFalse[defLower] ?? opt.default);
+                            out = `${key}="${next}"`;
                         } else if (t === "dayscheckbox") {
                             const val = data[key] || "";
                             out = `${key}="${val}"`;
