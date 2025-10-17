@@ -654,7 +654,7 @@
                 const dd = String(today.getDate()).padStart(2, "0");
                 window.lineStore.push({
                     type: "comment",
-                    content: `# Multi-Report v3.20 dtd:${yyyy}-${mm}-${dd}`,
+                    content: `# Multi-Report v3.22 dtd:2025-10-13 --- Generated Date: ${yyyy}-${mm}-${dd}`,
                     order: -1,
                 });
 

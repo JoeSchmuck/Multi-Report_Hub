@@ -144,7 +144,7 @@ window.MRCE.CONFIG = {
                 "options": {
                     "statistical_data_file": { "label": "Statistical Data File:", "type": "text", "default": "$SCRIPT_DIR/statisticalsmartdata.csv", "required": true },
                     "SDF_DataRecordEnable": { "label": "Enable SDF Data Record:", "type": "checkbox", "default": "enable" },
-                    "SDF_DataPurgeDays": { "label": "SDF Data Purge Days:", "type": "number", "required": true, "min":0, "default": 720},
+                    "SDF_DataPurgeDays": { "label": "SDF Data Purge Days:", "type": "number", "required": true, "min":0, "default": 730},
 					"add_new_drive_factor": { "label": "Add New Drive Factor", "type": "select", "required": true, "default": "actual", "options": [ { "value": "actual", "label": "Drive metrics use the date the script recognized the drive." }, { "value": "Serial", "label": "Use the entire life of the drive data." }]}
                 }
             },
@@ -164,13 +164,13 @@ window.MRCE.CONFIG = {
                     "Enable_SMART_Messages": { "label": "Enable SMART data in report", "type": "checkbox", "default": "enable" },
 					"ReportNonSMART": { "label": "Force non-SMART devices to be reported", "type": "checkbox", "default": "enable" },
 					"DisableRAWdata": { "label": "Remove the >smartctl -a data< and non-smart data from the normal report.", "type": "checkbox", "default": "disable" },
-					"ATA_Auto_Enable": { "label": "Update Log Error count offset automatically for new errors.", "type": "checkbox", "default": "disable" },
-					"zfs_report_enable": { "label": "Enable ZFS Report:", "type": "checkbox", "default": "enable" },
-                    "zfs_report_only_on_error": { "label": "Send ZFS Report on Error Only:", "type": "checkbox", "default": "disable" },
-					"smart_report_enable": { "label": "Enable SMART Report:", "type": "checkbox", "default": "enable" },
-                    "send_smart_report_only_on_error": { "label": "Send SMART Report on Error Only:", "type": "checkbox", "default": "disable" },
-					"scrub_report_enable": { "label": "Enable Scrub Report:", "type": "checkbox", "default": "disable" },
-                    "scrub_report_only_on_error": { "label": "Send Scrub Report on Error Only:", "type": "checkbox", "default": "disable" }
+					"ATA_Auto_Enable": { "label": "Update Log Error count offset automatically for new errors.", "type": "checkbox", "default": "disable" }
+				//	"zfs_report_enable": { "label": "Enable ZFS Report:", "type": "checkbox", "default": "enable" },
+                //    "zfs_report_only_on_error": { "label": "Send ZFS Report on Error Only:", "type": "checkbox", "default": "disable" },
+				//	"smart_report_enable": { "label": "Enable SMART Report:", "type": "checkbox", "default": "enable" },
+                //    "send_smart_report_only_on_error": { "label": "Send SMART Report on Error Only:", "type": "checkbox", "default": "disable" },
+				//	"scrub_report_enable": { "label": "Enable Scrub Report:", "type": "checkbox", "default": "disable" },
+                //    "scrub_report_only_on_error": { "label": "Send Scrub Report on Error Only:", "type": "checkbox", "default": "disable" }
                 }
             }
         },
@@ -278,7 +278,7 @@ window.MRCE.CONFIG = {
 			"Other Drive Settings": {
 				"label": "Other Settings",
 				"options": {
-					"Ignore_Lock": { "label": "Do Not check for multiple instances of Multi-Report", "type": "checkbox", "default": "disable" },
+				//	"Ignore_Lock": { "label": "Do Not check for multiple instances of Multi-Report", "type": "checkbox", "default": "disable" },
 					"NVM_Low_Power": { "label": "Set NVMe drives to lowest power level", "type": "checkbox", "default": "enable" },
 					"Multipath": { "label": "Multipath Setting", "type": "select", "required": true, "default": "off", "options": [ "off", "normal", "Exos2x", "serial"] },
 					"Run_SMART_No_power_on_time": { "label": "Set Alternate method for Power_On_Hours for SCSI drives?", "type": "checkbox", "default": "no" },
@@ -306,7 +306,7 @@ window.MRCE.CONFIG = {
 				"label": "F.A.R.M.",
 				"options": {
 					"DriveFARMCheck": { "label": "Enable F.A.R.M. checks", "type": "checkbox", "default": "enable" },
-					"DriveFARMCheckHours": { "label": "F.A.R.M. - Maximum number of days different from S.M.A.R.T.", "type": "number", "required": true, "min":0, "default": 30 }
+					"DriveFARMCheckHours": { "label": "F.A.R.M. - Maximum number of days different from S.M.A.R.T.", "type": "number", "required": true, "min":0, "default": 1000 }
 				}
 			}
 		},
@@ -522,16 +522,16 @@ window.MRCE.CONFIG = {
 				"label": "Variable list",
 				"options": {
 					"expiredWarrantyBoxColor": { "label": "\"black\" = normal box perimeter color.", "type": "colorpicker", "required": true, "default": "#000000" },
-                    "WarrantyBackgndColor": { "label": "Background color for expired drives. \"none\" = normal background", "type": "colorpicker", "required": true, "default": "#f1ffad" },
-                    "okColor": { "label": "Hex code for color to use in SMART Status column if drives pass (default is darker light green, #b5fcb9)", "type": "colorpicker", "required": true, "default": "#F38B16" },
+                    "WarrantyBackgndColor": { "label": "Background color for expired drives. \"none\" = normal background", "type": "colorpicker", "required": true, "default": "#F1FFAD" },
+                    "okColor": { "label": "Hex code for color to use in SMART Status column if drives pass (default is darker light green, #B5FCB9)", "type": "colorpicker", "required": true, "default": "#B5FCB9" },
                     "warnColor": { "label": "Hex code for WARN color (default is orange, #F38B16)", "type": "colorpicker", "required": true, "default": "#F38B16" },
-                    "critColor": { "label": "Hex code for CRITICAL color (default is red, #f44336)", "type": "colorpicker", "required": true, "default": "#f44336" },
-                    "altColor": { "label": "Table background alternates row colors between white and this color (default is light gray, #f4f4f4)", "type": "colorpicker", "required": true, "default": "#f4f4f4" },
-                    "whtColor": { "label": "Hex for White background", "type": "colorpicker", "required": true, "default": "#ffffff" },
-                    "ovrdColor": { "label": "Hex code for Override Yellow", "type": "colorpicker", "required": true, "default": "#ffffe4" },
-                    "blueColor": { "label": "Hex code for Sky Blue, used for the SCRUB/SMART Test In Progress/background", "type": "colorpicker", "required": true, "default": "#87ceeb" },
-                    "yellowColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "required": true, "default": "#f1ffad" },
-                    "pohColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "required": true, "default": "#ffffcc" },   
+                    "critColor": { "label": "Hex code for CRITICAL color (default is red, #f44336)", "type": "colorpicker", "required": true, "default": "#F44336" },
+                    "altColor": { "label": "Table background alternates row colors between white and this color (default is light gray, #F4F4F4)", "type": "colorpicker", "required": true, "default": "#F4F4F4" },
+                    "whtColor": { "label": "Hex for White background", "type": "colorpicker", "required": true, "default": "#FFFFFF" },
+                    "ovrdColor": { "label": "Hex code for Override Yellow", "type": "colorpicker", "required": true, "default": "#FFFFE4" },
+                    "blueColor": { "label": "Hex code for Sky Blue, used for the SCRUB/SMART Test In Progress/background", "type": "colorpicker", "required": true, "default": "#87CEEB" },
+                    "yellowColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "required": true, "default": "#F1FFAD" },
+                    "pohColor": { "label": "Hex code for pale yellow", "type": "colorpicker", "required": true, "default": "#FFFFCC" },   
                     "tdrcolor": { "label": "Hex code for 30-Day Read Percentage Value", "type": "colorpicker", "required": true, "default": "#008000" },
                     "tdwcolor": { "label": "Hex code for 30-Day Write Percentage Value", "type": "colorpicker", "required": true, "default": "#0000FF" }                                     
 				}
@@ -581,7 +581,7 @@ window.MRCE.TOOLTIPS = {
         "Statistical Data File (SDF)": {
             "statistical_data_file": "The file path and name for the Statistical Data File.  Default=$SCRIPT_DIR/statisticalsmartdata.csv",
             "SDF_DataRecordEnable": "Enable recording of statistical data.  Default=enable/checked",
-			"SDF_DataPurgeDays": "Set the number of days the statistical data file should retain.  Default=720 (2 years)",
+			"SDF_DataPurgeDays": "Set the number of days the statistical data file should retain.  Default=730 (2 years)",
 			"SDF_DataEmail": "Set to enable to have an attachment of the file emailed to you.  Default=enable/checked",
             "add_new_drive_factor": "When adding an older used drive to the system, use the current values in factoring statistics or pretend the drive is new and use all previous data for the statistics.  Default=actual/Used Drive (also work when installing a new drive)"
         },
@@ -731,7 +731,7 @@ window.MRCE.TOOLTIPS = {
 		},		
 		"F.A.R.M.": {
 			"DriveFARMCheck": "Check all drives with F.A.R.M. data with S.M.A.R.T. data.  Default=enable/checked",
-			"DriveFARMCheckHours": "Maximum difference in days that FARM can be greater than SMART Power On Hours. Default=30"		
+			"DriveFARMCheckHours": "Maximum difference in days that FARM can be greater than SMART Power On Hours. Default=1000"		
 		},		
 		"Ignore or Activate Alarms": {
 			"IgnoreUDMA": "Ignore all UltraDMA CRC Errors for the summary alarm (Email Header) only, errors will appear in the graphical chart. Default=disable/unchecked",
