@@ -135,6 +135,8 @@
                 })
                 .join("");
             return `<div class="d-flex flex-wrap"${groupReq}>${boxes}</div>`;
+        } else if (type === "statictext") {
+                return;
         } else {
             return `
         <input type="text" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}>`;
@@ -154,33 +156,49 @@
             const id = nextId();
             const tip = getFieldTip(sectionObj.label, fieldKey);
             const isCheckbox = (opt.type || "").toLowerCase() === "checkbox";
+            const fieldtype = (opt.type || "").toLowerCase();
 
-            const leftCol = isCheckbox
-                ? `
-        <div class="col-12 col-md-6">
-          <span class="d-inline-flex align-items-center">
-            ${opt.label}
-            ${tip ? `<i class="fa-solid fa-circle-info ms-2" data-bs-toggle="tooltip" title="${tip}"></i>` : ""}
-          </span>
-        </div>`
-                : `
-        <div class="col-12 col-md-6">
-          <label for="${id}" class="col-form-label d-inline-flex align-items-center">
-            ${opt.label}
-            ${tip ? `<i class="fa-solid fa-circle-info ms-2" data-bs-toggle="tooltip" title="${tip}"></i>` : ""}
-          </label>
-        </div>`;
+            // new statictext fields need to be rendered differently
+            if (fieldtype === "statictext") {
+                const statictextrow = `
+                <div class="row align-items-center border-bottom p-2">
+                    <div class="col-12 col-md-12">
+                    <span class="d-inline-flex align-items-center">
+                        ${opt.label}
+                        ${tip ? `<i class="fa-solid fa-circle-info ms-2" data-bs-toggle="tooltip" title="${tip}"></i>` : ""}
+                    </span>
+                    </div>
+                </div>`
+                $container.append(statictextrow);
+            } else {           
+                    const leftCol = isCheckbox
+                        ? `
+                <div class="col-12 col-md-6">
+                <span class="d-inline-flex align-items-center">
+                    ${opt.label}
+                    ${tip ? `<i class="fa-solid fa-circle-info ms-2" data-bs-toggle="tooltip" title="${tip}"></i>` : ""}
+                </span>
+                </div>`
+                        : `
+                <div class="col-12 col-md-6">
+                <label for="${id}" class="col-form-label d-inline-flex align-items-center">
+                    ${opt.label}
+                    ${tip ? `<i class="fa-solid fa-circle-info ms-2" data-bs-toggle="tooltip" title="${tip}"></i>` : ""}
+                </label>
+                </div>`;
+                
 
-            const rightColControl = renderFieldControl(fieldKey, opt, id);
+                    const rightColControl = renderFieldControl(fieldKey, opt, id);
 
-            const row = `
-        <div class="row align-items-center border-bottom p-2">
-          ${leftCol}
-          <div class="col-12 col-md-6">
-            ${rightColControl}
-          </div>
-        </div>`;
-            $container.append(row);
+                    const row = `
+                <div class="row align-items-center border-bottom p-2">
+                ${leftCol}
+                <div class="col-12 col-md-6">
+                    ${rightColControl}
+                </div>
+                </div>`;
+                    $container.append(row);
+            }
         }
     }
 
@@ -285,6 +303,7 @@
                 for (const key in opts) {
                     const opt = opts[key] || {};
                     const t = (opt.type || "").toLowerCase();
+                    if (t === "statictext") continue;
                     if (t === "dayscheckbox") {
                         const vals = [];
                         document
@@ -357,6 +376,13 @@
         return { ok: true };
     }
 
+    // trying fix html entities from config and config.js
+    function decodeEntities(s){
+    const t=document.createElement('textarea');
+    t.innerHTML = s;
+    return t.value;
+    }    
+
     function setFieldValueByKey(key, val) {
         // dayscheckbox
         const $days = $(`input[type="checkbox"][name="${key}"]`);
@@ -381,7 +407,11 @@
         if (type === "checkbox") {
             $el.prop("checked", ["true", "enable", "yes", "1"].includes(String(val).toLowerCase()));
         } else if ($el.is("select") || $el.is("textarea")) {
-            $el.val(val);
+            //$el.val(val);
+            const raw = String(val ?? "");
+            const decoded = decodeEntities(raw);
+            $el.val(raw);
+            if ($el.val() !== raw) $el.val(decoded);
         } else if ($el.hasClass("mr-color") && typeof $el.spectrum === "function") {
             const hex = normalizeHex(val);
             $el.spectrum("set", hex || null);
@@ -469,9 +499,8 @@
                             const rhs = trimmed.substring(eq + 1).trim();
                             let value;
                             const mQuoted = rhs.match(/^(['"])(.*?)\1/);
-                            if (mQuoted) {
-                                value = mQuoted[2].trim();
-                            } else {
+                            if (mQuoted) value = mQuoted[2].trim();
+                            else {
                                 const mHex = rhs.match(/#([0-9a-fA-F]{3,8})\b/);
                                 if (mHex) value = "#" + mHex[1];
                                 else {
@@ -482,17 +511,24 @@
                                             : rhs;
                                 }
                             }
-                            if (rawKey.toLowerCase().includes("color")) {
-                                value = normalizeHex(value);
-                            }
-
+                            let unparsedvalue = value
+                            if (rawKey.toLowerCase().includes("color")) value = normalizeHex(value);
+                                                       
                             loadedData[rawKey] = value;
+                            // let's try to preserve comment 
+                            const keyValString = `${rawKey}=${unparsedvalue}`;
+                            const keyValString2 = `${rawKey}="${unparsedvalue}"`;
+                            let tailcomment = "";
+                            if (unparsedvalue) tailcomment = line.replace(keyValString, "").replace(keyValString2, "").trimEnd() || "";        
+                            else tailcomment = line.replace(keyValString2, "").trimEnd() || "";                   
+                            console.log(tailcomment);
                             lineStore.push({
                                 type: "kvp",
                                 key: rawKey,
                                 order: index,
                                 originalLine: line,
                                 originalValue: value,
+                                originalcomment: tailcomment,                               
                             });
                         }
                     });
@@ -563,7 +599,7 @@
     }
 
 
-    //  SAVE main function now async 
+    //  SAVE main function now async to use sweet alert
     async function saveData() {
         try {
             const data = collectData();
@@ -668,7 +704,10 @@
                         for (const key in opts) {
                             const opt = opts[key] || {};
                             const t = (opt.type || "").toLowerCase();
+                            if (t === "statictext") continue;
+
                             let originalValue;
+                            const tailcomment = buildInlineTailFromConfig(opt);
                             if (t === "checkbox") originalValue = opt.default;
                             else if (t === "dayscheckbox") originalValue = opt.default ?? "";
                             else originalValue = data[key];
@@ -678,6 +717,7 @@
                                 order: order++,
                                 originalLine: `${key}="${originalValue}"`,
                                 originalValue,
+                                originalcomment: tailcomment,
                             });
                         }
                     }
@@ -720,13 +760,14 @@
                         out = `${key}="${next}"`;
                     } else if (t === "dayscheckbox") {
                         const val = data[key] || "";
-                        out = `${key}="${val}"`;
+                        out = `${key}="${val}"`;            
                     } else {
                         const val = data[key] ?? "";
                         out = isNumericStrict(val) ? `${key}=${val}` : `${key}="${val}"`;
                     }
+                    
 
-                    outputLines.push(out);
+                    outputLines.push(`${out} ${item.originalcomment}`);
                     usedKeys.add(key);
                 });
 
@@ -752,12 +793,13 @@
                             const defLower = String(opt.default ?? "").toLowerCase();
                             const toTrue  = { "false": "true", "no": "yes", "disable": "enable", "0": "1" };
                             const toFalse = { "true": "false", "yes": "no", "enable": "disable", "1": "0" };
-                            const next = checked ? (toTrue[defLower] ?? opt.originalValue) : (toFalse[defLower] ?? opt.default);
+                            const next = checked ? (toTrue[defLower] ?? opt.default) : (toFalse[defLower] ?? opt.default);
                             out = `${key}="${next}"`;
                         } else if (t === "dayscheckbox") {
                             const val = data[key] || "";
                             out = `${key}="${val}"`;
-                        } else {
+                        } else if (t === "statictext") continue;
+                        else {
                             const val = data[key] ?? "";
                             out = isNumericStrict(val) ? `${key}=${val}` : `${key}="${val}"`;
                         }
@@ -782,6 +824,13 @@
             toastr.error("Failed to save the configuration.");
         }
     }
+
+    function buildInlineTailFromConfig(opt) {
+        //const comment = String(opt?.label ?? "").trim();
+        //if (!comment) return "";
+        //return `        # ${comment}`;
+        return ``;
+    }    
 
     // restart -> reload default
     function restartData() {

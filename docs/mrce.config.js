@@ -315,7 +315,7 @@ window.MRCE.CONFIG = {
 			"Drive Customization": {
 				"label": "Drive Customization",
 				"options": {
-					"READ_ME_FIRST": { "label": "NOTES (READ ME!)  There is a very specific format that each value must use below.  You are better to use the built-in Multi-Report -config option the establish these values.","type": "text", "default": "YOU HAVE BEEN WARNED"},
+					"READ_ME_FIRST": { "label": "<div class='card'> <div class='card-body bg-danger text-white'>NOTES (READ ME!)  There is a very specific format that each value must use below.  You are better to use the built-in Multi-Report -config option the establish these values. </div></div>","type": "statictext"},
 					"Ignore_Drives_List": { "label": "Ignore Drives List", "type": "text", "default": "" },
 					"ATA_Errors_List": { "label": "ATA Errors List", "type": "text", "default": "" },
 					"CRC_Errors_List": { "label": "CRC Errors List", "type": "text", "default": "" },
@@ -741,7 +741,7 @@ window.MRCE.TOOLTIPS = {
 			"DisableWarranty": "Disable Email Subject line alerts for any expired warranty alert. The Email body will still report the alert. Default=enable/checked"
 		},		
 		"Drive Customization": {
-			"READ_ME_FIRST": "MODIFY AT OWN RISK.",
+			"_____READ_ME_FIRST": "MODIFY AT OWN RISK.",
 			"Ignore_Drives_List": "Use this to list any drives to ignore and remove from the report.",
 			"ATA_Errors_List": "Offset ATA Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
 			"CRC_Errors_List": "Offset CRC Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
