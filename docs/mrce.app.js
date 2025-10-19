@@ -137,6 +137,29 @@
             return `<div class="d-flex flex-wrap"${groupReq}>${boxes}</div>`;
         } else if (type === "statictext") {
                 return;
+        } else if (type === "customlist") {
+            return `
+            <div class="input-group">
+                <input type="text" class="form-control notranslate mr-customlist" 
+                    id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}
+                    placeholder="${opt.placeholder}">
+                <button class="btn btn-outline-secondary mr-customlist-edit" type="button" 
+                        data-target="${id}" title="Edit List">
+                <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>`; 
+        } else if (type === "listwithoffset") {
+        return `
+            <div class="input-group">
+            <input type="text" class="form-control notranslate mr-listwithoffset"
+                    id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}
+                    data-offsettype="${(opt.offsettype || 'text')}"
+                    placeholder="${opt.placeholder}">
+            <button class="btn btn-outline-secondary mr-listwithoffset-edit" type="button"
+                    data-target="${id}" title="Edit" data-offsettype="${(opt.offsettype || 'text')}">
+                <i class="fa-solid fa-list"></i>
+            </button>
+            </div>`;                           
         } else {
             return `
         <input type="text" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}>`;
@@ -1009,6 +1032,315 @@
         }
     }
 
+    // --- CUSTOM LIST SUPPORT --- //
+    // helper
+    function parseCsv(str) {
+        return String(str || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+    }
+    function joinCsv(arr) {
+        return (arr || []).map(s => String(s).trim()).filter(Boolean).join(", ");
+    }
+    function parsePairsCsv(str) {
+        return String(str || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean)
+            .map(tok => {
+            const i = tok.indexOf(":");
+            const v = i === -1 ? tok : tok.slice(0, i);
+            const o = i === -1 ? "" : tok.slice(i + 1);
+            return { v: v.trim(), o: o.trim() };
+            })
+            .filter(p => p.v.length > 0);
+    }
+
+    function joinPairsCsv(arr) {
+        return (arr || [])
+            .map(p => `${String(p.v).trim()}:${String(p.o).trim()}`)
+            .filter(s => s !== ":") // evita tuple vuote
+            .join(", ");
+    }
+
+
+    function buildCustomListModal() {
+        let modal = document.getElementById("mr-customlist-modal");
+        if (modal) return modal;
+
+        const html = `
+            <div class="modal fade" id="mr-customlist-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-bars me-2"></i>Edit list</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <div class="vstack gap-3">
+                        <div>
+                        <label class="form-label">Add</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="mr-cl-input" placeholder="New">
+                            <button class="btn btn-info" id="mr-cl-add" type="button">Add</button>
+                        </div>
+                        </div>
+                        <div>
+                        <label class="form-label d-flex align-items-center justify-content-between">
+                            Actual list
+                        </label>
+                        <ul class="list-group" id="mr-cl-list"></ul>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="mr-cl-confirm">Confirm</button>
+                    </div>
+                </div>
+                </div>
+            </div>`;
+        document.body.insertAdjacentHTML("beforeend", html);
+        return document.getElementById("mr-customlist-modal");
+    }
+
+    function buildListWithOffsetModal() {
+        let modal = document.getElementById("mr-listwithoffset-modal");
+        if (modal) return modal;
+
+        const html = `
+        <div class="modal fade" id="mr-listwithoffset-modal" tabindex="-1" aria-hidden="true"
+            data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-list me-2"></i>Edit list</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <div class="vstack gap-3">
+                    <div>
+                    <label class="form-label">Add pair</label>
+                    <div class="row g-2 align-items-center">
+                        <div class="col">
+                        <input type="text" class="form-control" id="mr-lwo-input-value" placeholder="Value">
+                        </div>
+                        <div class="col-auto">:</div>
+                        <div class="col">
+                        <input type="text" class="form-control" id="mr-lwo-input-offset" placeholder="Offset">
+                        </div>
+                        <div class="col-auto">
+                        <button class="btn btn-info" id="mr-lwo-add" type="button">Add</button>
+                        </div>
+                    </div>
+                    </div>
+                    <div>
+                    <label class="form-label">Current items</label>
+                    <ul class="list-group" id="mr-lwo-list"></ul>
+                    </div>
+                </div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="mr-lwo-confirm">Confirm</button>
+                </div>
+            </div>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML("beforeend", html);
+        return document.getElementById("mr-listwithoffset-modal");
+    }
+
+
+    function openCustomListEditor($input) {
+        const modalEl = buildCustomListModal();
+        const listEl = modalEl.querySelector("#mr-cl-list");
+        const addBtn = modalEl.querySelector("#mr-cl-add");
+        const confirmBtn = modalEl.querySelector("#mr-cl-confirm");
+        const inEl = modalEl.querySelector("#mr-cl-input");
+
+        const values = parseCsv($input.val());
+        listEl.innerHTML = values.map((v, i) => `
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+            <span class="text-truncate me-3" title="${v}">${v}</span>
+            <button type="button" class="btn btn-sm btn-danger mr-cl-del" data-index="${i}" title="Delete"><i class="fas fa-trash"></i></button>
+            </li>`).join("");
+
+        function refreshIndices() {
+            listEl.querySelectorAll(".mr-cl-del").forEach((btn, i) => btn.setAttribute("data-index", i));
+        }
+
+        // add
+        addBtn.onclick = () => {
+            const val = inEl.value.trim();
+            if (!val) return;
+            listEl.insertAdjacentHTML("beforeend", `
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+                <span class="text-truncate me-3" title="${val}">${val}</span>
+                <button type="button" class="btn btn-sm btn-danger mr-cl-del" title="Delete"><i class="fas fa-trash"></i></button>
+            </li>`);
+            inEl.value = "";
+            refreshIndices();
+        };
+
+        // delete
+        listEl.onclick = (e) => {
+            const btn = e.target.closest(".mr-cl-del");
+            if (!btn) return;
+            const item = btn.closest("li");
+            item?.remove();
+            refreshIndices();
+        };
+
+        // confirm
+        confirmBtn.onclick = () => {
+            const newVals = Array.from(listEl.querySelectorAll("li span")).map(s => s.textContent.trim()).filter(Boolean);
+            $input.val(joinCsv(newVals)).trigger("input");
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: "static", keyboard: false });
+            modal.hide();
+        };
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: "static", keyboard: false });
+        modal.show();
+        setTimeout(() => inEl?.focus(), 100);
+    }
+
+    function openListWithOffsetEditor($input) {
+        const modalEl = buildListWithOffsetModal();
+        const listEl = modalEl.querySelector("#mr-lwo-list");
+        const addBtn = modalEl.querySelector("#mr-lwo-add");
+        const confirmBtn = modalEl.querySelector("#mr-lwo-confirm");
+        const valEl = modalEl.querySelector("#mr-lwo-input-value");
+        const offEl = modalEl.querySelector("#mr-lwo-input-offset");        
+        const offsetType = String($input.data("offsettype") || "text").toLowerCase();
+        const htmlType = offsetType === "number" ? "number" : (offsetType === "date" ? "date" : "text");
+        offEl.setAttribute("type", htmlType);
+        offEl.setAttribute("placeholder", offsetType === "number" ? "Number offset" : offsetType === "date" ? "Date offset (YYYY-MM-DD)" : "Offset");
+
+        function isValidOffset(o) {
+            if (o === "") return false; // TO DO: OFFSET NOT OPTIONAL RIGHT?
+            if (offsetType === "number") return !isNaN(Number(o));
+            if (offsetType === "date") {
+              // YYYY-MM-DD
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(o)) return false;
+              const [y, m, d] = o.split("-").map(Number);
+              if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+              const dt = new Date(Date.UTC(y, m - 1, d));
+              return (
+                dt.getUTCFullYear() === y &&
+                dt.getUTCMonth() === m - 1 &&
+                dt.getUTCDate() === d
+              );
+            }
+            return true;
+        }        
+
+        const pairs = parsePairsCsv($input.val());
+        listEl.innerHTML = pairs.map((p, i) => `
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+            <span class="text-truncate me-3" title="${p.v}:${p.o}">${p.v}:${p.o}</span>
+            <button type="button" class="btn btn-sm btn-danger mr-lwo-del" data-index="${i}" title="Delete">
+                <i class="fas fa-trash"></i>
+            </button>
+            </li>`).join("");
+
+        const refreshIndices = () => {
+            listEl.querySelectorAll(".mr-lwo-del").forEach((btn, i) => btn.setAttribute("data-index", i));
+        };
+
+        // add
+        addBtn.onclick = () => {
+            const v = valEl.value.trim();
+            const o = offEl.value.trim();
+            if (!v) return;
+            if (!isValidOffset(o)) {
+              toastr.error(
+                offsetType === "number" ? "Offset must be a number"
+                : offsetType === "date" ? "Offset must be a valid date (YYYY-MM-DD)"
+                : "Invalid offset"
+              );
+              return;
+            }
+
+            listEl.insertAdjacentHTML("beforeend", `
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+                <span class="text-truncate me-3" title="${v}:${o}">${v}:${o}</span>
+                <button type="button" class="btn btn-sm btn-danger mr-lwo-del" title="Delete">
+                <i class="fas fa-trash"></i>
+                </button>
+            </li>`);
+            valEl.value = "";
+            offEl.value = "";
+            refreshIndices();
+            valEl.focus();
+        };
+
+        // delete
+        listEl.onclick = (e) => {
+            const btn = e.target.closest(".mr-lwo-del");
+            if (!btn) return;
+            btn.closest("li")?.remove();
+            refreshIndices();
+        };
+
+        // confirM
+        confirmBtn.onclick = () => {
+            const items = Array.from(listEl.querySelectorAll("li span"))
+            .map(s => s.textContent.trim())
+            .filter(Boolean)
+            .map(t => {
+                const i = t.indexOf(":");
+                return { v: i === -1 ? t : t.slice(0, i), o: i === -1 ? "" : t.slice(i + 1) };
+            });
+            const bad = items.find(it => !isValidOffset(String(it.o || "")));
+            if (bad) {
+              toastr.error(
+                offsetType === "number" ? "Offset must be a number"
+                : offsetType === "date" ? "Offset must be a valid date (YYYY-MM-DD)"
+                : "Invalid offset"
+              );
+              return;
+            }            
+            $input.val(joinPairsCsv(items)).trigger("input");
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: "static", keyboard: false });
+            modal.hide();
+        };
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: "static", keyboard: false });
+        modal.show();
+        setTimeout(() => valEl?.focus(), 100);
+    }
+
+
+    function initCustomListHandlers() {
+        $(document).off("click", ".mr-customlist-edit").on("click", ".mr-customlist-edit", function () {
+            const id = $(this).attr("data-target");
+            const $input = $("#"+id);
+            if ($input.length) openCustomListEditor($input);
+        });
+        //$(document).off("focus", "input.mr-customlist").on("focus", "input.mr-customlist", function () {
+        //    toastr.info("", "", { timeOut: 500, extendedTimeOut: 500 });
+        //});
+        $(document).off("click", "input.mr-customlist").on("click", "input.mr-customlist", function (e) {
+            openCustomListEditor($(this));
+        });
+    }
+
+    function initListWithOffsetHandlers() {
+        $(document).off("click", ".mr-listwithoffset-edit").on("click", ".mr-listwithoffset-edit", function () {
+            const id = $(this).attr("data-target");
+            const $input = $("#"+id);
+            if ($input.length) openListWithOffsetEditor($input);
+        });
+        $(document).off("click", "input.mr-listwithoffset").on("click", "input.mr-listwithoffset", function () {
+            openListWithOffsetEditor($(this));
+        });
+    }
+
+    // --- END CUSTOM LIST SUPPORT --- //
+
+
 
 
     //  Init 
@@ -1020,6 +1352,8 @@
         rememberTabsAndAccordions();
         bindModeToggles();
         bindToolbar(); 
+        initCustomListHandlers();
+        initListWithOffsetHandlers();
         $("header.container").removeClass("hidden").addClass("animate-in");
         $("main.container").removeClass("hidden").addClass("animate-in");
     }

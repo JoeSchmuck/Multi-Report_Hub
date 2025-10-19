@@ -316,16 +316,16 @@ window.MRCE.CONFIG = {
 				"label": "Drive Customization",
 				"options": {
 					"READ_ME_FIRST": { "label": "<div class='card'> <div class='card-body bg-danger text-white'>NOTES (READ ME!)  There is a very specific format that each value must use below.  You are better to use the built-in Multi-Report -config option the establish these values. </div></div>","type": "statictext"},
-					"Ignore_Drives_List": { "label": "Ignore Drives List", "type": "text", "default": "" },
-					"ATA_Errors_List": { "label": "ATA Errors List", "type": "text", "default": "" },
-					"CRC_Errors_List": { "label": "CRC Errors List", "type": "text", "default": "" },
-					"MultiZone_List": { "label": "MultiZone List", "type": "text", "default": "" },
-					"ReAllocated_Sector_List": { "label": "ReAllocated Sector List", "type": "text", "default": "" },
-					"ReAllocated_Sector_Events_List": { "label": "ReAllocated Sector Events List", "type": "text", "default": "" },
-					"Media_Errors_List": { "label": "Media Errors List", "type": "text", "default": "" },
+					"Ignore_Drives_List": { "label": "Ignore Drives List", "type": "customlist", "default": "", "placeholder": "S/N_1, S/N_2, S/N_3...", "offsettype":"number" },
+					"ATA_Errors_List": { "label": "ATA Errors List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number" },
+					"CRC_Errors_List": { "label": "CRC Errors List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number"  },
+					"MultiZone_List": { "label": "MultiZone List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number"  },
+					"ReAllocated_Sector_List": { "label": "ReAllocated Sector List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number"  },
+					"ReAllocated_Sector_Events_List": { "label": "ReAllocated Sector Events List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number"  },
+					"Media_Errors_List": { "label": "Media Errors List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number"  },
 					"Custom_Drives_List": { "label": "Custom Drives List", "type": "text", "default": "" },
-					"Drive_Locations": { "label": "Drive Locations", "type": "text", "default": "" },
-					"Drive_Warranty_List": { "label": "Drive Warranty List", "type": "text", "default": "" }
+					"Drive_Locations": { "label": "Drive Locations", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:path1, S/N_2:path2, ...", "offsettype":"text" },
+					"Drive_Warranty_List": { "label": "Drive Warranty List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:date1, S/N_2:date2, ...", "offsettype":"date" }
 				}
 			}	
 		},
