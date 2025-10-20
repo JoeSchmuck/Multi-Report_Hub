@@ -159,10 +159,26 @@
                     data-target="${id}" title="Edit" data-offsettype="${(opt.offsettype || 'text')}">
                 <i class="fa-solid fa-list"></i>
             </button>
-            </div>`;                           
-        } else {
+            </div>`;  
+        } else if (type === "customdriveslist") {            
+        return `
+            <div class="input-group">
+            <input type="text" class="form-control notranslate mr-complexlist"
+                    id="${id}" data-key="${fieldKey}" value="${def}"
+                    data-configkey="${opt.configKey || ''}"
+                    placeholder="${opt.placeholder || ''}" ${reqAttr}>
+            <button class="btn btn-outline-secondary mr-complexlist-edit" type="button"
+                    data-target="${id}" title="Edit">
+                <i class="fa-solid fa-table-list"></i>
+            </button>
+            </div>`;
+        } else if (type === "text") {
             return `
-        <input type="text" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr}>`;
+        <input type="text" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr} placeholder="${opt.placeholder || ''}">`;           
+        } else { // debug line to find missconfiguration 
+            console.warning(fieldKey + ' | ' + type + ' missing');
+            return `
+        <input type="text" class="form-control notranslate" id="${id}" data-key="${fieldKey}" value="${def}"${reqAttr} placeholder="${opt.placeholder || ''}">`;
         }
     }
 
@@ -186,7 +202,7 @@
                 const statictextrow = `
                 <div class="row align-items-center border-bottom p-2">
                     <div class="col-12 col-md-12">
-                    <span class="d-inline-flex align-items-center">
+                    <span >
                         ${opt.label}
                         ${tip ? `<i class="fa-solid fa-circle-info ms-2" data-bs-toggle="tooltip" title="${tip}"></i>` : ""}
                     </span>
@@ -1064,7 +1080,22 @@
             .join(", ");
     }
 
+    function cxSerialize(cfg, obj) {
+        return (cfg || []).map(f => String(obj[f.key] ?? "").trim()).join(":");
+    }
+    function cxParseToArray(cfg, text) {
+        const lines = String(text || "").trim();
+        if (!lines) return [];
+        return lines.split(/\s*,\s*/).map(line => {
+            const parts = line.split(":");
+            const o = {};
+            (cfg || []).forEach((f, i) => { o[f.key] = (parts[i] ?? "").trim(); });
+            return o;
+        });
+    }
 
+
+    // modal //
     function buildCustomListModal() {
         let modal = document.getElementById("mr-customlist-modal");
         if (modal) return modal;
@@ -1152,7 +1183,83 @@
         return document.getElementById("mr-listwithoffset-modal");
     }
 
+    function buildComplexListModal() {
+        let modal = document.getElementById("mr-complexlist-modal");
+        if (modal) return modal;
 
+        const html = `
+        <div class="modal fade" id="mr-complexlist-modal" tabindex="-1" aria-hidden="true"
+            data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-table-list me-2"></i>Edit list</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="vstack gap-3">
+                <div class="card">
+                    <div class="card-header">New item</div>
+                    <div class="card-body">
+                    <form id="mr-cx-form"></form>
+                    </div>
+                    <div class="card-footer d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" id="mr-cx-clear">Clear</button>
+                    <button type="button" class="btn btn-primary" id="mr-cx-add">Add</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Items</div>
+                    <div class="card-body">
+                    <ul class="list-group" id="mr-cx-list"></ul>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="mr-cx-confirm">Confirm</button>
+            </div>
+            </div>
+        </div>
+        </div>`;
+        document.body.insertAdjacentHTML("beforeend", html);
+        return document.getElementById("mr-complexlist-modal");
+    }
+
+
+    function renderCustomDrivesListFromConfig() {
+        const cfg = (window.MRCE && window.MRCE.customDriveListConfig) || [];
+        if (!Array.isArray(cfg) || !cfg.length) return;
+        const targetSelector = (window.MRCE?.config?.Drive_Customization?.__target);
+        const container = document.querySelector(targetSelector);
+        if (!container) return;
+        if (document.getElementById('Drive_Thresholds')) return;
+
+        const html = `
+        <div class="row align-items-center border-bottom p-2">
+            <div class="col-12 col-md-6">
+            <label for="Drive_Thresholds" class="col-form-label d-inline-flex align-items-center">
+                Per-Drive Thresholds
+            </label>
+            </div>
+            <div class="col-12 col-md-6">
+            <div class="input-group">
+                <input type="text" class="form-control notranslate mr-complexlist"
+                    id="Drive_Thresholds" data-key="Drive_Thresholds"
+                    placeholder="SERIAL:val2:val3:...  (use the editor)" required>
+                <button class="btn btn-outline-secondary mr-complexlist-edit" type="button"
+                        data-target="Drive_Thresholds" title="Edit">
+                <i class="fa-solid fa-table-list"></i>
+                </button>
+            </div>
+            </div>
+        </div>`;
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+
+    // editor //
     function openCustomListEditor($input) {
         const modalEl = buildCustomListModal();
         const listEl = modalEl.querySelector("#mr-cl-list");
@@ -1182,6 +1289,7 @@
             </li>`);
             inEl.value = "";
             refreshIndices();
+            toastr.success("", "", { timeOut: 500, extendedTimeOut: 500 });
         };
 
         // delete
@@ -1198,6 +1306,7 @@
             const newVals = Array.from(listEl.querySelectorAll("li span")).map(s => s.textContent.trim()).filter(Boolean);
             $input.val(joinCsv(newVals)).trigger("input");
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: "static", keyboard: false });
+            toastr.success("", "", { timeOut: 500, extendedTimeOut: 500 });
             modal.hide();
         };
 
@@ -1274,6 +1383,7 @@
             offEl.value = "";
             refreshIndices();
             valEl.focus();
+            toastr.success("", "", { timeOut: 500, extendedTimeOut: 500 });
         };
 
         // delete
@@ -1304,6 +1414,7 @@
             }            
             $input.val(joinPairsCsv(items)).trigger("input");
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: "static", keyboard: false });
+            toastr.success("", "", { timeOut: 500, extendedTimeOut: 500 });
             modal.hide();
         };
 
@@ -1312,7 +1423,100 @@
         setTimeout(() => valEl?.focus(), 100);
     }
 
+    function openComplexListEditor(inputEl) {
+        const modalEl = buildComplexListModal();
+        const cfg = (window.MRCE && window.MRCE.customDriveListConfig) || [];
+        if (!Array.isArray(cfg) || !cfg.length) { toastr.error("Missing customDriveListConfig"); return; }
 
+        const form  = modalEl.querySelector("#mr-cx-form");
+        const list  = modalEl.querySelector("#mr-cx-list");
+        const btnAdd = modalEl.querySelector("#mr-cx-add");
+        const btnClear = modalEl.querySelector("#mr-cx-clear");
+        const btnConfirm = modalEl.querySelector("#mr-cx-confirm");
+
+        // build form
+        form.innerHTML = `
+            <div class="row g-2">
+            ${cfg.map(f => {
+                if (f.type === "select") {
+                const opts = (f.options || []).map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+                return `
+                    <div class="col-12 col-md-6 col-xl-3">
+                    <label class="form-label">${f.label}</label>
+                    <select class="form-select" name="${f.key}" required>${opts}</select>
+                    </div>`;
+                }
+                const min = f.min != null ? ` min="${f.min}"` : "";
+                const max = f.max != null ? ` max="${f.max}"` : "";
+                const typ = f.type === "number" ? "number" : "text";
+                return `
+                <div class="col-12 col-md-6 col-xl-3">
+                    <label class="form-label">${f.label}</label>
+                    <input type="${typ}" class="form-control" name="${f.key}"${min}${max} required>
+                </div>`;
+            }).join("")}
+            </div>`;
+
+        const items = cxParseToArray(cfg, inputEl.value);
+
+        function renderList() {
+            list.innerHTML = items.length
+                ? items.map((it, i) => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-truncate" style="max-width:80%">${cxSerialize(cfg, it)}</span>
+                    <button type="button" class="btn btn-sm btn-danger" data-idx="${i}"><i class="fa-solid fa-trash"></i></button>
+                </li>`).join("")
+                : `<li class="list-group-item text-muted">No items.</li>`;
+        }
+
+        function clearForm() {
+            cfg.forEach(f => {
+                const el = form.querySelector(`[name="${f.key}"]`);
+                if (!el) return;
+                el.value = f.default ?? "";
+            });
+        }
+
+        function readForm() {
+            const o = {};
+            for (const f of cfg) {
+                const el = form.querySelector(`[name="${f.key}"]`);
+                const v = (el?.value ?? "").trim();
+                if (v === "") return null;
+                o[f.key] = v;
+            }
+            return o;
+        }
+
+        btnAdd.onclick = () => {
+            const obj = readForm();
+            if (!obj) { toastr.warning("All fields are required"); return; }
+            items.push(obj);
+            renderList();
+            clearForm();
+            toastr.success("", "", { timeOut: 500, extendedTimeOut: 500 });
+        };
+        btnClear.onclick = () => clearForm();
+        list.onclick = (e) => {
+            const b = e.target.closest("button[data-idx]");
+            if (!b) return;
+            const i = parseInt(b.dataset.idx, 10);
+            items.splice(i, 1);
+            renderList();
+        };
+        btnConfirm.onclick = () => {
+            inputEl.value = items.map(it => cxSerialize(cfg, it)).join(", ");
+            inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            toastr.success("", "", { timeOut: 500, extendedTimeOut: 500 });
+        };
+
+        clearForm();
+        renderList();
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+
+    // init handler
     function initCustomListHandlers() {
         $(document).off("click", ".mr-customlist-edit").on("click", ".mr-customlist-edit", function () {
             const id = $(this).attr("data-target");
@@ -1338,10 +1542,21 @@
         });
     }
 
+    function initComplexListHandlers() {
+        $(document).off("click", ".mr-complexlist-edit").on("click", ".mr-complexlist-edit", function () {
+            const target = $(this).data("target");
+            const input = document.getElementById(target);
+            if (input) openComplexListEditor(input);
+        });
+        $(document).off("click", "input.mr-complexlist").on("click", "input.mr-complexlist", function () {
+            openComplexListEditor(this);
+        });
+    }
+
+
+
+
     // --- END CUSTOM LIST SUPPORT --- //
-
-
-
 
     //  Init 
     function init() {   
@@ -1354,6 +1569,8 @@
         bindToolbar(); 
         initCustomListHandlers();
         initListWithOffsetHandlers();
+        renderCustomDrivesListFromConfig();
+        initComplexListHandlers();  
         $("header.container").removeClass("hidden").addClass("animate-in");
         $("main.container").removeClass("hidden").addClass("animate-in");
     }

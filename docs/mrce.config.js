@@ -315,7 +315,7 @@ window.MRCE.CONFIG = {
 			"Drive Customization": {
 				"label": "Drive Customization",
 				"options": {
-					"READ_ME_FIRST": { "label": "<div class='card'> <div class='card-body bg-danger text-white'>NOTES (READ ME!)  There is a very specific format that each value must use below.  You are better to use the built-in Multi-Report -config option the establish these values. </div></div>","type": "statictext"},
+					"READ_ME_FIRST": { "label": "<div class='card fw-bold'> <div class='card-body bg-warning text-white'>NOTES (READ ME!)  There is a very specific format that each value must use below. Be careful and follow the istruction </div></div>","type": "statictext"},
 					"Ignore_Drives_List": { "label": "Ignore Drives List", "type": "customlist", "default": "", "placeholder": "S/N_1, S/N_2, S/N_3...", "offsettype":"number" },
 					"ATA_Errors_List": { "label": "ATA Errors List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number" },
 					"CRC_Errors_List": { "label": "CRC Errors List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number"  },
@@ -323,7 +323,7 @@ window.MRCE.CONFIG = {
 					"ReAllocated_Sector_List": { "label": "ReAllocated Sector List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number"  },
 					"ReAllocated_Sector_Events_List": { "label": "ReAllocated Sector Events List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number"  },
 					"Media_Errors_List": { "label": "Media Errors List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:offset1, S/N_2:offset2, ...", "offsettype":"number"  },
-					"Custom_Drives_List": { "label": "Custom Drives List", "type": "text", "default": "" },
+					"Custom_Drives_List": { "label": "Custom Drives List", "type": "customdriveslist", "default": "", "placeholder":"****:55:65:0:9:0:0:5:5:100:5:100:2:0:100:d:d:d" },
 					"Drive_Locations": { "label": "Drive Locations", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:path1, S/N_2:path2, ...", "offsettype":"text" },
 					"Drive_Warranty_List": { "label": "Drive Warranty List", "type": "listwithoffset", "default": "", "placeholder": "S/N_1:date1, S/N_2:date2, ...", "offsettype":"date" }
 				}
@@ -933,3 +933,164 @@ window.MRCE.longRelated = [
     "Long_Drives_Test_Period",
     "Long_Drives_Tested_Days_of_the_Week",
 ];  
+
+window.MRCE.customDriveListConfig = [
+    {
+      "key": "serial_number",
+      "label": "Serial Number",
+      "type": "text",
+      "default": "",
+      "required": true
+    },
+    {
+      "key": "temp_warning_c",
+      "label": "Drive Temp Warning (°C)",
+      "type": "number",
+      "default": 55,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "temp_critical_c",
+      "label": "Drive Temp Critical (°C)",
+      "type": "number",
+      "default": 65,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "sector_errors_warning",
+      "label": "Sector Errors (Warning)",
+      "type": "number",
+      "default": 5,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "sector_errors_critical",
+      "label": "Sector Errors (Critical)",
+      "type": "number",
+      "default": 9,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "reallocated_warning",
+      "label": "Reallocated Sectors (Warning)",
+      "type": "number",
+      "default": 5,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "multizone_errors_warning",
+      "label": "MultiZone Errors (Warning)",
+      "type": "number",
+      "default": 0,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "multizone_errors_critical",
+      "label": "MultiZone Errors (Critical)",
+      "type": "number",
+      "default": 5,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "raw_read_rate_warning",
+      "label": "Raw Read Rate (Warning)",
+      "type": "number",
+      "default": 10,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "raw_read_rate_critical",
+      "label": "Raw Read Rate (Critical)",
+      "type": "number",
+      "default": 100,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "seek_rate_warning",
+      "label": "Seek Rate (Warning)",
+      "type": "number",
+      "default": 5,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "seek_rate_critical",
+      "label": "Seek Rate (Critical)",
+      "type": "number",
+      "default": 100,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "test_age_days",
+      "label": "Test Age Alarm (days)",
+      "type": "number",
+      "default": 2,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "test_age_override",
+      "label": "Test Age Override",
+      "type": "select",
+      "default": 0,
+      "options": [
+        { "label": "No Override", "value": 0 },
+        { "label": "Override / Ignore Alarm", "value": 1 }
+      ],
+      "required": true
+    },
+    {
+      "key": "helium_level_critical",
+      "label": "Helium Level (Critical)",
+      "type": "number",
+      "default": 100,
+      "min": 0,
+      "required": true
+    },
+    {
+      "key": "wear_level_adjustment",
+      "label": "Wear Level Adjustment",
+      "type": "select",
+      "default": "d",
+      "options": [
+        { "label": "Default", "value": "d" },
+        { "label": "Reverse", "value": "r" },
+        { "label": "Use Normalized Value", "value": "n" },
+        { "label": "Ignore", "value": "i" }
+      ],
+      "required": true
+    },
+    {
+      "key": "farm_offset",
+      "label": "F.A.R.M. Offset",
+      "type": "select",
+      "default": "d",
+      "options": [
+        { "label": "Default", "value": "d" },
+        { "label": "Ignore", "value": "i" }
+      ],
+      "required": true
+    },
+    {
+      "key": "test_type_override",
+      "label": "Test Type Override",
+      "type": "select",
+      "default": "i",
+      "options": [
+        { "label": "Default", "value": "d" },
+        { "label": "Ignore", "value": "i" }
+      ],
+      "required": true
+    }
+]
+
