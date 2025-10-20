@@ -1137,51 +1137,50 @@
     }
 
     function buildListWithOffsetModal() {
-        let modal = document.getElementById("mr-listwithoffset-modal");
-        if (modal) return modal;
+    let modal = document.getElementById("mr-listwithoffset-modal");
+    if (modal) return modal;
 
-        const html = `
-        <div class="modal fade" id="mr-listwithoffset-modal" tabindex="-1" aria-hidden="true"
-            data-bs-backdrop="static" data-bs-keyboard="false">
-            <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                <h5 class="modal-title"><i class="fa-solid fa-list me-2"></i>Edit list</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                <div class="vstack gap-3">
-                    <div>
-                    <label class="form-label">Add pair</label>
-                    <div class="row g-2 align-items-center">
-                        <div class="col">
+    const html = `
+    <div class="modal fade" id="mr-listwithoffset-modal" tabindex="-1" aria-hidden="true"
+        data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title"><i class="fa-solid fa-list me-2"></i>Edit list</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <div class="vstack gap-3">
+                <div class="row g-2">
+                    <div class="col">
+                        <label class="form-label">Serial Number</label>
                         <input type="text" class="form-control" id="mr-lwo-input-value" placeholder="Value">
-                        </div>
-                        <div class="col-auto">:</div>
-                        <div class="col">
+                    </div>
+                    <div class="col-auto align-self-end">:</div>
+                    <div class="col">
+                        <label class="form-label">Offset Value</label>
                         <input type="text" class="form-control" id="mr-lwo-input-offset" placeholder="Offset">
-                        </div>
-                        <div class="col-auto">
+                    </div>
+                    <div class="col-auto align-self-end">
                         <button class="btn btn-info" id="mr-lwo-add" type="button">Add</button>
-                        </div>
-                    </div>
-                    </div>
-                    <div>
-                    <label class="form-label">Current items</label>
-                    <ul class="list-group" id="mr-lwo-list"></ul>
                     </div>
                 </div>
-                </div>
-                <div class="modal-footer">
-                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" id="mr-lwo-confirm">Confirm</button>
+                <div>
+                <label class="form-label">Current items</label>
+                <ul class="list-group" id="mr-lwo-list"></ul>
                 </div>
             </div>
             </div>
-        </div>`;
-        document.body.insertAdjacentHTML("beforeend", html);
-        return document.getElementById("mr-listwithoffset-modal");
-    }
+            <div class="modal-footer">
+            <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success" id="mr-lwo-confirm">Confirm</button>
+            </div>
+        </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML("beforeend", html);
+    return document.getElementById("mr-listwithoffset-modal");
+}
 
     function buildComplexListModal() {
         let modal = document.getElementById("mr-complexlist-modal");

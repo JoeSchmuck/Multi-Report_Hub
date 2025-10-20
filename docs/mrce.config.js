@@ -743,12 +743,12 @@ window.MRCE.TOOLTIPS = {
 		"Drive Customization": {
 			"_____READ_ME_FIRST": "MODIFY AT OWN RISK.",
 			"Ignore_Drives_List": "Use this to list any drives to ignore and remove from the report.",
-			"ATA_Errors_List": "Offset ATA Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
-			"CRC_Errors_List": "Offset CRC Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
-			"MultiZone_List": "Offset MultiZone Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
-			"ReAllocated_Sector_List": "Offset Reallocated Sector Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
-			"ReAllocated_Sector_Events_List": "Offset Reallocated Sector Events.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
-			"Media_Errors_List": "Offset Media Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value",
+			"ATA_Errors_List": "Offset ATA Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value (the current number of errors reported)",
+			"CRC_Errors_List": "Offset CRC Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value (the current number of errors reported)",
+			"MultiZone_List": "Offset MultiZone Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value (the current number of errors reported)",
+			"ReAllocated_Sector_List": "Offset Reallocated Sector Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value (the current number of errors reported)",
+			"ReAllocated_Sector_Events_List": "Offset Reallocated Sector Events.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value (the current number of errors reported)",
+			"Media_Errors_List": "Offset Media Errors.  Format: Drive S/N:Offset Value, Drive S/N:Offset Value (the current number of errors reported)",
 			"Custom_Drives_List": "See Help for details.",
 			"Drive_Locations": "Identify Drive Location.  Format: Drive S/N:Text of location,Drive S/N:Text of location",
 			"Drive_Warranty_List": "Specify the drive warranty date.  Format: Drive S/N:YYYY-MM-DD,Drive S/N:YYYY-MM-DD"
