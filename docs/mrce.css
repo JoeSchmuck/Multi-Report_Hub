@@ -6,6 +6,7 @@
   --mr-body-cl: #ffffff;
   --mr-disabled-color: #ffffff;
   --mr-disabled-bg-color: #9FA6B2;
+  --mr-checkbox-linecolor: #ffffff;
 }
 
 [data-bs-theme="light"] {
@@ -16,6 +17,7 @@
   --mr-body-cl: #000000;
   --mr-disabled-color: #9ca3af;
   --mr-disabled-bg-color: #f3f4f6;
+  --mr-checkbox-linecolor: #000000;  
 }
 
 Body {
@@ -130,4 +132,10 @@ header.container.animate-in {
   0%,100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
+}
+
+/* issue #13 */
+.form-check-input[type=checkbox] {
+  border-width: 2px;
+  border-color: var(--mr-checkbox-linecolor);  
 }
