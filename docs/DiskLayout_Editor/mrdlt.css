@@ -114,8 +114,12 @@ body.dragging *{ user-select: none !important; }
   flex-direction:column; gap:.25rem;
 }
 .bay .bay-label {
-  position: absolute; top: .25rem; left: .5rem;
-  font-size: .7rem; color: #6c757d;
+  position: absolute; 
+  top: .25rem; 
+  left: .5rem;
+  font-size: .7rem; 
+  color: #6c757d; 
+  display:none; /*disabled for now until we think something better to place there */
 }
 .bay .port-select { position: absolute; top: .25rem; right: .5rem; width: 11rem; }
 .bay .disk{ margin: .5rem; width: calc(100% - 1rem); }
