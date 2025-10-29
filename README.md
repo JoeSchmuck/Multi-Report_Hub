@@ -4,12 +4,21 @@
 
 ---
 
-## 📌 What this GUI do
+## 📌 What this tool do
 
-Build and configure Multi-Report easily.
+Build and configure Multi-Report easily with a GUI instead of the shell.
+Visit the [WEB](https://joeschmuck.github.io/Multi-Report_Config_HTML/) page and try it!
+We do not raccomend (better use the latest public version) but you can also run it locally in your pc!
 
-- run it directly from the [WEB](https://joeschmuck.github.io/Multi-Report_Config_HTML/)
-- run it locally: download the files and open with your favorite browser!
+# 🧩 Multi-Report: disk layout manager 
+
+---
+
+## 📌 What this tool do
+
+Reproduce your case/enclosure layout using this tool easily.
+Visit the [WEB](https://joeschmuck.github.io/Multi-Report_Config_HTML/) page
+We do not raccomend (better use the latest public version) but you can also run it locally in your pc!
 
 ## 🙋‍♂️ For any problem or improvements let us know!
 
