@@ -4,7 +4,7 @@
 
 ---
 
-Choose which tool you want to use from the [LIST](https://joeschmuck.github.io/Multi-Report_Hub/Configuration_Editor)
+Choose which tool you want to use from the [LIST](https://joeschmuck.github.io/Multi-Report_Hub)
 
 # ⚙️ Multi-Report: config file manager 
 
