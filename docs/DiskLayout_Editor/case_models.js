@@ -40,6 +40,26 @@ window.CASE_MODELS = [
     }
   },
   {
+    "id": "small-6-1-nvme",
+    "name": "Compact 6-bay plus 1 onboard NVME",
+    "bays": 7,
+    "description": "Compact 6-bay case",
+    "layout": {
+      "rows": 6,
+      "activeSlots": [4, 8, 12, 13, 16, 20, 24]
+    }
+  },  
+  {
+    "id": "small-6-2-nvme",
+    "name": "Compact 6-bay plus 2 onboard NVME",
+    "bays": 8,
+    "description": "Compact 6-bay case",
+    "layout": {
+      "rows": 6,
+      "activeSlots": [4, 8, 12, 13, 16, 17, 20, 24]
+    }
+  },    
+  {
     "id": "mid-8",
     "name": "Mid Tower 8-bay",
     "bays": 8,
@@ -61,7 +81,7 @@ window.CASE_MODELS = [
   },
   {
     "id": "tower-12-2r-1nvme",
-    "name": "Tower 12-bay + 1 NVMe",
+    "name": "Tower 12-bay plus 1 NVMe oboard",
     "bays": 13,
     "description": "Tower with 12 bays in two rows, plus one motherboard NVMe slot.",
     "layout": {
@@ -71,12 +91,12 @@ window.CASE_MODELS = [
   },
   {
     "id": "tower-12-2r-2nvme",
-    "name": "Tower 12-bay + 1 NVMe on motherboard",
+    "name": "Tower 12-bay plus 2 NVMe onboard",
     "bays": 13,
     "description": "Tower with 12 bays in two rows, plus two motherboard NVMe slot.",
     "layout": {
       "rows": 6,
-      "activeSlots": [3, 4, 7, 8, 11, 12, 13, 15, 16, 18, 19, 20, 23, 24]
+      "activeSlots": [3, 4, 7, 8, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24]
     }
   },  
   {
