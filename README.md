@@ -9,11 +9,15 @@ Choose which tool you need from [HERE](https://joeschmuck.github.io/Multi-Report
 
 ## ⚙️ Multi-Report: config file manager 
 
+<img src="../docs/assets/mr_config_preview.png" alt="config file manager" height="250">
+
 Build and configure Multi-Report easily with a GUI instead of using the shell, easily.<br>
 Visit the [WEB](https://joeschmuck.github.io/Multi-Report_Hub/Configuration_Editor) page and try it!<br>
 We do not raccomend but you can also run it locally in your pc (better use the latest public version)!
 
 ## 🧩 Multi-Report: disk layout manager 
+
+<img src="../docs/assets/mr_disklayout_preview.png" alt="disk layout manager" height="250">
 
 Reproduce your case/enclosure layout using this drag and drop tool, easily.<br>
 Visit the [WEB](https://joeschmuck.github.io/Multi-Report_Hub/DiskLayout_Editor) page and try it!<br>

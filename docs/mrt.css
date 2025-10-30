@@ -80,3 +80,7 @@ header.container.animate-in {
   transform: translateX(0);
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
+
+.img-tool-preview {
+  max-height: 250px;
+}
