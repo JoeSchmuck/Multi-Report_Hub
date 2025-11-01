@@ -302,7 +302,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 .unplaced .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px}}
 
 </style></head><body>
-{(f'<div class="badge">{{escape(name)}}</div>' if has_real_case else '')}
+{(f'<div class="badge">{escape(name)}</div>' if has_real_case else '')}
 <div class="wrapper">
 {("<div class='notice'>No case selected — some drives are unplaced.</div>" if (unplaced_indices and not has_real_case) else "")}
 {("<div class='case'>" if has_real_case else '')}"""
@@ -336,7 +336,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
         parts.append('<div class="slots">')
         for idx in unplaced_indices:
             b = bays_list[idx] or {}
-            parts.append(render_drive_line(b, bay_idx))
+            parts.append(render_drive_line(b, idx))
         parts.append('</div></div>')
 
 
