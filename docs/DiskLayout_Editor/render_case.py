@@ -313,7 +313,8 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 
     for pos in range(1, total_slots + 1):
         if pos not in active:
-            parts.append('<div class="slot empty"></div>')
+            hide_empty_bay = ' style="display:none;"' if not has_real_case else ''
+            parts.append(f'<div class="slot empty"{hide_empty_bay}></div>')
             continue
 
         info = pos_to_info.get(pos)
@@ -325,7 +326,8 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
             parts.append(render_drive_line(d, bay_idx))
 
         else:
-            parts.append('<div class="slot empty"></div>')
+            hide_empty_bay = ' style="display:none;"' if not has_real_case else ''
+            parts.append(f'<div class="slot empty"{hide_empty_bay}></div>')
 
     # Unplaced drives panel (only if present and not hidden)
     if has_real_case:
