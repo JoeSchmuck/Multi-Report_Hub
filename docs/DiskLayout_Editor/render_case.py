@@ -292,7 +292,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 .unplaced{{width:min(900px,92vw);background:#151515;border:1px dashed #3a3a3a;border-radius:10px;padding:12px}}
 .unplaced h4{{margin:0 0 10px 0;color:#cfcfcf;font-size:13px}}
 .unplaced .slots{{display:flex;flex-wrap:wrap;gap:22px}}
-.unplaced .slot{{width:200px;height:58px;padding:10px 12px;border-radius:8px;position:relative;
+.unplaced .slot{{width:240px;height:58px;padding:10px 12px;border-radius:8px;position:relative;
   display:flex;align-items:center;justify-content:flex-start;cursor:pointer;transition:transform .06s ease-out, box-shadow .06s ease-out}}
 .unplaced .slot:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35)}}
 .unplaced .text{{display:flex;flex-direction:column;gap:3px}}
@@ -446,7 +446,7 @@ def build_email_css(namespace: str = ".case-email") -> str:
 {ns} .slot.empty {{ border:1px dashed #444; opacity:.55 }}
 {ns} .unplaced{{margin-top:10px;text-align:center;}}
 {ns} .unplaced .row{{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}}
-{ns} .unplaced .slot{{width:200px;height:58px;padding:10px 12px;border-radius:8px;position:relative;
+{ns} .unplaced .slot{{width:240px;height:58px;padding:10px 12px;border-radius:8px;position:relative;
   display:flex;align-items:center;justify-content:flex-start;}}
 {ns} .unplaced .text{{display:flex;flex-direction:column;gap:3px}}
 {ns} .unplaced .line-1{{font-weight:800;color:#fff;font-size:13px;letter-spacing:.2px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
