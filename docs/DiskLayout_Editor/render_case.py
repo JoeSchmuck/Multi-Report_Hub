@@ -2,15 +2,15 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.01
-##### Stand alone script to generate the html render for config.json
+##### V 0.02
+##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.01"
+__version__ = "0.02"
 __cols__ = 4
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
 __script_name__ = os.path.basename(__script_path__)
-__input_default__ = os.path.join(__script_directory__, "config.json")
+__input_default__ = os.path.join(__script_directory__, "disklayout_config.json")
 __output_render__ = os.path.join(__script_directory__, "case_render.html")
 __output_render_snipplet__ = os.path.join(__script_directory__, "case_email_snippet.html")
 
