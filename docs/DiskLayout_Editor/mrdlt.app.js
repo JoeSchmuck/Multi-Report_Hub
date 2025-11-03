@@ -331,6 +331,7 @@ function onLoadConfigFile(e){
   const file = e.target.files && e.target.files[0];
   if (!file) return;
   if (!/\.json$/i.test(file.name)) { toastr.error('Please select a JSON file.'); return; }
+  if (file.name.toLowerCase() !== 'disklayout_config.json') {toastr.error('Only "disklayout_config.json" can be selected.');return; }
 
   resetAllState();
   const reader = new FileReader();
@@ -406,7 +407,7 @@ function onSaveConfig(){
   const blob = new Blob([JSON.stringify(out, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'config.json'; a.click();
+  a.href = url; a.download = 'disklayout_config.json'; a.click();
   URL.revokeObjectURL(url);
   toastr.success('Config saved.');
 }
