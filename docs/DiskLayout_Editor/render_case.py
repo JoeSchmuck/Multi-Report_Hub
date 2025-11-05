@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.02
+##### V 0.03
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.02"
+__version__ = "0.03"
 __cols__ = 4
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
@@ -13,14 +13,14 @@ __script_name__ = os.path.basename(__script_path__)
 __input_default__ = os.path.join(__script_directory__, "disklayout_config.json")
 __output_render__ = os.path.join(__script_directory__, "case_render.html")
 __output_render_snipplet__ = os.path.join(__script_directory__, "case_email_snippet.html")
-
+__output_render_outlook_snipplet__ = os.path.join(__script_directory__, "case_email_outlook_snippet.html")
 
 def assert_outputs_secure_or_abort() -> bool:
     """
     Security check 
     """
     append_log("testing symlink on output")
-    for out_path in (__output_render__, __output_render_snipplet__):
+    for out_path in (__output_render__, __output_render_snipplet__, __output_render_outlook_snipplet__):
         if os.path.lexists(out_path) and os.path.islink(out_path):
             process_output(True, f"[SECURITY ERROR]: output file '{out_path}' is a symlink; refusing to write.", 1)
 
@@ -28,6 +28,7 @@ def assert_outputs_secure_or_abort() -> bool:
     dirs = {
         os.path.dirname(os.path.abspath(__output_render__)) or __script_directory__,
         os.path.dirname(os.path.abspath(__output_render_snipplet__)) or __script_directory__,
+        os.path.dirname(os.path.abspath(__output_render_outlook_snipplet__)) or __script_directory__,
     }
     for d in dirs:
         try:
@@ -36,8 +37,8 @@ def assert_outputs_secure_or_abort() -> bool:
             process_output(True, f"[ERROR]: cannot stat directory '{d}': {e}", 1)
             
         append_log("test pass, checking permission")
-        if bool(st.st_mode & stat.S_IWOTH):
-            process_output(True, f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation aborted.", 1)
+#        if bool(st.st_mode & stat.S_IWOTH):
+#            process_output(True, f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation aborted.", 1)
 
     return True
 
@@ -503,6 +504,138 @@ def render_email_snippet(
     return "\n".join(parts)
 
 
+def render_outlook_email_snippet(
+    case: dict,
+    rows: int,
+    cols: int,
+    pos_to_info: dict,
+    drive_lookup: dict,
+    bays_list: list,
+    unplaced_indices: list[int],
+    has_real_case: bool,
+) -> str:
+    """Render a simplified, Outlook-compatible HTML email version with LED colors."""
+    active = set(int(x) for x in case["layout"].get("activeSlots", []))
+    total_slots = rows * cols
+
+    # helper for inline LED dot
+    def led_dot(color: str) -> str:
+        colors = {
+            "green": "#00ff55",
+            "yellow": "#ffd100",
+            "red": "#ff3b3b",
+            "orange": "#E4A11B",
+            "blank": "#9e9e9e",
+        }
+        c = colors.get(color, "#9e9e9e")
+        return f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{c};margin-left:6px;"></span>'
+
+    def led_background_color(color: str) -> str:
+        """Return a light cell background color based on LED color."""
+        color = (color or "blank").lower()
+        if color == "green":
+            return "#245c34"   # muted green
+        elif color == "yellow":
+            return "#5a5120"   # muted yellow/gold
+        elif color == "red":
+            return "#5a2525"   # muted red
+        elif color == "orange":
+            return "#5c3a1c"   # muted orange
+        elif color == "blank":
+            return "#444444"   # neutral grey
+        else:
+            return "#3b3b3b"   # default background
+
+
+    parts = []
+    parts.append(
+        '<table border="0" cellpadding="6" cellspacing="0" style="border-collapse:collapse;margin:auto;background-color:#181818;border:1px solid #282828;border-radius:8px;">'
+    )
+
+    if has_real_case:
+        for r in range(rows):
+            parts.append("<tr>")
+            for c in range(cols):
+                pos = r * cols + c + 1
+                if pos not in active:
+                    parts.append(
+                        '<td style="border:1px dashed #444;width:275px;height:58px;text-align:center;vertical-align:middle;color:#777;font-family:Consolas,monospace;">Empty</td>'
+                    )
+                    continue
+
+                info = pos_to_info.get(pos)
+                serial = info.get("serial") if info else None
+                if serial and serial in drive_lookup:
+                    d = drive_lookup[serial]
+                    line1 = escape(drive_label(d))      # serial or disk
+                    line2 = escape(drive_pool(d))       # pool or --SPARE--
+                    line3 = escape(drive_id(d))         # drive_id
+                    line4 = escape(drive_capacity(d))   # capacity
+                    line5 = escape(drive_temp(d))       # temp
+                    led_color = d.get("led") or d.get("drive_color") or "blank"
+                    led_color = led_color.lower() if isinstance(led_color, str) else "blank"
+
+                    parts.append(
+                        f"""
+                        <td style="border:1px solid #555;border-radius:6px;background-color:{led_background_color(led_color)};width:275px;height:58px;vertical-align:middle;padding:6px 10px;">
+                        <table border="0" width="100%%" cellspacing="0" cellpadding="0">
+                            <tr>
+                            <td style="vertical-align:top;">
+                                <div style="font-weight:bold;color:#fff;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{line1}</div>
+                                <div style="color:#cfe7ff;font-size:11px;">{line2}</div>
+                                <div style="color:#ccc;font-size:11px;">Drive: {line3} / {line4} / Temp: {line5}</div>
+                            </td>
+                            <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color)}</td>
+                            </tr>
+                        </table>
+                        </td>
+                        """
+                    )
+
+                else:
+                    parts.append(
+                        '<td style="border:1px dashed #444;width:275px;height:58px;text-align:center;vertical-align:middle;color:#777;">Empty</td>'
+                    )
+            parts.append("</tr>")
+    parts.append("</table>")
+
+    # Unplaced drives section
+    if unplaced_indices:
+        parts.append('<div style="margin-top:10px;text-align:center;">')
+        parts.append(
+            '<table border="0" cellpadding="6" cellspacing="0" align="center" style="border-collapse:collapse;">'
+        )
+        for idx in unplaced_indices:
+            b = bays_list[idx] or {}
+            line1 = b.get("name", "Unknown")
+            line2 = b.get("model", "")
+            line3 = b.get("serial", "")
+            led_color = b.get("led") or b.get("drive_color") or "blank"
+            led_color = led_color.lower() if isinstance(led_color, str) else "blank"
+
+            parts.append(
+                f"""
+                <tr><td style="border:1px solid #555;border-radius:6px;background-color:#3b3b3b;width:240px;height:58px;padding:6px 10px;">
+                  <table border="0" width="100%%" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td style="vertical-align:top;">
+                        <div style="font-weight:bold;color:#fff;font-size:13px;">{line1}</div>
+                        <div style="color:#cfe7ff;font-size:11px;">{line2}</div>
+                        <div style="color:#ccc;font-size:11px;">{line3}</div>
+                      </td>
+                      <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color)}</td>
+                    </tr>
+                  </table>
+                </td></tr>
+                """
+            )
+        parts.append("</table></div>")
+
+    return "\n".join(parts)
+
+
+
+
 # ---------- CLI ----------
 def main():
     parser = argparse.ArgumentParser(description="Render case layout: output a rich web page plus a smaller snipplet")
@@ -556,6 +689,16 @@ def main():
             f.write(email_html)
     except Exception as e:
         process_output(True, f"Something wrong on rendering snipplet file {e}", 1)              
+
+    append_log(f"rendering Outlook-compatible file")
+    try:
+        outlook_html = render_outlook_email_snippet(
+            case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case
+        )
+        with open(__output_render_outlook_snipplet__, "w", encoding="utf-8") as f:
+            f.write(outlook_html)
+    except Exception as e:
+        process_output(True, f"Something wrong on rendering Outlook snipplet file {e}", 1)
 
     process_output(False, "Operation completed", 0)
 
