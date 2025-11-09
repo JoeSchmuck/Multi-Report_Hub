@@ -9,7 +9,7 @@
   <meta property="og:title" content="Disk Layout Configurator Tool">
   <meta property="og:url" content="https://github.com/JoeSchmuck/Multi-Report" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://joeschmuck.github.io/Multi-Report_Hub/assets/HD3aGUI-resized.png" /> 
+  <meta property="og:image" content="https://joeschmuck.github.io/Multi-Report_Hub/assets/HD3aGUI-resized.png" />
   <meta property="og:description" content=" Drag and drop your disks as you placed them in your case">
 
 
@@ -39,9 +39,9 @@
       </ul>
       <div class="ms-lg-3 d-flex gap-2 align-items-center">
         <div class="btn-group" role="group" aria-label="Theme">
-          <button class="btn btn-outline-secondary btn-sm" data-theme-value="light" title="Tema chiaro">☀️</button>
-          <button class="btn btn-outline-secondary btn-sm" data-theme-value="dark" title="Tema scuro">🌙</button>
-          <button class="btn btn-outline-secondary btn-sm" data-theme-value="auto" title="Tema automatico">🖥️</button>
+          <button class="btn btn-outline-secondary btn-sm" data-theme-value="light" title="Light Theme">☀️</button>
+          <button class="btn btn-outline-secondary btn-sm" data-theme-value="dark" title="Dark Theme">🌙</button>
+          <button class="btn btn-outline-secondary btn-sm" data-theme-value="auto" title="Auto Theme">🖥️</button>
         </div>
         <div id="google_translate_element" class="ms-2"></div>
       </div>
@@ -49,7 +49,7 @@
   </div>
 </nav>
 
-  <header class="container my-4 hidden" id="top"> 
+  <header class="container my-4 hidden" id="top">
     <div class="mr-hero">
         <div class="row justify-content-center align-items-center g-3">
             <div class="col-auto d-flex flex-wrap justify-content-center">
@@ -62,7 +62,7 @@
             </div>
             <div class="col-auto d-flex flex-wrap justify-content-center mr-hide-mobile">
                 <img src="../assets/HD3aGUI-resized.png" alt="Logo">
-            </div>            
+            </div>
         </div>
     </div>
   </header>
@@ -84,7 +84,7 @@
 
 <main class="container-fluid px-4">
   <div class="row g-3">
-    <div class="col-lg-4">
+    <div class="col-lg-3">
       <div class="card shadow-sm h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
           <span>Unassigned Disks</span>
@@ -96,7 +96,7 @@
         </div>
       </div>
     </div>
-    <div class="col-lg-8">
+    <div class="col-lg-9">
       <div class="card shadow-sm h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
           <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -123,7 +123,7 @@
         <h5 class="modal-title">Choose a case</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      
+
 
       <div class="modal-body">
         <form id="case-search-form" class="row g-2 align-items-end mb-2" onsubmit="return false;">
@@ -149,13 +149,14 @@
                data-search="true"
                data-search-selector="#case-search-text"
                data-pagination="true"
-               data-page-size="8"
+               data-page-size="20"
                data-page-list="[5, 8, 12, 20, 50]"
-               data-sort-name="bays"
-               data-sort-order="desc"
+               data-sort-name="manufacturer"
+               data-sort-order="asc"
                class="table table-hover table-sm">
           <thead>
             <tr>
+              <th data-field="manufacturer" data-sortable="true">Manuf.</th>
               <th data-field="name" data-sortable="true">Case</th>
               <th data-field="bays" data-sortable="true" class="text-end">Bays</th>
               <th data-field="description">Description</th>
@@ -226,7 +227,10 @@
 <footer class="container py-4">
   <div class="d-flex flex-column flex-md-row align-items-center gap-2 justify-content-between">
     <small class="text-muted">© <span id="year"></span> <b>Multi-Report Disk Layout Tool</b><br>
-      Credits: <a href="https://github.com/oxyde1989" target="_blank" rel="noopener">Oxyde</a>, <a href="https://github.com/JoeSchmuck" target="_blank" rel="noopener">JoeSchmuck</a>
+      Credits:
+      <a href="https://github.com/oxyde1989" target="_blank">Oxyde</a>,
+      <a href="https://github.com/JoeSchmuck" target="_blank">JoeSchmuck</a>,
+      <a href="https://github.com/Sophist-UK" target="_blank">Sophist-UK</a>
     </small>
   </div>
 </footer>
@@ -235,8 +239,8 @@
 <script>
 function googleTranslateElementInit() {
   new google.translate.TranslateElement({
-    pageLanguage: 'it',
-    includedLanguages: 'it,en,fr,de,es,pt,ru',
+    pageLanguage: 'en',
+    includedLanguages: 'en,it,fr,de,es,pt,ru',
     layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
     autoDisplay: false
   }, 'google_translate_element');

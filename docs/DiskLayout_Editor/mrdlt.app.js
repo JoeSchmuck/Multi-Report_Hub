@@ -76,7 +76,7 @@ function buildEmptyCaseHint(){
 function makeDiskEl(rec){
   let color = (rec.drive_color || 'blank').toLowerCase();
   const validColors = ['green', 'yellow', 'red', 'orange', 'blank'];
-  if (!validColors.includes(color)) { color = 'blank'; }  
+  if (!validColors.includes(color)) { color = 'blank'; }
   const colorClass = `clr-${color}`; // clr-green / clr-yellow / clr-red / clr-orange / clr-blank
   const pill = $(`<div class=\"disk ${colorClass}\" data-serial=\"${rec.serial}\"><span class=\"fw-semibold\">${rec.serial|| rec.drive_id} <i class="small hide-filled">-  ${rec.address}</i></span><span class=\"meta\">${rec.capacity || ''}</span></div>`);
   return pill;
@@ -98,8 +98,8 @@ function rebuildUnassignedFromRegistry(){
     }
   }
   $('#disk-count-badge').text(count);
-  if (count === 0 && currentCase) { 
-    $('#save-config').addClass('mr-highlight').delay(1200).queue(function(n){ $(this).removeClass('mr-highlight'); n(); }); 
+  if (count === 0 && currentCase) {
+    $('#save-config').addClass('mr-highlight').delay(1200).queue(function(n){ $(this).removeClass('mr-highlight'); n(); });
     $.playSound('../assets/kids_cheering.mp3');
   }
   initSortableForUnassigned();
@@ -172,14 +172,14 @@ function initSortableForUnassigned(){
   if (!el) return;
   if (el._sortable) return;
   el._sortable = new Sortable(el, {
-    group: { name: 'disks', pull: true, put: true }, 
+    group: { name: 'disks', pull: true, put: true },
     animation: 150,
     sort: true,
     draggable: '.disk',
     forceFallback: true,
     fallbackOnBody: true,
     fallbackTolerance: 12,
-    emptyInsertThreshold: 30,    
+    emptyInsertThreshold: 30,
     onStart(evt){ $(evt.item).addClass('dragging'); document.body.classList.add('dragging'); },
     onEnd(evt){ $(evt.item).removeClass('dragging'); document.body.classList.remove('dragging'); $('.bay.highlight').removeClass('highlight'); }
   });
@@ -191,7 +191,7 @@ function initSortableForBay(bayEl){
   bayEl._sortable = new Sortable(bayEl, {
     group: { name: 'disks', pull: true, put: true },
     animation: 150,
-    sort: false,               
+    sort: false,
     draggable: '.disk',
     forceFallback: true,
     fallbackOnBody: true,
@@ -331,7 +331,10 @@ function onLoadConfigFile(e){
   const file = e.target.files && e.target.files[0];
   if (!file) return;
   if (!/\.json$/i.test(file.name)) { toastr.error('Please select a JSON file.'); return; }
-  if (file.name.toLowerCase() !== 'disklayout_config.json') {toastr.error('Only "disklayout_config.json" can be selected.');return; }
+  if (
+    (window.location.host.endsWith('.github.io')) &&
+    (file.name.toLowerCase() !== 'disklayout_config.json')
+    ) {toastr.error('Only "disklayout_config.json" can be selected.');return; }
 
   resetAllState();
   const reader = new FileReader();
@@ -458,65 +461,13 @@ $(document).on('input', '#case-search-text,#case-search-bays-min,#case-search-ba
 });
 
 
-function buildCaseTableData(){
-  // Build raw data array from CASE_MODELS, with id and case-data-bay
-  return CASE_MODELS.map(m => ({
-    id: m.id,
-    name: m.name,
-    bays: parseInt(m.bays,10)||0,
-    description: String(m.description||''),
-    _raw: m
-  }));
-}
-
-function applyCaseTableFilters(data){
-  // external numeric filters
-  const minBays = parseInt($('#case-search-bays-min').val(), 10);
-  const maxBays = parseInt($('#case-search-bays-max').val(), 10);
-  return data.filter(row => {
-    const b = row.bays;
-    const okMin = !minBays || b >= minBays;
-    const okMax = !maxBays || b <= maxBays;
-    return okMin && okMax;
-  });
-}
-
-function refreshCaseTable(){
-  const data = applyCaseTableFilters(buildCaseTableData());
-  const $table = $('#case-table');
-  if ($table.data('bootstrap.table')){
-    $table.bootstrapTable('load', data);
-  } else {
-    $table.bootstrapTable({
-      data,
-      onClickRow(row, $el){
-        const model = row?._raw; if (!model) return;
-        selectCase(model);
-        const modalEl = document.getElementById('caseModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        modal?.hide();
-        toastr.success('Case selected.');
-      },
-      // Formatters to align numbers right
-      columns: [{
-        field: 'name', title: 'Case', sortable: true
-      },{
-        field: 'bays', title: 'Bays', sortable: true, align: 'right', halign: 'right'
-      },{
-        field: 'description', title: 'Description'
-      }]
-    });
-  }
-}
-
-
-
 // --- Case modal (Bootstrap Table) ---
 function buildCaseTableData(){
   return CASE_MODELS.map(m => ({
     id: m.id,
+    manufacturer: String(m.manufacturer||''),
     name: String(m.name||''),
-    bays: parseInt(m.bays,10)||0,
+    bays: m.layout.activeSlots.length||0,
     description: String(m.description||''),
     _raw: m
   }));
@@ -546,6 +497,8 @@ function refreshCaseTable(){
         toastr.success('Case selected.');
       },
       columns: [{
+        field: 'manufacturer', title: 'Manuf.', sortable: true
+      },{
         field: 'name', title: 'Case', sortable: true
       },{
         field: 'bays', title: 'Bays', sortable: true, align: 'right', halign: 'right'
@@ -561,7 +514,7 @@ function populateCaseModal(){
 
 
 // MRCE-style version badge (optional)
-(function(){var el=document.getElementById('mr-v'); if(el){el.textContent='v1.0';}})();
+(function(){var el=document.getElementById('mr-v'); if(el){el.textContent='v1.0.1';}})();
 
 
 document.addEventListener('DOMContentLoaded', () => {
