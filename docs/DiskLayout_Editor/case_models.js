@@ -168,5 +168,30 @@ window.CASE_MODELS = [
         21, 22, 23, 24
       ]
     }
+  },
+  {
+    "id": "multi-chassis-36bay",
+    "name": "multi-chassis-36bay",
+    "bays": 36,
+    "description": "24 slot backplane in front & 12 backplane rear",
+    "layout": {
+      "rows": 11,
+      "activeSlots": [
+        5, 6, 7, 8,
+        9, 10, 11, 12,
+        13, 14, 15, 16,
+        17, 18, 19, 20,
+        21, 22, 23, 24,
+        25, 26, 27, 28, 
+        33, 34, 35, 36,
+        37, 38, 39, 40,
+        41, 42, 43, 44
+      ],
+      "sepSlots": [ 1, 2, 3, 4,29, 30, 31, 32]
+      ,"placeholderSlots": [
+        {"id": 1, "title": "Front Bays"}
+        , {"id": 29, "title": "Rear Bays"}
+      ]
+    }
   } 
 ];

@@ -140,6 +140,9 @@ function buildCase(){
 
   const { rows, active } = layout;
   const actSet = new Set(active.map(p=>`${p.row}-${p.col}`));
+  const sepSet = (currentCase?.layout?.sepSlots && Array.isArray(currentCase.layout.sepSlots))
+    ? new Set(currentCase.layout.sepSlots.map(n => parseInt(n, 10)))
+    : null;
   $case.removeClass('empty-hint').addClass('grid')
        .css({'grid-template-columns': 'repeat(4, 1fr)', 'grid-template-rows': `repeat(${rows}, 70px)`})
        .empty();
@@ -157,7 +160,37 @@ function buildCase(){
                       <span class="placeholder">Drop disk here</span>
                    </div>`;
       } else {
-        bayHtml = `<div class="bay disabled" data-slot="${slotIndex}"><span class="bay-label">—</span></div>`;
+        const isSep = sepSet && sepSet.has(slotIndex);
+        let extra = isSep ? ' slot-placeholder' : '';
+        if (isSep){
+          const modelPH = getModelPlaceholderMap(currentCase);
+          const filePH  = getFilePlaceholderMap();
+          const ph = modelPH.get(slotIndex) || filePH.get(slotIndex);
+          if (ph){ 
+            const val = getPlaceholderValue(slotIndex, modelPH, filePH);
+            extra += ' has-input';
+            bayHtml = `
+              <div class="bay ${extra}" data-slot="${slotIndex}">
+                <div class="ph-wrapper">
+                  <input
+                    id="ph-${slotIndex}"
+                    name="ph-${slotIndex}"
+                    class="ph-input"
+                    type="text"
+                    maxlength="50"
+                    placeholder="${(ph?.title || '').replaceAll('"','&quot;')}"
+                    value="${String(val).replaceAll('"','&quot;')}"
+                  >
+                  <!-- opzionale: counter -->
+                  <span class="ph-count" aria-hidden="true"></span>
+                </div>
+              </div>`;
+          } else {
+            bayHtml = `<div class="bay disabled${extra}" data-slot="${slotIndex}"><span class="bay-label">—</span></div>`;
+          }
+        } else {
+          bayHtml = `<div class="bay disabled${extra}" data-slot="${slotIndex}"><span class="bay-label">—</span></div>`;
+        }
       }
       const $bay = $(bayHtml);
       $case.append($bay);
@@ -237,6 +270,30 @@ function initSortableForBay(bayEl){
     onEnd(evt){ $(evt.item).removeClass('dragging'); document.body.classList.remove('dragging'); $('.bay.highlight').removeClass('highlight'); }
   });}
 
+// --- Placeholder helpers ---
+function getModelPlaceholderMap(model){
+  const list = model?.layout?.placeholderSlots;
+  const m = new Map();
+  if (Array.isArray(list)) list.forEach(p => {
+    const id = parseInt(p.id, 10);
+    if (id) m.set(id, { title: String(p.title || '') });
+  });
+  return m;
+}
+function getFilePlaceholderMap(){
+  const list = RAW_CONFIG?.case?.layout?.placeholderSlots;
+  const m = new Map();
+  if (Array.isArray(list)) list.forEach(p => {
+    const id = parseInt(p.id, 10);
+    if (id) m.set(id, { title: String(p.title || '') });
+  });
+  return m;
+}
+function getPlaceholderValue(slotId, modelMap, fileMap){
+  if (fileMap.has(slotId)) return fileMap.get(slotId).title || '';
+  if (modelMap.has(slotId)) return modelMap.get(slotId).title || '';
+  return '';
+}
 
 
 // --- Case modal ---
@@ -380,6 +437,23 @@ function onSaveConfig(){
     bays: currentCase.bays,
     layout: JSON.parse(JSON.stringify(currentCase.layout))
   };
+
+// --- take placeholder from DOM ---
+(function(){
+  const modelPH = getModelPlaceholderMap(currentCase);
+  const filePH  = getFilePlaceholderMap();
+  const ids = [...new Set([...modelPH.keys(), ...filePH.keys()])];
+
+  const collected = ids.map(slotId => {
+    const input = document.getElementById(`ph-${slotId}`);
+    const value = String(input?.value ?? '').slice(0, 50); // hard cap xd
+    return { id: slotId, title: value };
+  });
+
+  out.case.layout = out.case.layout || {};
+  out.case.layout.placeholderSlots = collected;
+})();
+
 
   // Map serial -> slot from current DOM
   const placedBySerial = new Map();
