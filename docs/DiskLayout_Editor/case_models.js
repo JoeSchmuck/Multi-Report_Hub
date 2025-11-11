@@ -199,7 +199,6 @@ window.CASE_MODELS = [
         21, 22, 23, 24
       ]
     }
-  }
   },
   {
     "id": "multi-chassis-36bay",
