@@ -188,12 +188,13 @@ header.container.animate-in {
   background:
     repeating-linear-gradient(
       135deg,
-      rgba(255,255,255,.06) 0px,
-      rgba(255,255,255,.06) 6px,
-      rgba(0,0,0,0) 6px,
-      rgba(0,0,0,0) 12px
-    ), #0b0b0b !important;
-  border-color: #2b2b2b !important;  
+      #a066ff 0px,
+      #a066ff 6px,
+      transparent 6px,
+      transparent 12px
+    ),
+    #6A1B9A !important;
+  border-color: #6A1B9A !important;  
   opacity: .6;
 }
 
