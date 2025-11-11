@@ -119,15 +119,51 @@ function resetAllState(){
 
 
 // --- Case building (matrix 4 x rows) ---
-function idxToRowCol(idx){ const n=parseInt(idx,10); return {row: Math.ceil(n/4), col: ((n-1)%4)+1}; }
+//function idxToRowCol(idx){ const n=parseInt(idx,10); return {row: Math.ceil(n/4), col: ((n-1)%4)+1}; }
+// --- Case building NEW ---
+function getColsFromModel(model){ 
+  const cols = parseInt(model?.layout?.cols, 10);
+  return (Number.isInteger(cols) && cols > 0) ? cols : 4;
+}
+function idxToRowCol(idx, cols){ 
+  const n = parseInt(idx,10); 
+  const C = Number.isInteger(cols) && cols>0 ? cols : 4; // need a fallback
+  return { row: Math.ceil(n / C), col: ((n-1) % C) + 1 };
+}
 
 function computeActivePositions(model){
   const L = model?.layout || {};
   if (!Array.isArray(L.activeSlots) || !L.activeSlots.length) throw new Error('layout.activeSlots is required');
-  const positions = L.activeSlots.map(idxToRowCol);
+  const cols = getColsFromModel(model);
+  const positions = L.activeSlots.map(idx => idxToRowCol(idx, cols));
   const rows = L.rows || Math.max(...positions.map(p=>p.row));
-  return { rows, active: positions };
+  return { rows, cols, active: positions }; 
 }
+
+// --- helper to better handle huge case REMEMBERT TO ADJUST THIS IN CASE INDEX.HTML CHANGE
+function apply8colpatch(cols) {
+  const $left  = $('#mr-unassigned-disk-container');
+  const $right = $('#mr-case-container');
+  const isWide = cols >= 6;
+
+  $left.removeClass('col-lg-12 col-lg-3');
+  $right.removeClass('col-lg-12 col-lg-9');
+
+  if (isWide) {
+    $left.addClass('col-lg-12');
+    $right.addClass('col-lg-12');
+    toastr.info(
+      'The layout was adjusted to allow dragging across all columns.',
+      'Wide layout enabled',
+      { timeOut: 3500, positionClass: 'toast-top-right', preventDuplicates: true }
+    );    
+  } else {
+    $left.addClass('col-lg-3');
+    $right.addClass('col-lg-9');
+  }
+
+}
+
 
 function buildCase(){
   const $case = $('#case');
@@ -138,20 +174,22 @@ function buildCase(){
   try { layout = computeActivePositions(currentCase); }
   catch(err){ toastr.error(String(err)); return; }
 
-  const { rows, active } = layout;
+  const { rows, cols, active } = layout;
+  apply8colpatch(cols);
   const actSet = new Set(active.map(p=>`${p.row}-${p.col}`));
   const sepSet = (currentCase?.layout?.sepSlots && Array.isArray(currentCase.layout.sepSlots))
     ? new Set(currentCase.layout.sepSlots.map(n => parseInt(n, 10)))
     : null;
   $case.removeClass('empty-hint').addClass('grid')
-       .css({'grid-template-columns': 'repeat(4, 1fr)', 'grid-template-rows': `repeat(${rows}, 70px)`})
-       .empty();
+    .css({'grid-template-columns': `repeat(${cols}, 1fr)`, //
+    'grid-template-rows': `repeat(${rows}, 70px)`})  
+    .empty();
 
   let bayIndex = 0;
   for (let r=1; r<=rows; r++){
-    for (let c=1; c<=4; c++){
+    for (let c=1; c<=cols; c++){
       const isActive = actSet.has(`${r}-${c}`);
-      const slotIndex = ((r-1)*4)+c;
+      const slotIndex = ((r-1)*cols)+c;
       let bayHtml = '';
       if (isActive){
         bayIndex++;

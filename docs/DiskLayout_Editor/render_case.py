@@ -185,6 +185,9 @@ def get_sep_slots(case: dict) -> List[int]:
             continue
     return out
 
+def get_cols_width(cols: int = __cols__) -> int:
+    """ centralize the calc of the cols width """
+    return 275 if cols <= 5 else 200
 
 # ---------- Domain ----------
 def get_field(d: dict, key: str, default: str = "–", fmt_temp: bool = False) -> str:
@@ -254,11 +257,11 @@ def render_placeholder_slot(title: str) -> str:
         '</div>'
     ) 
     
-def render_outlook_placeholder_cell(title: str) -> str:
+def render_outlook_placeholder_cell(title: str, colswidth: int) -> str:
     t = escape(title)
     return (
         '<td style="border:1px solid #000;border-radius:6px;'
-        'background-color:#7E57C2;width:275px;height:58px;vertical-align:middle;'
+        'background-color:#7E57C2;width:{colswidth}px;height:58px;vertical-align:middle;'
         'padding:6px 10px;">'
         f'<div style="font-weight:bold;color:#fff;font-size:13px;">{t}</div>'
         '</td>'
@@ -287,6 +290,7 @@ def render_web_html(
     name = case.get("name", case.get("id", "Case"))
     total_slots = cols * rows
     bays_json = json.dumps(bays_list, ensure_ascii=False)
+    colswidth = get_cols_width(cols)
 
     head = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>{escape(name)}</title>
@@ -299,7 +303,7 @@ body {{ margin:0; background:#0f0f0f; }}
 .wrapper{{color:var(--text);font-family:ui-monospace, Menlo, Consolas, monospace;
 display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px;gap:18px}}
 .notice{{background:#241f00;border:1px solid #5a4d00;color:#ffec9c;padding:8px 12px;border-radius:8px;font-size:12px}}
-.case{{display:grid;grid-template-columns:repeat({cols},275px);grid-template-rows:repeat({rows},58px);
+.case{{display:grid;grid-template-columns:repeat({cols},{colswidth}px);grid-template-rows:repeat({rows},58px);
 gap:22px;padding:18px;background:var(--bg);border-radius:12px;border:3px solid var(--border);
 box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot{{border-radius:8px;display:flex;align-items:center;justify-content:flex-start;position:relative;padding:10px 12px;}}
@@ -503,13 +507,14 @@ document.addEventListener('keydown', (e) => {{ if (e.key === 'Escape') closeModa
 
 
 # ---------- EMAIL: safe snippet (no title, no global selectors) + Unplaced when applicable ----------
-def build_email_css(namespace: str = ".case-email") -> str:
+def build_email_css(namespace: str = ".case-email", cols: int = __cols__) -> str:
     ns = namespace
+    colswidth = get_cols_width(cols)
     return f"""
 {ns} {{ color:#ddd; font-family:ui-monospace, Menlo, Consolas, monospace; }}
 {ns} .case {{
   display:grid;
-  grid-template-columns:repeat(var(--cols,{__cols__}), 275px);
+  grid-template-columns:repeat(var(--cols,{__cols__}), {colswidth}px);
   grid-auto-rows:58px;
   gap:16px;
   padding:10px;
@@ -586,7 +591,7 @@ def render_email_snippet(
     active = set(int(x) for x in case["layout"]["activeSlots"])
     active_set = active | set(placeholder_map.keys()) | sep_slots
     total_slots = rows * cols
-    css = build_email_css(".case-email")
+    css = build_email_css(".case-email", cols)
 
     parts = [f"<style>{css}</style>"]
     parts.append(f'<div class="case-email" style="--cols:{cols};">')
@@ -628,6 +633,36 @@ def render_email_snippet(
     return "\n".join(parts)
 
 
+# helper for simplified outlook 
+
+def led_dot(color: str) -> str:
+    """Return led element """
+    colors = {
+        "green": "#00ff55",
+        "yellow": "#ffd100",
+        "red": "#ff3b3b",
+        "orange": "#E4A11B",
+        "blank": "#9e9e9e",
+        }
+    c = colors.get(color, "#9e9e9e")
+    return f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{c};margin-left:6px;"></span>'
+
+def led_background_color(color: str) -> str:
+    """Return a light cell background color based on LED color."""
+    color = (color or "blank").lower()
+    if color == "green":
+        return "#245c34"   # muted green
+    elif color == "yellow":
+        return "#947f0d"   # muted yellow/gold
+    elif color == "red":
+        return "#970e0e"   # muted red
+    elif color == "orange":
+        return "#D87904"   # muted orange
+    elif color == "blank":
+        return "#444444"   # neutral grey
+    else:
+        return "#3b3b3b"   # default background
+
 def render_outlook_email_snippet(
     case: dict,
     rows: int,
@@ -645,63 +680,30 @@ def render_outlook_email_snippet(
     active_set = active | set(placeholder_map.keys()) | sep_slots
     #total_slots = rows * cols #?? not accessed?
 
-    # helper for inline LED dot
-    def led_dot(color: str) -> str:
-        colors = {
-            "green": "#00ff55",
-            "yellow": "#ffd100",
-            "red": "#ff3b3b",
-            "orange": "#E4A11B",
-            "blank": "#9e9e9e",
-        }
-        c = colors.get(color, "#9e9e9e")
-        return f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{c};margin-left:6px;"></span>'
-
-    def led_background_color(color: str) -> str:
-
-        """Return a light cell background color based on LED color."""
-
-        color = (color or "blank").lower()
-
-        if color == "green":
-            return "#245c34"   # muted green
-        elif color == "yellow":
-            return "#947f0d"   # muted yellow/gold
-        elif color == "red":
-            return "#970e0e"   # muted red
-        elif color == "orange":
-            return "#D87904"   # muted orange
-        elif color == "blank":
-            return "#444444"   # neutral grey
-        else:
-            return "#3b3b3b"   # default background
-
-
     parts = []
     parts.append(
         '<table border="0" cellpadding="6" cellspacing="0" style="border-collapse:collapse;margin:auto;background-color:#181818;border:1px solid #282828;border-radius:8px;">'
     )
 
     if has_real_case:
+        colswidth = get_cols_width(cols)
         for r in range(rows):
             parts.append("<tr>")
             for c in range(cols):
                 pos = r * cols + c + 1
                 if pos not in active_set:
                     parts.append(
-                        '<td style="border:1px dashed #444;width:275px;height:58px;text-align:center;vertical-align:middle;color:#777;font-family:Consolas,monospace;">&nbsp;</td>'
+                        '<td style="border:1px dashed #444;width:{colswidth}px;height:58px;text-align:center;vertical-align:middle;color:#777;font-family:Consolas,monospace;">&nbsp;</td>'
                     )
                     continue
-                
-
                 if pos in placeholder_map:
                     title = escape(placeholder_map[pos])
-                    parts.append(render_outlook_placeholder_cell(title))
+                    parts.append(render_outlook_placeholder_cell(title, colswidth))
                     continue                
                 if pos in sep_slots:
                     parts.append(
                         '<td style="border:1px solid #000;border-radius:6px;'
-                        'background-color:#7E57C2;width:275px;height:58px;">&nbsp;</td>'
+                        'background-color:#7E57C2;width:{colswidth}px;height:58px;">&nbsp;</td>'
                     )
                     continue
 
@@ -719,7 +721,7 @@ def render_outlook_email_snippet(
 
                     parts.append(
                         f"""
-                        <td style="border:1px solid #000;border-radius:6px;background-color:{led_background_color(led_color)};width:275px;height:58px;vertical-align:middle;padding:6px 10px;">
+                        <td style="border:1px solid #000;border-radius:6px;background-color:{led_background_color(led_color)};width:{colswidth}px;height:58px;vertical-align:middle;padding:6px 10px;">
                         <table border="0" width="100%%" cellspacing="0" cellpadding="0">
                             <tr>
                             <td style="vertical-align:top;">
@@ -736,7 +738,7 @@ def render_outlook_email_snippet(
 
                 else:
                     parts.append(
-                        '<td style="border:1px dashed #444;width:275px;height:58px;text-align:center;vertical-align:middle;color:#777;">&nbsp;</td>'
+                        '<td style="border:1px dashed #444;width:{colswidth}px;height:58px;text-align:center;vertical-align:middle;color:#777;">&nbsp;</td>'
                     )
             parts.append("</tr>")
     parts.append("</table>")
