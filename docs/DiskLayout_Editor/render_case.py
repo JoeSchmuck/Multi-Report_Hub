@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.04
+##### V 0.05
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.04"
+__version__ = "0.05"
 __cols__ = 4
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
