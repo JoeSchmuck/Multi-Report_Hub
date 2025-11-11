@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.03
+##### V 0.04
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.03"
+__version__ = "0.04"
 __cols__ = 4
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
@@ -37,8 +37,10 @@ def assert_outputs_secure_or_abort() -> bool:
             process_output(True, f"[ERROR]: cannot stat directory '{d}': {e}", 1)
             
         append_log("test pass, checking permission")
-#        if bool(st.st_mode & stat.S_IWOTH):
+        if bool(st.st_mode & stat.S_IWOTH):
+            print(f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation will not be aborted, until script is in BETA test .") 
 #            process_output(True, f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation aborted.", 1)
+
 
     return True
 
@@ -154,6 +156,35 @@ def normalize_drives_from_bays(bays_list: list) -> Dict[str, dict]:
             lookup[serial] = b
     return lookup
 
+def get_placeholder_map(case: dict) -> Dict[int, str]:
+    """Return {slot_id: title} for placeholderSlots."""
+    layout = (case or {}).get("layout", {}) or {}
+    placeholders = layout.get("placeholderSlots") or []
+    out: Dict[int, str] = {}
+    for it in placeholders:
+        if not isinstance(it, dict):
+            continue
+        try:
+            sid = int(it.get("id"))
+        except (TypeError, ValueError):
+            continue
+        title = (it.get("title") or "").strip()
+        if sid > 0 and title:
+            out[sid] = title
+    return out
+
+def get_sep_slots(case: dict) -> List[int]:
+    """Return list of sepSlots (as integers)."""
+    layout = (case or {}).get("layout", {}) or {}
+    raw = layout.get("sepSlots") or []
+    out = []
+    for it in raw:
+        try:
+            out.append(int(it))
+        except (TypeError, ValueError):
+            continue
+    return out
+
 
 # ---------- Domain ----------
 def get_field(d: dict, key: str, default: str = "–", fmt_temp: bool = False) -> str:
@@ -214,6 +245,32 @@ def render_drive_line(d: dict, bay_idx) -> str:
         f'  <div class="led {led}"></div>'
         f'</div>'
     )
+    
+def render_placeholder_slot(title: str) -> str:
+    t = escape(title)
+    return (
+        '<div class="slot placeholder box-blank">'
+        f'  <div class="text"><div class="line-1">{t}</div></div>'
+        '</div>'
+    ) 
+    
+def render_outlook_placeholder_cell(title: str) -> str:
+    t = escape(title)
+    return (
+        '<td style="border:1px solid #000;border-radius:6px;'
+        'background-color:#7E57C2;width:275px;height:58px;vertical-align:middle;'
+        'padding:6px 10px;">'
+        f'<div style="font-weight:bold;color:#fff;font-size:13px;">{t}</div>'
+        '</td>'
+    )
+    
+def render_sep_slot() -> str:
+    return (
+        '<div class="slot separator box-blank">'
+        '  <div class="text"><div class="line-1">&nbsp;</div></div>'
+        '</div>'
+    )    
+       
 
 # ---------- WEB: rich document with modal (+ Unplaced when applicable) ----------
 def render_web_html(
@@ -265,6 +322,28 @@ box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot.filled{{cursor:pointer;transition:transform .06s ease-out, box-shadow .06s ease-out}}
 .slot.filled:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35)}}
 .badge{{position:fixed;top:16px;left:16px;color:#aaa;font-size:12px;letter-spacing:.3px}}
+.slot.placeholder.box-blank{{opacity:1; background: #7E57C2}}
+.slot.separator.box-blank{{opacity:1; background: #7E57C2}}
+/* right side block before */
+.slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
+.slot.placeholder.box-blank:has(+ .slot.separator.box-blank),
+.slot.separator.box-blank:has(+ .slot.placeholder.box-blank),
+.slot.separator.box-blank:has(+ .slot.separator.box-blank) {{
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-right: -16px;
+  border: none!important;
+}}
+/* left side block after */
+.slot.placeholder.box-blank + .slot.placeholder.box-blank,
+.slot.placeholder.box-blank + .slot.separator.box-blank,
+.slot.separator.box-blank + .slot.placeholder.box-blank,
+.slot.separator.box-blank + .slot.separator.box-blank {{
+  margin-left: -16px;
+  border-top-left-radius: 0;
+  border: none!important;
+}}
+
 
 /* Modal (animated) */
 .modal-backdrop{{position:fixed;inset:0;background:rgba(0,0,0,.6);
@@ -310,13 +389,25 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
     parts = [head]
 
     total_slots = cols * rows
+    placeholder_map = get_placeholder_map(case)
     active = [int(x) for x in case["layout"]["activeSlots"]]
+    active_set = set(active) | set(placeholder_map.keys())
+    sep_slots = set(get_sep_slots(case))
+    active_set |= sep_slots
 
     for pos in range(1, total_slots + 1):
-        if pos not in active:
+        if pos not in active_set:
             hide_empty_bay = ' style="display:none;"' if not has_real_case else ''
             parts.append(f'<div class="slot empty"{hide_empty_bay}></div>')
             continue
+        
+        if pos in placeholder_map:
+            parts.append(render_placeholder_slot(placeholder_map[pos]))
+            continue    
+        
+        if pos in sep_slots:
+            parts.append(render_sep_slot())
+            continue            
 
         info = pos_to_info.get(pos)
         serial = info.get("serial") if info else None
@@ -454,6 +545,28 @@ def build_email_css(namespace: str = ".case-email") -> str:
 {ns} .unplaced .line-2{{font-weight:600;color:#cfe7ff;font-size:11px;opacity:.95;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 {ns} .unplaced .line-3{{font-weight:600;color:#cccccc;font-size:11px;opacity:.9}}
 {ns} .unplaced .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px;}}
+{ns} .slot.placeholder.box-blank{{opacity:1; background: #7E57C2}}
+{ns} .slot.separator.box-blank{{opacity:1; background: #7E57C2}}
+/* right side block before */
+{ns} .slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
+{ns} .slot.placeholder.box-blank:has(+ .slot.separator.box-blank),
+{ns} .slot.separator.box-blank:has(+ .slot.placeholder.box-blank),
+{ns} .slot.separator.box-blank:has(+ .slot.separator.box-blank) {{
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-right: -16px;
+  border: none!important;
+}}
+/* left side block after */
+{ns} .slot.placeholder.box-blank + .slot.placeholder.box-blank,
+{ns} .slot.placeholder.box-blank + .slot.separator.box-blank,
+{ns} .slot.separator.box-blank + .slot.placeholder.box-blank,
+{ns} .slot.separator.box-blank + .slot.separator.box-blank {{
+  margin-left: -16px;
+  border-top-left-radius: 0;
+  border: none!important;
+}}
+
 
 """.strip()
 
@@ -468,7 +581,10 @@ def render_email_snippet(
     unplaced_indices: List[int],
     has_real_case: bool,
 ) -> str:
+    placeholder_map = get_placeholder_map(case)
+    sep_slots = set(get_sep_slots(case))
     active = set(int(x) for x in case["layout"]["activeSlots"])
+    active_set = active | set(placeholder_map.keys()) | sep_slots
     total_slots = rows * cols
     css = build_email_css(".case-email")
 
@@ -478,8 +594,16 @@ def render_email_snippet(
         parts.append('  <div class="case">')
 
         for pos in range(1, total_slots + 1):
-            if pos not in active:
+            if pos not in active_set:
                 parts.append('    <div class="slot empty"></div>')
+                continue
+            
+            if pos in placeholder_map:
+                parts.append(render_placeholder_slot(placeholder_map[pos]))
+                continue            
+            
+            if pos in sep_slots:
+                parts.append(render_sep_slot())
                 continue
 
             info = pos_to_info.get(pos)
@@ -515,8 +639,11 @@ def render_outlook_email_snippet(
     has_real_case: bool,
 ) -> str:
     """Render a simplified, Outlook-compatible HTML email version with LED colors."""
+    placeholder_map = get_placeholder_map(case)
+    sep_slots = set(get_sep_slots(case))
     active = set(int(x) for x in case["layout"].get("activeSlots", []))
-    total_slots = rows * cols
+    active_set = active | set(placeholder_map.keys()) | sep_slots
+    #total_slots = rows * cols #?? not accessed?
 
     # helper for inline LED dot
     def led_dot(color: str) -> str:
@@ -531,16 +658,19 @@ def render_outlook_email_snippet(
         return f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{c};margin-left:6px;"></span>'
 
     def led_background_color(color: str) -> str:
+
         """Return a light cell background color based on LED color."""
+
         color = (color or "blank").lower()
+
         if color == "green":
             return "#245c34"   # muted green
         elif color == "yellow":
-            return "#5a5120"   # muted yellow/gold
+            return "#947f0d"   # muted yellow/gold
         elif color == "red":
-            return "#5a2525"   # muted red
+            return "#970e0e"   # muted red
         elif color == "orange":
-            return "#5c3a1c"   # muted orange
+            return "#D87904"   # muted orange
         elif color == "blank":
             return "#444444"   # neutral grey
         else:
@@ -557,9 +687,21 @@ def render_outlook_email_snippet(
             parts.append("<tr>")
             for c in range(cols):
                 pos = r * cols + c + 1
-                if pos not in active:
+                if pos not in active_set:
                     parts.append(
-                        '<td style="border:1px dashed #444;width:275px;height:58px;text-align:center;vertical-align:middle;color:#777;font-family:Consolas,monospace;">Empty</td>'
+                        '<td style="border:1px dashed #444;width:275px;height:58px;text-align:center;vertical-align:middle;color:#777;font-family:Consolas,monospace;">&nbsp;</td>'
+                    )
+                    continue
+                
+
+                if pos in placeholder_map:
+                    title = escape(placeholder_map[pos])
+                    parts.append(render_outlook_placeholder_cell(title))
+                    continue                
+                if pos in sep_slots:
+                    parts.append(
+                        '<td style="border:1px solid #000;border-radius:6px;'
+                        'background-color:#7E57C2;width:275px;height:58px;">&nbsp;</td>'
                     )
                     continue
 
@@ -577,7 +719,7 @@ def render_outlook_email_snippet(
 
                     parts.append(
                         f"""
-                        <td style="border:1px solid #555;border-radius:6px;background-color:{led_background_color(led_color)};width:275px;height:58px;vertical-align:middle;padding:6px 10px;">
+                        <td style="border:1px solid #000;border-radius:6px;background-color:{led_background_color(led_color)};width:275px;height:58px;vertical-align:middle;padding:6px 10px;">
                         <table border="0" width="100%%" cellspacing="0" cellpadding="0">
                             <tr>
                             <td style="vertical-align:top;">
@@ -594,7 +736,7 @@ def render_outlook_email_snippet(
 
                 else:
                     parts.append(
-                        '<td style="border:1px dashed #444;width:275px;height:58px;text-align:center;vertical-align:middle;color:#777;">Empty</td>'
+                        '<td style="border:1px dashed #444;width:275px;height:58px;text-align:center;vertical-align:middle;color:#777;">&nbsp;</td>'
                     )
             parts.append("</tr>")
     parts.append("</table>")
