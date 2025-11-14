@@ -1,28 +1,26 @@
 window.CASE_MODELS = [
-{
-  "id": "dell-t330-tower",
-  "manufacturer": "Dell",
-  "name": "Dell T330 (tower)",
-  "bays": 17,
-  "description": "Dell T330 (tower) — 8x front hot-swap (vertical), 6x MB SATA (horizontal), 3x PCIe usable (horizontal, slot 2 reserved)",
-  "layout": {
-    "rows": 10,
-    "cols": 6,
-    "placeholderSlots": [
-      { "id": 3,  "title": "Front hot-swap bays (8) — orientation: vertical" },
-      { "id": 19, "title": "Motherboard SATA ports (6) — orientation: horizontal" },
-      { "id": 36, "title": "PCIe slots (3 usable) — orientation: horizontal; slot 2 reserved" }
-    ],
-    "sepSlots": [3,4,5,6,19,20,21,22,23,24,36],
-    "activeSlots": [
-      9,10,11,12,15,16,17,18
-      ,25,26,27,28,29,30
-      ,42,48,54,60
-
-    ]
-  }
-}
-,
+  {
+    "id": "dell-t330-tower",
+    "manufacturer": "Dell",
+    "name": "Dell T330 (tower)",
+    "bays": 17,
+    "description": "Dell T330 (tower) — 8x front hot-swap (vertical), 6x MB SATA, 3x PCIe usable",
+    "layout": {
+      "rows": 10,
+      "cols": 6,
+      "placeholderSlots": [
+        { "id": 1,  "title": "Front hot-swap bays (8) — orientation: vertical" },
+        { "id": 19, "title": "Motherboard SATA ports (6) — orientation: horizontal" },
+        { "id": 31, "title": "PCIe slots (3 usable) — orientation: horizontal; slot 2 reserved" }
+      ],
+      "sepSlots": [1,2,3,4,5,6,19,20,21,22,23,24,31,32,33,34,35,36],
+      "activeSlots": [
+        7,8,9,10,13,14,15,16,
+        25,26,27,28,29,30,
+        37,49,55
+      ]
+    }
+  },
   {
     "id": "mini-4",
     "manufacturer": "Generic",

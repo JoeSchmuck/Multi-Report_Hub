@@ -47,6 +47,13 @@
 let RAW_CONFIG = null;           // Original JSON (preserved)
 let CASE_MODELS = [];            // From case_models.js (global)
 let currentCase = null;          // Selected case object
+// --- expose safe getter/setter for global access ---
+Object.defineProperty(window, 'currentCase', {
+  get() { return currentCase; },
+  set(v) { currentCase = v; },
+  configurable: true,
+  enumerable: false
+});
 const disksRegistry = new Map(); // serial -> full record
 
 // --- Utilities ---
@@ -56,14 +63,14 @@ function loadCaseModels(){
     return true;
   }
   toastr.error('case_models.js missing or empty.');
-  $('#open-case-modal,#reset-layout,#save-config').prop('disabled', true);
+  $('#open-case-modal,#reset-layout,#save-config,#open-custom-case-modal').prop('disabled', true);
   return false;
 }
 
 function setCaseLabel(){
   const $label = $('#current-case-label');
-  if (!currentCase) { $label.text('No case'); return; }
-  $label.text(currentCase.name || currentCase.id);
+  if (!currentCase) { $label.val('No case'); return; }
+  $label.val(currentCase.name || currentCase.id);
 }
 
 function buildEmptyCaseHint(){
@@ -114,12 +121,9 @@ function resetAllState(){
   currentCase = null;
   setCaseLabel();
   buildEmptyCaseHint();
-  $('#save-config,#reset-layout,#open-case-modal').prop('disabled', true);
+  $('#save-config,#reset-layout,#open-case-modal,#open-custom-case-modal').prop('disabled', true);
 }
 
-
-// --- Case building (matrix 4 x rows) ---
-//function idxToRowCol(idx){ const n=parseInt(idx,10); return {row: Math.ceil(n/4), col: ((n-1)%4)+1}; }
 // --- Case building NEW ---
 function getColsFromModel(model){ 
   const cols = parseInt(model?.layout?.cols, 10);
@@ -140,7 +144,7 @@ function computeActivePositions(model){
   return { rows, cols, active: positions }; 
 }
 
-// --- helper to better handle huge case REMEMBERT TO ADJUST THIS IN CASE INDEX.HTML CHANGE
+// --- helper to better handle huge case TODO--> ADJUST THIS IN CASE INDEX.HTML CHANGE
 function apply8colpatch(cols) {
   const $left  = $('#mr-unassigned-disk-container');
   const $right = $('#mr-case-container');
@@ -333,9 +337,296 @@ function getPlaceholderValue(slotId, modelMap, fileMap){
   return '';
 }
 
+// === build case from file -> can be custom and id no need to match! ===
+function buildModelFromFileCase(fileCase, fallbackBaysCount){
+  const fc = fileCase || {};
+  const L  = fc.layout || {};
+  let cols = parseInt(L.cols, 10); if (!Number.isInteger(cols) || cols <= 0) cols = 4;
+  let active = Array.isArray(L.activeSlots) && L.activeSlots.length ? [...L.activeSlots] : null;
+
+  if (!active){
+    const n = parseInt(fc.bays, 10) || parseInt(fallbackBaysCount, 10) || 0;
+    active = Array.from({length: Math.max(0, n)}, (_,i)=> i+1);
+  }
+
+  const maxIdx = active.length ? Math.max(...active.map(x=>parseInt(x,10)||0)) : 0;
+  let rows = parseInt(L.rows, 10);
+  if (!Number.isInteger(rows) || rows <= 0){
+    rows = maxIdx ? Math.ceil(maxIdx / cols) : 1;
+  }
+
+  return {
+    //id: fc.id || 'custom-from-file',
+    manufacturer: fc.manufacturer || 'Generic',
+    name: fc.name || 'Case from file',
+    bays: active.length,
+    description: 'Loaded from config file',
+    layout: {
+      rows, cols,
+      activeSlots: active,
+      placeholderSlots: Array.isArray(L.placeholderSlots) ? L.placeholderSlots : [],
+      sepSlots: Array.isArray(L.sepSlots) ? L.sepSlots : []
+    }
+  };
+}
+
+// ==== Custom Case Modal Builder ====
+
+(function initCustomCaseModal(){
+  const openBtn  = document.getElementById('open-custom-case-modal');
+  const modal    = document.getElementById('mr-custom-case-modal');
+  const closeBtn = document.getElementById('ccm-close');
+  const cancel   = document.getElementById('ccm-cancel');
+  const rowsSel  = document.getElementById('ccm-rows');
+  const colsSel  = document.getElementById('ccm-cols');
+  const renderBt = document.getElementById('ccm-render');
+  const gridEl   = document.getElementById('ccm-grid');
+
+  if (!openBtn || !modal) return;
+
+  // Populate R/C options (12x8 MAX)
+  fillNumericSelect(rowsSel, 1, 12, 6); // default 6 max 12
+  fillNumericSelect(colsSel, 1, 8, 4);   // default 4 max 8
+
+  //openBtn.addEventListener('click', () => openModal(modal));
+  openBtn.addEventListener('click', () => {
+    openModalCustomCaseBuilder(modal);
+
+    const gridEl = document.getElementById('ccm-grid');
+    const rowsSel = document.getElementById('ccm-rows');
+    const colsSel = document.getElementById('ccm-cols');
+
+    gridEl.innerHTML = '';
+
+    //console.log(window.currentCase);
+    loadCaseIntoBuilder(gridEl, rowsSel, colsSel, window.currentCase || null);
+  });
+
+  [closeBtn, cancel].forEach(b => b && b.addEventListener('click', () => closeModalCustomCaseBuilder(modal)));
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && modal.getAttribute('aria-hidden')==='false'){ closeModalCustomCaseBuilder(modal); } });
+
+  renderBt.addEventListener('click', () => {
+    const R = parseInt(rowsSel.value, 10) || 1;
+    const C = parseInt(colsSel.value, 10) || 1;
+    renderCustomGrid(gridEl, R, C);
+  });
+
+  renderBt.click();
+})();
+
+function openModalCustomCaseBuilder(modal){
+  modal.setAttribute('aria-hidden','false');
+  document.documentElement.style.overflow='hidden'; // prevent background scroll
+}
+function closeModalCustomCaseBuilder(modal){
+  modal.setAttribute('aria-hidden','true');
+  document.documentElement.style.overflow='';
+}
+
+function fillNumericSelect(sel, min, max, defVal){
+  if (!sel) return;
+  sel.innerHTML = '';
+  for (let i=min;i<=max;i++){
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = String(i);
+    if (i===defVal) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+function snapshotBuilderState(container){
+  const map = new Map();
+  if (!container) return map;
+
+  container.querySelectorAll('.ccm-slot-kind').forEach(sel => {
+    const slot = parseInt(sel.dataset.slot, 10);
+    if (!slot) return;
+    const val = String(sel.value || 'empty');
+    map.set(slot, val);
+  });
+
+  return map;
+}
+
+function renderCustomGrid(container, rows, cols){
+  if (!container) return;
+  const prevKinds = snapshotBuilderState(container);
+  container.innerHTML = '';
+  container.style.gridTemplateColumns = `repeat(${cols}, minmax(180px, 1fr))`;
+
+  for (let r=0; r<rows; r++){
+    for (let c=0; c<cols; c++){
+      const idx = r*cols + c + 1; // numbering L->R, T->B
+
+      const cell = document.createElement('div');
+      cell.className = 'ccm-cell';
+
+      const select = document.createElement('select');
+      select.className = 'ccm-slot-kind';
+      select.setAttribute('data-slot', String(idx));
+      // options avail
+      const options = [
+        {v:'empty',       t:'empty'},
+        {v:'active',      t:'active'},
+        {v:'separator',   t:'separator'},
+        {v:'placeholder', t:'placeholder'}
+      ]
+      options.forEach(o=>{
+        const opt = document.createElement('option');
+        opt.value = o.v; 
+        opt.textContent = o.t;
+        select.appendChild(opt);
+      });
+
+      const prevVal = prevKinds.get(idx);
+      if (prevVal && options.some(o => o.v === prevVal)) {
+        select.value = prevVal;
+      }      
+
+      cell.appendChild(select);
+      container.appendChild(cell);
+    }
+  }
+}
+
+// === Helper: calc the custom case ===
+function buildCustomCaseFromGrid(){
+  const rowsSel = document.getElementById('ccm-rows');
+  const colsSel = document.getElementById('ccm-cols');
+  const gridEl  = document.getElementById('ccm-grid');
+
+  const rows = Math.max(1, Math.min(12, parseInt(rowsSel?.value,10)||1));
+  const cols = Math.max(1, Math.min(8,  parseInt(colsSel?.value,10)||1));
+
+  const selects = gridEl ? gridEl.querySelectorAll('.ccm-slot-kind') : [];
+  const activeSlots = [];
+  const sepSlotsRaw = [];
+  const placeholderSlots = [];
+  const prevPH = collectCurrentPlaceholderValues();
+
+  selects.forEach(sel => {
+    const slot = parseInt(sel.dataset.slot, 10);
+    const val  = String(sel.value||'empty');
+    if (!slot) return;
+
+    if (val === 'active') {
+      activeSlots.push(slot);
+    } else if (val === 'separator') {
+      sepSlotsRaw.push(slot);
+    } else if (val === 'placeholder') {
+      const phtitle = prevPH.get(slot) || '';
+      placeholderSlots.push({ id: slot, title: phtitle });
+      sepSlotsRaw.push(slot);
+    }
+  });
+
+  const sepSlots = [...new Set(sepSlotsRaw)].sort((a,b)=>a-b);
+
+  const model = {
+    id: 'custom-case',
+    manufacturer: 'Generic',
+    name: 'Custom case',
+    bays: activeSlots.length,
+    description: 'Custom case built from the grid',
+    layout: {
+      rows,
+      cols,
+      placeholderSlots,          // [{id, title}]
+      sepSlots,
+      activeSlots: activeSlots.sort((a,b)=>a-b)
+    }
+  };
+
+  return model;
+}
+
+// === Apply: apply the case ===
+function applyCustomCaseFromGrid(){
+  const model = buildCustomCaseFromGrid();
+  if (!model.layout.activeSlots.length){
+    toastr.warning('Please mark at least one slot as "active" to build a case.');
+    return;
+  }
+  selectCasePreserve(model);
+  toastr.success('Custom case applied.');
+}
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#ccm-apply');
+  if (!btn) return;
+  e.preventDefault();
+  applyCustomCaseFromGrid();
+  const modal = document.getElementById('mr-custom-case-modal');
+  if (modal) modal.setAttribute('aria-hidden','true');
+  document.documentElement.style.overflow='';
+});
+
+// HELPER for retrieve actual case data and not start from scratch everytime //
+function normalizeSlotIds(arr){
+  if (!Array.isArray(arr)) return [];
+  return arr.map(x => (typeof x === 'object' && x !== null ? x.id : x))
+            .map(n => parseInt(n, 10))
+            .filter(n => Number.isInteger(n) && n > 0);
+}
+
+function buildStateMapFromCaseModel(model){
+  const map = new Map();
+  if (!model || !model.layout) return map;
+
+  const active = normalizeSlotIds(model.layout.activeSlots);
+  const placeholders = normalizeSlotIds(model.layout.placeholderSlots);
+  const separators = normalizeSlotIds(model.layout.sepSlots);
+
+  placeholders.forEach(s => map.set(s, 'placeholder'));
+  separators.forEach(s => { if (!map.has(s)) map.set(s, 'separator'); });
+  active.forEach(s => { if (!map.has(s)) map.set(s, 'active'); });
+
+  return map;
+}
+
+function loadCaseIntoBuilder(container, rowsSel, colsSel, model){
+  const maxRows = 12, maxCols = 8;
+
+  if (model && model.layout){
+    const R = Math.max(1, Math.min(maxRows, parseInt(model.layout.rows,10) || 6));
+    const C = Math.max(1, Math.min(maxCols, parseInt(model.layout.cols,10) || 4));
+    rowsSel.value = R;
+    colsSel.value = C;
+
+    renderCustomGrid(container, R, C);
+
+    const stateMap = buildStateMapFromCaseModel(model);
+    container.querySelectorAll('.ccm-slot-kind').forEach(sel => {
+      const slot = parseInt(sel.dataset.slot, 10);
+      sel.value = stateMap.get(slot) || 'empty';
+    });
+  } else {
+    rowsSel.value = 6;
+    colsSel.value = 4;
+    renderCustomGrid(container, 6, 4);
+  }
+}
+
+function collectCurrentPlaceholderValues(){
+  const map = new Map();
+  if (!currentCase) return map;
+
+  const modelPH = getModelPlaceholderMap(currentCase);
+  const filePH  = getFilePlaceholderMap();
+  const ids = new Set([...modelPH.keys(), ...filePH.keys()]);
+
+  ids.forEach(slotId => {
+    const input = document.getElementById(`ph-${slotId}`);
+    const val = String(input?.value ?? getPlaceholderValue(slotId, modelPH, filePH) ?? '').trim();
+    if (val) map.set(slotId, val);
+  });
+  return map;
+}
 
 // --- Case modal ---
-const caseModal = new bootstrap.Modal(document.getElementById('caseModal'));
+const caseModal = new bootstrap.Modal(document.getElementById('mr-caseModal'));
+const caseModalLB = new bootstrap.Modal(document.getElementById('mr-custom-case-modal'));
 
 
 $(document).on('click', '#open-case-modal', function(){
@@ -346,7 +637,7 @@ $(document).on('click', '#case-models-list .list-group-item', function(){
   const id = this.getAttribute('data-id');
   const model = CASE_MODELS.find(m=>m.id===id);
   if (!model) return;
-  selectCase(model);
+  selectCasePreserve(model);
   caseModal.hide();
   toastr.success('Case selected.');
 });
@@ -368,10 +659,21 @@ $(document).on('dblclick', '#case .bay .disk', function () {
 });
 
 
-function selectCase(model){
+function selectCase(model, opts = {}){
+  const { resetRawPlaceholders = true, clearSlots = true } = opts;
   currentCase = model;
   setCaseLabel();
-  // reset placements when switching case
+
+  // manual change case --> restart
+  if (resetRawPlaceholders && RAW_CONFIG){
+    if (RAW_CONFIG.case?.layout) {
+      delete RAW_CONFIG.case.layout.placeholderSlots;
+    }
+    if (clearSlots && Array.isArray(RAW_CONFIG.bays)){
+      RAW_CONFIG.bays.forEach(b => { delete b.slot; });
+    }
+  }
+
   clearPlacements();
   buildCase();
   rebuildUnassignedFromRegistry();
@@ -389,6 +691,65 @@ function clearPlacements(){
     }
   });
 }
+
+// Read current placements
+function snapshotPlacementsFromDOM(){
+  const map = new Map();
+  $('#case .bay[data-slot]').each(function(){
+    const slot = parseInt(this.getAttribute('data-slot'), 10);
+    if (!slot) return;
+    const $d = $(this).children('.disk').first();
+    if (!$d.length) return;
+    const serial = String($d.attr('data-serial') || '').trim();
+    if (!serial) return;
+    map.set(serial, slot);
+  });
+  return map;
+}
+function applyPlacementsToRawConfig(placements, allowedSlots){
+  if (!RAW_CONFIG || !Array.isArray(RAW_CONFIG.bays)) return;
+
+  const allowed = allowedSlots
+    ? new Set(allowedSlots.map(n => parseInt(n, 10)))
+    : null;
+
+  RAW_CONFIG.bays.forEach(b => {
+    const serial = String(b.serial || '').trim();
+    if (!serial) return;
+
+    const slot = placements.get(serial);
+    if (slot && (!allowed || allowed.has(slot))) {
+      b.slot = String(slot);
+    } else {
+      delete b.slot;
+    }
+  });
+}
+
+// --- Case selection with preserved common slots ---
+function selectCasePreserve(model, opts = {}){
+  const { resetRawPlaceholders = true } = opts;
+
+  if (!currentCase){
+    return selectCase(model, { resetRawPlaceholders, clearSlots: false });
+  }
+
+  const currentPlacements = snapshotPlacementsFromDOM();
+
+  const active = (model.layout && model.layout.activeSlots) || [];
+  const activeSet = new Set(active.map(n => parseInt(n, 10)));
+
+  applyPlacementsToRawConfig(currentPlacements, active);
+
+  selectCase(model, { resetRawPlaceholders, clearSlots: false });
+
+  if (RAW_CONFIG && Array.isArray(RAW_CONFIG.bays)){
+    autoPlaceFromSlots(RAW_CONFIG.bays, model);
+  }
+
+  rebuildUnassignedFromRegistry();
+}
+
 
 // --- Load & Save ---
 function rebuildRegistryFromRaw(baysList){
@@ -443,22 +804,25 @@ function onLoadConfigFile(e){
     RAW_CONFIG = obj;
     rebuildRegistryFromRaw(obj.bays);
 
-    if (obj.case && obj.case.id){
-      const cm = CASE_MODELS.find(x=>x.id===obj.case.id);
-      if (cm){
-        selectCase(cm);
-        autoPlaceFromSlots(obj.bays, cm);
+    if (obj.case) {
+      const custom = buildModelFromFileCase(obj.case, obj?.bays?.length || 0);
+
+      if (Array.isArray(custom?.layout?.activeSlots) && custom.layout.activeSlots.length){
+        selectCase(custom, { resetRawPlaceholders:false, clearSlots:false });
+        autoPlaceFromSlots(obj.bays, custom);
+        toastr.success('File succesfully loaded');
       } else {
         currentCase = null; setCaseLabel(); buildEmptyCaseHint();
-        toastr.warning('Case id not found in models. Please choose a case.');
+        toastr.info('Case data in file is incomplete. Please choose a new case or start from scratch');
+        $('#open-case-modal').prop('disabled', false).trigger('click');
       }
     } else {
       currentCase = null; setCaseLabel(); buildEmptyCaseHint();
-      toastr.info('No case in file. Choose a case and place disks.');
-      $('#open-case-modal').prop('disabled', false).trigger('click'); //.addClass('mr-highlight').delay(900).queue(function(next){ $(this).removeClass('mr-highlight'); next(); });
+      toastr.info('No case model in file. Choose a case or start from scratch');
+      $('#open-case-modal').prop('disabled', false).trigger('click');     
     }
 
-    $('#save-config,#reset-layout,#open-case-modal').prop('disabled', false);
+    $('#save-config,#reset-layout,#open-case-modal,#open-custom-case-modal').prop('disabled', false);
     $('#load-hint').hide();
     $('#load-config').val('');
 
@@ -473,7 +837,7 @@ function onSaveConfig(){
   const out = JSON.parse(JSON.stringify(RAW_CONFIG));
   // Update case block
   out.case = {
-    id: currentCase.id,
+    //id: currentCase.id,
     name: currentCase.name,
     bays: currentCase.bays,
     layout: JSON.parse(JSON.stringify(currentCase.layout))
@@ -553,6 +917,7 @@ $(function(){
   $('#save-config').on('click', onSaveConfig).prop('disabled', true);
   $('#reset-layout').on('click', onResetLayout).prop('disabled', true);
   $('#open-case-modal').prop('disabled', true);
+  $('#open-custom-case-modal').prop('disabled',true);
   initSortableForUnassigned();
   setCaseLabel();
 });
@@ -602,8 +967,8 @@ function refreshCaseTable(){
       data,
       onClickRow(row){
         const model = row?._raw; if (!model) return;
-        selectCase(model);
-        const modalEl = document.getElementById('caseModal');
+        selectCasePreserve(model); // <-- nuovo comportamento conservativo
+        const modalEl = document.getElementById('mr-caseModal');
         const modal = bootstrap.Modal.getInstance(modalEl);
         modal?.hide();
         toastr.success('Case selected.');
@@ -626,7 +991,7 @@ function populateCaseModal(){
 
 
 // MRCE-style version badge (optional)
-(function(){var el=document.getElementById('mr-v'); if(el){el.textContent='v1.0.1';}})();
+(function(){var el=document.getElementById('mr-v'); if(el){el.textContent='v1.2 BETA';}})();
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -654,4 +1019,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // highlight on the load button
   $('#label-load-config').addClass('mr-highlight').delay(900).queue(function(next){ $(this).removeClass('mr-highlight'); next(); });
 
+});
+
+$(document).on('input', '#current-case-label', function () {
+  if (!currentCase) return;
+
+  const newName = $(this).val().trim().slice(0, 50);
+  currentCase.name = newName;
+});
+
+$(document).on('click', '#btn-start-from-scratch', function () {
+    const cm = bootstrap.Modal.getInstance(document.getElementById('mr-caseModal'));
+    cm?.hide();
+    setTimeout(() => { $('#open-custom-case-modal')[0].click(); }, 500);
 });

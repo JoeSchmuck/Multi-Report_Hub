@@ -75,6 +75,7 @@
         <i class="fa-solid fa-file-arrow-up me-1"></i> Load Config <input id="load-config" type="file" accept="application/json" hidden>
       </label>
       <button id="open-case-modal" class="btn btn-secondary" disabled><i class="fa-solid fa-server me-1"></i> Choose Case…</button>
+      <button id="open-custom-case-modal" class="btn btn-secondary" disabled><i class="fa-brands fa-simplybuilt"></i> Build custom case</button>
       <button id="reset-layout" class="btn btn-danger" disabled><i class="fa-solid fa-rotate-left me-1"></i> Reset</button>
       <button id="save-config" class="btn btn-success text-white" disabled><i class="fa-solid fa-floppy-disk me-1"></i> Save Config</button>
       <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#mr-help-modal" title="click here if you need some help"> <i class="fa-solid fa-circle-question me-1"></i> Help </button>
@@ -101,7 +102,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <span>Case</span>
-            <span class="badge text-bg-light" id="current-case-label">No case</span>
+            <input type="text" id="current-case-label" class="form-control form-control-sm d-inline-block" style="width: 300px;" maxlength="50" value="No Case"/>
           </div>
         </div>
         <div class="card-body">
@@ -116,7 +117,7 @@
 </main>
 
 <!-- Case Modal -->
-<div class="modal fade" id="caseModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="mr-caseModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
@@ -167,6 +168,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="btn-start-from-scratch"> Start from scratch instead </button>        
       </div>
     </div>
   </div>
@@ -186,13 +188,15 @@
 
       <div class="modal-body">
         <h6 class="fw-bold mb-2">💾 What this tool does</h6>
-        <p>This configurator allows you to visually organize disks into bays, save and load layouts as JSON files, and manage different case models.</p>
+        <p>This configurator allows you to visually organize disks into bays, save and load layouts as JSON files, and manage different case models (also customizable).</p>
 
         <h6 class="fw-bold mt-4 mb-2">🖱️ Basic actions</h6>
         <ul class="small">
           <li><b>Drag & Drop</b> disks from the <em>Unassigned</em> section into available bays.</li>
           <li><b>Double-click</b> a disk in a bay to unassign it.</li>
           <li>Use <b>Choose Case</b> to select a case model before assigning disks.</li>
+          <li>Use <b>Build custom case</b> to build from scratch your layout</li>
+          <li>Use <b>Choose Case</b> and then <b>Build custom case</b> to take little adjustment on existing layout</li>
           <li><b>Save Config</b> to export your current layout to JSON.</li>
           <li><b>Load Config</b> to import a previously saved layout.</li>
         </ul>
@@ -206,6 +210,48 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- build case modal -->
+ <div id="mr-custom-case-modal" class="mr-layoutbuilder-modal" aria-hidden="true">
+  <div class="mr-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="ccm-title">
+    <div class="mr-modal__header">
+      <h3 id="ccm-title">Build your own case</h3>
+      <button class="mr-modal__close" id="ccm-close" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="mr-modal__body">
+      <div class="mr-row ccm-controls">
+
+        <div class="ccm-field">
+          <button id="ccm-render" class="btn btn-sm btn-primary">Refresh layout</button>
+        </div>  
+
+        <div class="ccm-field">
+          <label for="ccm-rows">Rows</label>
+          <select id="ccm-rows"></select>
+        </div>
+
+        <div class="ccm-field">
+          <label for="ccm-cols">Columns</label>
+          <select id="ccm-cols"></select>
+        </div>
+        
+        <div class="ccm-field">
+          <button class="btn btn-success" id="ccm-apply"><i class="fa-solid fa-square-check"></i> Apply case</button>
+        </div>           
+      </div>
+
+      <div class="mr-row">
+        <div id="ccm-grid" class="ccm-grid" aria-live="polite"></div>
+      </div>
+
+    </div>
+
+    <div class="mr-modal__footer">
+      <button class="btn" id="ccm-cancel">Close</button>
     </div>
   </div>
 </div>
