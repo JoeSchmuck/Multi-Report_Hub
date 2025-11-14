@@ -257,11 +257,13 @@ function initSortableForUnassigned(){
     fallbackOnBody: true,
     fallbackTolerance: 12,
     emptyInsertThreshold: 30,
+    scroll: true,
+    scrollSensitivity: 25,
+    scrollSpeed: 15,
     onStart(evt){ $(evt.item).addClass('dragging'); document.body.classList.add('dragging'); },
     onEnd(evt){ $(evt.item).removeClass('dragging'); document.body.classList.remove('dragging'); $('.bay.highlight').removeClass('highlight'); }
   });
 }
-
 
 function initSortableForBay(bayEl){
   if (bayEl._sortable) return;
@@ -274,6 +276,9 @@ function initSortableForBay(bayEl){
     fallbackOnBody: true,
     fallbackTolerance: 12,
     emptyInsertThreshold: 30,
+    scroll: true,
+    scrollSensitivity: 25,
+    scrollSpeed: 15,  
     onMove(evt){
       const to = evt.to; if (to && to.classList.contains('bay')) to.classList.add('highlight');
       return true;

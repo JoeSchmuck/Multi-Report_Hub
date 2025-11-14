@@ -1,6 +1,9 @@
 :root {
   --bay-size: 80px;
 }
+html {
+  scroll-behavior: auto !important;
+}
 
 /* Theme variables */
 [data-bs-theme="dark"] {
