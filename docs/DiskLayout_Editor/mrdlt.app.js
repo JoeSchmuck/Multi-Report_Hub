@@ -146,28 +146,30 @@ function computeActivePositions(model){
 
 // --- helper to better handle huge case TODO--> ADJUST THIS IN CASE INDEX.HTML CHANGE
 function apply8colpatch(cols) {
-  const $left  = $('#mr-unassigned-disk-container');
-  const $right = $('#mr-case-container');
   const isWide = cols >= 6;
-
-  $left.removeClass('col-lg-12 col-lg-3');
-  $right.removeClass('col-lg-12 col-lg-9');
-
+  const $containerbody = $('#mr-case-body-container');
+  const $left  = $('#mr-unassigned-disk-container');
+  const $right = $('#mr-case-container');  
+  $left.removeClass('col-lg-12 col-lg-3 col-lg-2');
+  $right.removeClass('col-lg-12 col-lg-9 col-lg-10');  
+  $containerbody.removeClass('.scroll-x');
   if (isWide) {
-    $left.addClass('col-lg-12');
-    $right.addClass('col-lg-12');
+    setTimeout(() => { $('.bay').addClass('bay-wide');}, 50);
+    $left.addClass('col-lg-2');
+    $right.addClass('col-lg-10');
+    $containerbody.addClass('scroll-x');
     toastr.info(
       'The layout was adjusted to allow dragging across all columns.',
       'Wide layout enabled',
-      { timeOut: 3500, positionClass: 'toast-top-right', preventDuplicates: true }
-    );    
-  } else {
+      { timeOut: 3500, positionClass: 'toast-top-right', preventDuplicates: true } );   
+  }
+  else {
     $left.addClass('col-lg-3');
     $right.addClass('col-lg-9');
+    setTimeout(() => { $('.bay').removeClass('bay-wide');}, 50);
   }
 
 }
-
 
 function buildCase(){
   const $case = $('#case');

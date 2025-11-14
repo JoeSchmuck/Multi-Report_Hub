@@ -105,7 +105,7 @@
             <input type="text" id="current-case-label" class="form-control form-control-sm d-inline-block" style="width: 300px;" maxlength="50" value="No Case"/>
           </div>
         </div>
-        <div class="card-body">
+        <div class="card-body" id="mr-case-body-container">
           <p class="text-muted small">Drag disks into bays, one disk each bay. Double‑click in a bay to unassign.</p>
           <div id="case" class="case-grid empty-hint">
             <div class="text-center text-muted py-5">No case selected. Choose a case or load a config with case info.</div>
@@ -222,7 +222,8 @@
       <button class="mr-modal__close" id="ccm-close" aria-label="Close">&times;</button>
     </div>
 
-    <div class="mr-modal__body">
+    <div class="mr-modal__body"> 
+
       <div class="mr-row ccm-controls">
 
         <div class="ccm-field">
@@ -243,6 +244,14 @@
           <button class="btn btn-success" id="ccm-apply"><i class="fa-solid fa-square-check"></i> Apply case</button>
         </div>           
       </div>
+
+      <div class="mr-row ccm-controls">
+        <div class="ccm-field"> Quick Tips:</div>
+        <div class="ccm-field"> <span class="ccm-tip-title">empty</span> not rendered-draggable slot</div>
+        <div class="ccm-field"> <span class="ccm-tip-title">active</span> draggable slot where put disks</div>
+        <div class="ccm-field"> <span class="ccm-tip-title">separator</span> not draggable slot but rendered as a separator</div>
+        <div class="ccm-field"> <span class="ccm-tip-title">placeholder</span> not draggable slot that can be labeled</div>
+      </div>           
 
       <div class="mr-row">
         <div id="ccm-grid" class="ccm-grid" aria-live="polite"></div>

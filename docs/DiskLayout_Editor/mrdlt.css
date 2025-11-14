@@ -209,9 +209,9 @@ body.dragging * {
   justify-content: center;
   position: relative;
   background: #f8f9fa;
-  /*padding-top: 1.75rem;*/
   flex-direction: column;
-  gap: .25rem;
+  /*padding-top: 1.75rem;
+  gap: .25rem;*/
 }
 
 .bay .bay-label {
@@ -616,4 +616,25 @@ header.container.animate-in {
 #ccm-rows,
 #ccm-cols {
   min-width: 100px;
+}
+
+.ccm-tip-title {
+  color: #54B4D3;
+}
+
+/* attempt to fix wide layout */
+.bay-wide {
+  width: 230px;
+}
+
+.bay-wide .meta {
+    display: none;
+}
+
+.bay-wide .fw-semibold {
+    font-size:11px;
+}
+
+.scroll-x {
+  overflow-x: auto;  
 }
