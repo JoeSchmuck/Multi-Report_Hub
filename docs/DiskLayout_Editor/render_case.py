@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.05
+##### V 0.06
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.05"
+__version__ = "0.06"
 __cols__ = 4
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
@@ -682,7 +682,7 @@ def render_outlook_email_snippet(
 
     parts = []
     parts.append(
-        '<table border="0" cellpadding="6" cellspacing="0" style="border-collapse:collapse;margin:auto;background-color:#181818;border:1px solid #282828;border-radius:8px;">'
+        '<table align="center" border="0" cellpadding="6" cellspacing="0" style="border-collapse:collapse;background-color:#181818;border:1px solid #282828;border-radius:8px;">'
     )
 
     if has_real_case:
