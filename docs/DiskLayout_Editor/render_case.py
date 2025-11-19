@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.06
+##### V 0.07
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.06"
+__version__ = "0.07"
 __cols__ = 4
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
@@ -240,13 +240,13 @@ def render_drive_line(d: dict, bay_idx) -> str:
     cap = escape(drive_capacity(d))   
     return (
         f'<div class="slot filled box-{led}" data-bay="{bay_idx}">'
-        f'  <div class="text">'
+        '  <div class="text">'
         f'    <div class="line-1">{label}</div>'
         f'    <div class="line-2">{pool if pool else "&nbsp;"}</div>'
         f'    <div class="line-3">Drive: {did} / {cap} / Temp: {temp}</div>'
-        f'  </div>'
+        '  </div>'
         f'  <div class="led {led}"></div>'
-        f'</div>'
+        '</div>'
     )
     
 def render_placeholder_slot(title: str) -> str:
@@ -261,7 +261,7 @@ def render_outlook_placeholder_cell(title: str, colswidth: int) -> str:
     t = escape(title)
     return (
         '<td style="border:1px solid #000;border-radius:6px;'
-        'background-color:#7E57C2;width:{colswidth}px;height:58px;vertical-align:middle;'
+        f'background-color:#7E57C2;width:{colswidth}px;height:58px;vertical-align:middle;'
         'padding:6px 10px;">'
         f'<div style="font-weight:bold;color:#fff;font-size:13px;">{t}</div>'
         '</td>'
@@ -326,8 +326,8 @@ box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot.filled{{cursor:pointer;transition:transform .06s ease-out, box-shadow .06s ease-out}}
 .slot.filled:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35)}}
 .badge{{position:fixed;top:16px;left:16px;color:#aaa;font-size:12px;letter-spacing:.3px}}
-.slot.placeholder.box-blank{{opacity:1; background: #7E57C2}}
-.slot.separator.box-blank{{opacity:1; background: #7E57C2}}
+.slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
+.slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
 /* right side block before */
 .slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
 .slot.placeholder.box-blank:has(+ .slot.separator.box-blank),
@@ -550,8 +550,8 @@ def build_email_css(namespace: str = ".case-email", cols: int = __cols__) -> str
 {ns} .unplaced .line-2{{font-weight:600;color:#cfe7ff;font-size:11px;opacity:.95;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 {ns} .unplaced .line-3{{font-weight:600;color:#cccccc;font-size:11px;opacity:.9}}
 {ns} .unplaced .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px;}}
-{ns} .slot.placeholder.box-blank{{opacity:1; background: #7E57C2}}
-{ns} .slot.separator.box-blank{{opacity:1; background: #7E57C2}}
+{ns} .slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
+{ns} .slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
 /* right side block before */
 {ns} .slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
 {ns} .slot.placeholder.box-blank:has(+ .slot.separator.box-blank),
@@ -693,17 +693,16 @@ def render_outlook_email_snippet(
                 pos = r * cols + c + 1
                 if pos not in active_set:
                     parts.append(
-                        '<td style="border:1px dashed #444;width:{colswidth}px;height:58px;text-align:center;vertical-align:middle;color:#777;font-family:Consolas,monospace;">&nbsp;</td>'
+                        f'<td style="border:1px dashed #444;width:{colswidth}px;height:58px;text-align:center;vertical-align:middle;color:#777;font-family:Consolas,monospace;">&nbsp;</td>'
                     )
                     continue
                 if pos in placeholder_map:
-                    title = escape(placeholder_map[pos])
-                    parts.append(render_outlook_placeholder_cell(title, colswidth))
+                    parts.append(render_outlook_placeholder_cell(placeholder_map[pos], colswidth))
                     continue                
                 if pos in sep_slots:
                     parts.append(
                         '<td style="border:1px solid #000;border-radius:6px;'
-                        'background-color:#7E57C2;width:{colswidth}px;height:58px;">&nbsp;</td>'
+                        f'background-color:#7E57C2;width:{colswidth}px;height:58px;">&nbsp;</td>'
                     )
                     continue
 
@@ -738,7 +737,7 @@ def render_outlook_email_snippet(
 
                 else:
                     parts.append(
-                        '<td style="border:1px dashed #444;width:{colswidth}px;height:58px;text-align:center;vertical-align:middle;color:#777;">&nbsp;</td>'
+                        f'<td style="border:1px dashed #444;width:{colswidth}px;height:58px;text-align:center;vertical-align:middle;color:#777;">&nbsp;</td>'
                     )
             parts.append("</tr>")
     parts.append("</table>")
