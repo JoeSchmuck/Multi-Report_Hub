@@ -209,6 +209,14 @@ def drive_led_color(d: dict) -> str:
     c = get_field(d, "drive_color", "").lower()
     return c if c in ("green", "yellow", "red", "orange") else "blank"
 
+def drive_led_icon(color: str) -> str:
+    icons = {
+        "green":  "✅",
+        "yellow": "⚠️",
+        "orange": "⚠️",
+        "red":    "❌"        
+    }
+    return icons.get(color, "❔")
 
 def drive_label(d: dict) -> str:
     return get_field(d, "serial", "") or get_field(d, "drive_id", "disk")
@@ -237,8 +245,8 @@ def render_drive_line(d: dict, bay_idx, high_contrast_switch: bool = False) -> s
     temp = escape(drive_temp(d))
     led = drive_led_color(d)
     led_render = f'  <div class="led {led}"></div>'
-    if high_contrast_switch: # add color to label
-        led_render = f'  <div class="led-hc">{led}</div>'
+    if high_contrast_switch:
+        led_render = f'  <div class="led-hc">{led} {drive_led_icon(led)}</div>'
     did = escape(drive_id(d))
     cap = escape(drive_capacity(d))   
     return (
@@ -688,11 +696,13 @@ def led_dot(color: str, high_contrast_switch: bool = False) -> str:
         "orange": "#E4A11B",
         "blank": "#9e9e9e",
         }
+    i = ""
     if high_contrast_switch:
         c =  "#9e9e9e"
+        i = drive_led_icon(color)
     else:
         c = colors.get(color, "#9e9e9e")
-    return f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{c};margin-left:6px;"></span>'
+    return f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{c};margin-left:6px;">{i}</span>'
 
 def led_background_color(color: str, high_contrast_switch: bool = False) -> str:
     """Return a light cell background color based on LED color."""
