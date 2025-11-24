@@ -209,14 +209,14 @@ def drive_led_color(d: dict) -> str:
     c = get_field(d, "drive_color", "").lower()
     return c if c in ("green", "yellow", "red", "orange") else "blank"
 
-def drive_led_icon(color: str) -> str:
+def drive_led_icon(color: str) -> tuple[str, str]:
     icons = {
-        "green":  "✅",
-        "yellow": "⚠️",
-        "orange": "⚠️",
-        "red":    "❌"        
+        "green":  ("✅", "OK"),
+        "yellow": ("⚠️", "WARNING"),
+        "orange": ("⚠️", "WARNING"),
+        "red":    ("❌", "CRITICAL"),    
     }
-    return icons.get(color, "❔")
+    return icons.get(color, ("❔", "UNKNOWN"))
 
 def drive_label(d: dict) -> str:
     return get_field(d, "serial", "") or get_field(d, "drive_id", "disk")
@@ -246,7 +246,8 @@ def render_drive_line(d: dict, bay_idx, high_contrast_switch: bool = False) -> s
     led = drive_led_color(d)
     led_render = f'  <div class="led {led}"></div>'
     if high_contrast_switch:
-        led_render = f'  <div class="led-hc">{led} {drive_led_icon(led)}</div>'
+        ic, lb = drive_led_icon(led)
+        led_render = f'  <div class="led-hc">{ic} {lb} </div>'
     did = escape(drive_id(d))
     cap = escape(drive_capacity(d))   
     return (
@@ -350,7 +351,7 @@ gap:22px;padding:18px;background:var(--bg);border-radius:12px;border:3px solid v
 box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot{{border-radius:8px;display:flex;align-items:center;justify-content:flex-start;position:relative;padding:10px 12px;}}
 .slot .text{{display:flex;flex-direction:column;gap:3px}}
-.slot .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px;box-shadow:0 0 6px rgba(0,0,0,.4)}}
+.slot .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px;box-shadow:0 0 6px rgba(0,0,0,.4); border: 1px solid #ffffff}}
 .slot .led-hc{{position:absolute;top:8px;right:10px;font-weight:700;text-transform: uppercase; color: #000000}}
 .slot .led.green{{background:#00ff55;box-shadow:0 0 8px rgba(0,255,85,.55)}}
 .slot .led.yellow{{background:#ffd100;box-shadow:0 0 8px rgba(255,209,0,.55)}}
@@ -585,7 +586,7 @@ def build_email_css(namespace: str = ".case-email", cols: int = __cols__, high_c
 }}
 {ns} .slot {{ border-radius:8px; display:flex; align-items:center; justify-content:flex-start; position:relative; padding:10px 12px; }}
 {ns} .text {{ display:flex; flex-direction:column; gap:3px }}
-{ns} .led {{ width:8px; height:8px; border-radius:50%; position:absolute; top:8px; right:10px; }}
+{ns} .led {{ width:8px; height:8px; border-radius:50%; position:absolute; top:8px; right:10px; ; border: 1px solid #ffffff}}
 {ns} .led-hc{{position:absolute;top:8px;right:10px;font-weight:700;text-transform: uppercase;color: #000000}}
 {ns} .led.green  {{ background:#00ff55 }}
 {ns} .led.yellow {{ background:#ffd100 }}
@@ -685,8 +686,8 @@ def render_email_snippet(
 def led_dot(color: str, high_contrast_switch: bool = False) -> str:
     """Return led element color or the icon if high_contrast switch is enabled"""
     if high_contrast_switch:
-        i = drive_led_icon(color)    
-        return f'<span style="text-transform:uppercase; font-weight:700">{i} {color}</span>'
+        ic, lb = drive_led_icon(color)
+        return f'<span style="text-transform:uppercase; font-weight:700">{ic} {lb}</span>'
     colors = {
         "green": "#00ff55",
         "yellow": "#ffd100",
@@ -694,7 +695,6 @@ def led_dot(color: str, high_contrast_switch: bool = False) -> str:
         "orange": "#E4A11B",
         "blank": "#9e9e9e",
         }
-    i = ""
     c = colors.get(color, "#9e9e9e")
     return f'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{c}; border:2px solid #ffffff"></span>'
 
@@ -783,7 +783,7 @@ def render_outlook_email_snippet(
                         <table border="0" width="100%%" cellspacing="0" cellpadding="0">
                             <tr>
                             <td style="vertical-align:top;">
-                                <div style="font-weight:bold;color:{c_l1};font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform: uppercase">{line1} {led_color}</div>
+                                <div style="font-weight:bold;color:{c_l1};font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform: uppercase">{line1}</div>
                                 <div style="color:{c_l2};font-size:11px;">{line2}</div>
                                 <div style="color:{c_l3};font-size:11px;">Drive: {line3} / {line4} / Temp: {line5}</div>
                             </td>
