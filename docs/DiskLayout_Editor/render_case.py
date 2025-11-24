@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.07
+##### V 0.08
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.07"
+__version__ = "0.08"
 __cols__ = 4
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
@@ -214,7 +214,7 @@ def drive_label(d: dict) -> str:
     return get_field(d, "serial", "") or get_field(d, "drive_id", "disk")
 
 def drive_pool(d: dict) -> str:
-    return get_field(d, "pool", "--SPARE-")
+    return get_field(d, "pool", "--SPARE--")
 
 def drive_address(d: dict) -> str:
     return str(d.get("address") or "").strip()
@@ -231,11 +231,14 @@ def drive_capacity(d: dict) -> str:
 def drive_id(d: dict) -> str:
     return get_field(d, "drive_id")
 
-def render_drive_line(d: dict, bay_idx) -> str:
+def render_drive_line(d: dict, bay_idx, high_contrast_switch: bool = False) -> str:
     label = escape(drive_label(d))
     pool = escape(drive_pool(d))
     temp = escape(drive_temp(d))
     led = drive_led_color(d)
+    led_render = f'  <div class="led {led}"></div>'
+    if high_contrast_switch: # add color to label
+        led_render = f'  <div class="led-hc">{led}</div>'
     did = escape(drive_id(d))
     cap = escape(drive_capacity(d))   
     return (
@@ -245,7 +248,7 @@ def render_drive_line(d: dict, bay_idx) -> str:
         f'    <div class="line-2">{pool if pool else "&nbsp;"}</div>'
         f'    <div class="line-3">Drive: {did} / {cap} / Temp: {temp}</div>'
         '  </div>'
-        f'  <div class="led {led}"></div>'
+        f'  {led_render}'
         '</div>'
     )
     
@@ -257,11 +260,14 @@ def render_placeholder_slot(title: str) -> str:
         '</div>'
     ) 
     
-def render_outlook_placeholder_cell(title: str, colswidth: int) -> str:
+def render_outlook_placeholder_cell(title: str, colswidth: int, high_contrast_switch: bool = False) -> str:
     t = escape(title)
+    c = "#7E57C2"
+    if high_contrast_switch:
+        c= "#9FA6B2"
     return (
         '<td style="border:1px solid #000;border-radius:6px;'
-        f'background-color:#7E57C2;width:{colswidth}px;height:58px;vertical-align:middle;'
+        f'background-color:{c};width:{colswidth}px;height:58px;vertical-align:middle;'
         'padding:6px 10px;">'
         f'<div style="font-weight:bold;color:#fff;font-size:13px;">{t}</div>'
         '</td>'
@@ -285,12 +291,40 @@ def render_web_html(
     bays_list: list,
     unplaced_indices: List[int],
     has_real_case: bool,
+    high_contrast_switch: bool
 ) -> str:
     active = [int(x) for x in case["layout"]["activeSlots"]]
     name = case.get("name", case.get("id", "Case"))
     total_slots = cols * rows
     bays_json = json.dumps(bays_list, ensure_ascii=False)
     colswidth = get_cols_width(cols)
+    
+    colors_block = f"""
+.box-red{{background:linear-gradient(180deg,#b32121,#7a1414);border:1px solid #a32020}}
+.box-yellow{{background:linear-gradient(180deg,#d6a31e,#927213);border:1px solid #c59616}}
+.box-green{{background:linear-gradient(180deg,#3da94f,#237a33);border:1px solid #166b2d}}
+.box-orange{{background:linear-gradient(180deg,#e97822,#a34f0c);border:1px solid #d26510}}
+.box-blank{{background:linear-gradient(180deg,#7b7b7b,#4f4f4f);border:1px solid #5e5e5e}}   
+.slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
+.slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}} 
+.slot .line-1{{font-weight:800;color:#fff;font-size:13px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
+.slot .line-2{{font-weight:600;color:#cfe7ff;font-size:11px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
+.slot .line-3{{font-weight:600;color:#cccccc;font-size:11px;opacity:.9}}
+    """
+    
+    if high_contrast_switch:
+        colors_block = f"""
+.box-red{{background:#f0f0f0;border:1px solid #1E3A5F}}
+.box-yellow{{background:#f0f0f0;border:1px solid #9A4F15}}
+.box-green{{background:#f0f0f0;border:1px solid #234F22}}
+.box-orange{{background:#f0f0f0;border:1px solid #802828}}
+.box-blank{{background:#f0f0f0;border:1px solid #4A4A4A}}  
+.slot.placeholder.box-blank{{opacity:1; background: #9FA6B2;}}
+.slot.separator.box-blank{{opacity:1; background: #9FA6B2;}}
+.slot .line-1{{font-weight:800;color:#000000;font-size:13px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
+.slot .line-2{{font-weight:600;color:#000000;font-size:11px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
+.slot .line-3{{font-weight:600;color:#000000;font-size:11px;opacity:.9}}
+        """        
 
     head = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>{escape(name)}</title>
@@ -308,26 +342,17 @@ gap:22px;padding:18px;background:var(--bg);border-radius:12px;border:3px solid v
 box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot{{border-radius:8px;display:flex;align-items:center;justify-content:flex-start;position:relative;padding:10px 12px;}}
 .slot .text{{display:flex;flex-direction:column;gap:3px}}
-.slot .line-1{{font-weight:800;color:#fff;font-size:13px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
-.slot .line-2{{font-weight:600;color:#cfe7ff;font-size:11px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
-.slot .line-3{{font-weight:600;color:#cccccc;font-size:11px;opacity:.9}}
 .slot .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px;box-shadow:0 0 6px rgba(0,0,0,.4)}}
+.slot .led-hc{{position:absolute;top:8px;right:10px;font-weight:700;text-transform: uppercase; color: #000000}}
 .slot .led.green{{background:#00ff55;box-shadow:0 0 8px rgba(0,255,85,.55)}}
 .slot .led.yellow{{background:#ffd100;box-shadow:0 0 8px rgba(255,209,0,.55)}}
 .slot .led.red{{background:#ff3b3b;box-shadow:0 0 8px rgba(255,60,60,.55)}}
 .slot .led.orange{{background:#E4A11B;box-shadow:0 0 8px rgba(255,150,60,.55)}}
 .slot .led.blank{{background:#9e9e9e;box-shadow:0 0 6px rgba(150,150,150,.45)}}
-.box-red{{background:linear-gradient(180deg,#b32121,#7a1414);border:1px solid #a32020}}
-.box-yellow{{background:linear-gradient(180deg,#d6a31e,#927213);border:1px solid #c59616}}
-.box-green{{background:linear-gradient(180deg,#3da94f,#237a33);border:1px solid #166b2d}}
-.box-orange{{background:linear-gradient(180deg,#e97822,#a34f0c);border:1px solid #d26510}}
-.box-blank{{background:linear-gradient(180deg,#7b7b7b,#4f4f4f);border:1px solid #5e5e5e}}
 .slot.empty{{border:1px dashed #333;opacity:.5}}
 .slot.filled{{cursor:pointer;transition:transform .06s ease-out, box-shadow .06s ease-out}}
 .slot.filled:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35)}}
 .badge{{position:fixed;top:16px;left:16px;color:#aaa;font-size:12px;letter-spacing:.3px}}
-.slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
-.slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
 /* right side block before */
 .slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
 .slot.placeholder.box-blank:has(+ .slot.separator.box-blank),
@@ -384,7 +409,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 .unplaced .line-2{{font-weight:600;color:#cfe7ff;font-size:11px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
 .unplaced .line-3{{font-weight:600;color:#cccccc;font-size:11px;opacity:.9}}
 .unplaced .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px}}
-
+{colors_block}
 </style></head><body>
 {(f'<div class="badge">{escape(name)}</div>' if has_real_case else '')}
 <div class="wrapper">
@@ -419,7 +444,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 
         if serial and serial in drive_lookup:
             d = drive_lookup[serial]
-            parts.append(render_drive_line(d, bay_idx))
+            parts.append(render_drive_line(d, bay_idx, high_contrast_switch))
 
         else:
             hide_empty_bay = ' style="display:none;"' if not has_real_case else ''
@@ -434,7 +459,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
         parts.append('<div class="slots">')
         for idx in unplaced_indices:
             b = bays_list[idx] or {}
-            parts.append(render_drive_line(b, idx))
+            parts.append(render_drive_line(b, idx, high_contrast_switch))
         parts.append('</div></div>')
 
 
@@ -507,9 +532,35 @@ document.addEventListener('keydown', (e) => {{ if (e.key === 'Escape') closeModa
 
 
 # ---------- EMAIL: safe snippet (no title, no global selectors) + Unplaced when applicable ----------
-def build_email_css(namespace: str = ".case-email", cols: int = __cols__) -> str:
+def build_email_css(namespace: str = ".case-email", cols: int = __cols__, high_contrast_switch: bool = False) -> str:
     ns = namespace
     colswidth = get_cols_width(cols)
+    colors_block = f"""
+{ns} .box-red    {{ background:linear-gradient(180deg,#b32121,#7a1414); border:1px solid #a32020 }}
+{ns} .box-yellow {{ background:linear-gradient(180deg,#d6a31e,#927213); border:1px solid #c59616 }}
+{ns} .box-green  {{ background:linear-gradient(180deg,#3da94f,#237a33); border:1px solid #166b2d }}
+{ns} .box-orange {{ background:linear-gradient(180deg,#e97822,#a34f0c); border:1px solid #d26510 }}
+{ns} .box-blank  {{ background:linear-gradient(180deg,#7b7b7b,#4f4f4f); border:1px solid #5e5e5e }}
+{ns} .slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
+{ns} .slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
+{ns} .line-1 {{ font-weight:800; color:#fff; font-size:13px; letter-spacing:.2px; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
+{ns} .line-2 {{ font-weight:600; color:#cfe7ff; font-size:11px; opacity:.95; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
+{ns} .line-3 {{ font-weight:600; color:#cccccc; font-size:11px; opacity:.9 }}
+    """
+    
+    if high_contrast_switch:
+        colors_block = f"""
+{ns} .box-red    {{ background:#f0f0f0; border:1px solid #1E3A5F }}
+{ns} .box-yellow {{ background:#f0f0f0; border:1px solid #9A4F15 }}
+{ns} .box-green  {{ background:#f0f0f0; border:1px solid #234F22 }}
+{ns} .box-orange {{ background:#f0f0f0; border:1px solid #802828 }}
+{ns} .box-blank  {{ background:#f0f0f0; border:1px solid #4A4A4A }}
+{ns} .slot.placeholder.box-blank{{opacity:1; background: #9FA6B2;}}
+{ns} .slot.separator.box-blank{{opacity:1; background: #9FA6B2;}}
+{ns} .line-1 {{ font-weight:800; color:#000000; font-size:13px; letter-spacing:.2px; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
+{ns} .line-2 {{ font-weight:600; color:#000000; font-size:11px; opacity:.95; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
+{ns} .line-3 {{ font-weight:600; color:#000000; font-size:11px; opacity:.9 }}
+        """        
     return f"""
 {ns} {{ color:#ddd; font-family:ui-monospace, Menlo, Consolas, monospace; }}
 {ns} .case {{
@@ -526,20 +577,14 @@ def build_email_css(namespace: str = ".case-email", cols: int = __cols__) -> str
 }}
 {ns} .slot {{ border-radius:8px; display:flex; align-items:center; justify-content:flex-start; position:relative; padding:10px 12px; }}
 {ns} .text {{ display:flex; flex-direction:column; gap:3px }}
-{ns} .line-1 {{ font-weight:800; color:#fff; font-size:13px; letter-spacing:.2px; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
-{ns} .line-2 {{ font-weight:600; color:#cfe7ff; font-size:11px; opacity:.95; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
-{ns} .line-3 {{ font-weight:600; color:#cccccc; font-size:11px; opacity:.9 }}
 {ns} .led {{ width:8px; height:8px; border-radius:50%; position:absolute; top:8px; right:10px; }}
+{ns} .led-hc{{position:absolute;top:8px;right:10px;font-weight:700;text-transform: uppercase;color: #000000}}
 {ns} .led.green  {{ background:#00ff55 }}
 {ns} .led.yellow {{ background:#ffd100 }}
 {ns} .led.red    {{ background:#ff3b3b }}
 {ns} .led.orange {{ background:#E4A11B }}
 {ns} .led.blank  {{ background:#9e9e9e }}
-{ns} .box-red    {{ background:linear-gradient(180deg,#b32121,#7a1414); border:1px solid #a32020 }}
-{ns} .box-yellow {{ background:linear-gradient(180deg,#d6a31e,#927213); border:1px solid #c59616 }}
-{ns} .box-green  {{ background:linear-gradient(180deg,#3da94f,#237a33); border:1px solid #166b2d }}
-{ns} .box-orange {{ background:linear-gradient(180deg,#e97822,#a34f0c); border:1px solid #d26510 }}
-{ns} .box-blank  {{ background:linear-gradient(180deg,#7b7b7b,#4f4f4f); border:1px solid #5e5e5e }}
+{colors_block}
 {ns} .slot.empty {{ border:1px dashed #444; opacity:.55 }}
 {ns} .unplaced{{margin-top:10px;text-align:center;}}
 {ns} .unplaced .row{{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}}
@@ -550,8 +595,6 @@ def build_email_css(namespace: str = ".case-email", cols: int = __cols__) -> str
 {ns} .unplaced .line-2{{font-weight:600;color:#cfe7ff;font-size:11px;opacity:.95;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 {ns} .unplaced .line-3{{font-weight:600;color:#cccccc;font-size:11px;opacity:.9}}
 {ns} .unplaced .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px;}}
-{ns} .slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
-{ns} .slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, #7E57C2, #4527A0);}}
 /* right side block before */
 {ns} .slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
 {ns} .slot.placeholder.box-blank:has(+ .slot.separator.box-blank),
@@ -585,13 +628,14 @@ def render_email_snippet(
     bays_list: list,
     unplaced_indices: List[int],
     has_real_case: bool,
+    high_contrast_switch: bool
 ) -> str:
     placeholder_map = get_placeholder_map(case)
     sep_slots = set(get_sep_slots(case))
     active = set(int(x) for x in case["layout"]["activeSlots"])
     active_set = active | set(placeholder_map.keys()) | sep_slots
     total_slots = rows * cols
-    css = build_email_css(".case-email", cols)
+    css = build_email_css(".case-email", cols, high_contrast_switch)
 
     parts = [f"<style>{css}</style>"]
     parts.append(f'<div class="case-email" style="--cols:{cols};">')
@@ -616,7 +660,7 @@ def render_email_snippet(
 
             if serial and serial in drive_lookup:
                 d = drive_lookup[serial]
-                parts.append(render_drive_line(d, -1))
+                parts.append(render_drive_line(d, -1, high_contrast_switch))
             else:
                 parts.append('    <div class="slot empty"></div>')
     if has_real_case:
@@ -628,15 +672,15 @@ def render_email_snippet(
         parts.append('<div class="row">')
         for idx in unplaced_indices:
             b = bays_list[idx] or {}
-            parts.append(render_drive_line(b, -1))
+            parts.append(render_drive_line(b, -1, high_contrast_switch))
         parts.append('</div></div>')
     return "\n".join(parts)
 
 
 # helper for simplified outlook 
 
-def led_dot(color: str) -> str:
-    """Return led element """
+def led_dot(color: str, high_contrast_switch: bool = False) -> str:
+    """Return led element color now handling the high_contrast switch """
     colors = {
         "green": "#00ff55",
         "yellow": "#ffd100",
@@ -644,24 +688,29 @@ def led_dot(color: str) -> str:
         "orange": "#E4A11B",
         "blank": "#9e9e9e",
         }
-    c = colors.get(color, "#9e9e9e")
+    if high_contrast_switch:
+        c =  "#9e9e9e"
+    else:
+        c = colors.get(color, "#9e9e9e")
     return f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{c};margin-left:6px;"></span>'
 
-def led_background_color(color: str) -> str:
+def led_background_color(color: str, high_contrast_switch: bool = False) -> str:
     """Return a light cell background color based on LED color."""
     color = (color or "blank").lower()
+    if high_contrast_switch:
+        return "#9e9e9e"
     if color == "green":
-        return "#245c34"   # muted green
+        return "#245c34"
     elif color == "yellow":
-        return "#947f0d"   # muted yellow/gold
+        return "#947f0d"
     elif color == "red":
-        return "#970e0e"   # muted red
+        return "#970e0e"
     elif color == "orange":
-        return "#D87904"   # muted orange
+        return "#D87904"
     elif color == "blank":
-        return "#444444"   # neutral grey
+        return "#444444"
     else:
-        return "#3b3b3b"   # default background
+        return "#3b3b3b"
 
 def render_outlook_email_snippet(
     case: dict,
@@ -672,6 +721,7 @@ def render_outlook_email_snippet(
     bays_list: list,
     unplaced_indices: list[int],
     has_real_case: bool,
+    high_contrast_switch: bool
 ) -> str:
     """Render a simplified, Outlook-compatible HTML email version with LED colors."""
     placeholder_map = get_placeholder_map(case)
@@ -697,7 +747,7 @@ def render_outlook_email_snippet(
                     )
                     continue
                 if pos in placeholder_map:
-                    parts.append(render_outlook_placeholder_cell(placeholder_map[pos], colswidth))
+                    parts.append(render_outlook_placeholder_cell(placeholder_map[pos], colswidth, high_contrast_switch))
                     continue                
                 if pos in sep_slots:
                     parts.append(
@@ -710,17 +760,19 @@ def render_outlook_email_snippet(
                 serial = info.get("serial") if info else None
                 if serial and serial in drive_lookup:
                     d = drive_lookup[serial]
-                    line1 = escape(drive_label(d))      # serial or disk
-                    line2 = escape(drive_pool(d))       # pool or --SPARE--
-                    line3 = escape(drive_id(d))         # drive_id
-                    line4 = escape(drive_capacity(d))   # capacity
-                    line5 = escape(drive_temp(d))       # temp
+                    line1 = escape(drive_label(d))
+                    line2 = escape(drive_pool(d))
+                    line3 = escape(drive_id(d))
+                    line4 = escape(drive_capacity(d))
+                    line5 = escape(drive_temp(d))
                     led_color = d.get("led") or d.get("drive_color") or "blank"
                     led_color = led_color.lower() if isinstance(led_color, str) else "blank"
+                    if high_contrast_switch:
+                        line1 = f"{line1} {led_color}"
 
                     parts.append(
                         f"""
-                        <td style="border:1px solid #000;border-radius:6px;background-color:{led_background_color(led_color)};width:{colswidth}px;height:58px;vertical-align:middle;padding:6px 10px;">
+                        <td style="border:1px solid #000;border-radius:6px;background-color:{led_background_color(led_color, high_contrast_switch)};width:{colswidth}px;height:58px;vertical-align:middle;padding:6px 10px;">
                         <table border="0" width="100%%" cellspacing="0" cellpadding="0">
                             <tr>
                             <td style="vertical-align:top;">
@@ -728,7 +780,7 @@ def render_outlook_email_snippet(
                                 <div style="color:#cfe7ff;font-size:11px;">{line2}</div>
                                 <div style="color:#ccc;font-size:11px;">Drive: {line3} / {line4} / Temp: {line5}</div>
                             </td>
-                            <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color)}</td>
+                            <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color, high_contrast_switch)}</td>
                             </tr>
                         </table>
                         </td>
@@ -766,7 +818,7 @@ def render_outlook_email_snippet(
                         <div style="color:#cfe7ff;font-size:11px;">{line2}</div>
                         <div style="color:#ccc;font-size:11px;">{line3}</div>
                       </td>
-                      <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color)}</td>
+                      <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color, high_contrast_switch)}</td>
                     </tr>
                   </table>
                 </td></tr>
@@ -815,10 +867,13 @@ def main():
         unplaced_indices = [i for i, b in enumerate(bays_list) if is_real_drive(b)]
         pos_to_info = {}
 
+    # check for high contrast swtich, #TO-DO use bool in MR instad of string
+    high_contrast_switch = str(cfg.get("high_contrast", "false")).lower() == "true"
+
     append_log(f"rendering rich text file")
     try:
         web_html = render_web_html(
-            case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case)
+            case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case, high_contrast_switch)
         with open(__output_render__, "w", encoding="utf-8") as f:
             f.write(web_html)
     except Exception as e:
@@ -827,7 +882,7 @@ def main():
     append_log(f"rendering snipplet file")
     try:
         email_html = render_email_snippet(
-            case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case)
+            case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case, high_contrast_switch)
         with open(__output_render_snipplet__, "w", encoding="utf-8") as f:
             f.write(email_html)
     except Exception as e:
@@ -836,8 +891,7 @@ def main():
     append_log(f"rendering Outlook-compatible file")
     try:
         outlook_html = render_outlook_email_snippet(
-            case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case
-        )
+            case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case, high_contrast_switch)
         with open(__output_render_outlook_snipplet__, "w", encoding="utf-8") as f:
             f.write(outlook_html)
     except Exception as e:
