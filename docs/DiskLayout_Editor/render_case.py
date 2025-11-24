@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.08
+##### V 0.09
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.08"
+__version__ = "0.09"
 __cols__ = 4
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
@@ -594,7 +594,7 @@ def build_email_css(namespace: str = ".case-email", cols: int = __cols__, high_c
 {ns} .led.blank  {{ background:#9e9e9e }}
 {colors_block}
 {ns} .slot.empty {{ border:1px dashed #444; opacity:.55 }}
-{ns} .unplaced{{margin-top:10px;text-align:center;}}
+{ns} .unplaced{{margin-top:10px;}}
 {ns} .unplaced .row{{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}}
 {ns} .unplaced .slot{{width:240px;height:58px;padding:10px 12px;border-radius:8px;position:relative;
   display:flex;align-items:center;justify-content:flex-start;}}
@@ -809,9 +809,11 @@ def render_outlook_email_snippet(
         )
         for idx in unplaced_indices:
             b = bays_list[idx] or {}
-            line1 = b.get("name", "Unknown")
-            line2 = b.get("model", "")
-            line3 = b.get("serial", "")
+            line1 = escape(drive_label(b))
+            line2 = escape(drive_pool(b))
+            line3 = escape(drive_id(b))
+            line4 = escape(drive_capacity(b))
+            line5 = escape(drive_temp(b))            
             led_color = b.get("led") or b.get("drive_color") or "blank"
             led_color = led_color.lower() if isinstance(led_color, str) else "blank"
             c_l1 = "#ffffff"
@@ -827,7 +829,7 @@ def render_outlook_email_snippet(
                       <td style="vertical-align:top;">
                         <div style="font-weight:bold;color:{c_l1};font-size:13px;">{line1}</div>
                         <div style="color:{c_l2};font-size:11px;">{line2}</div>
-                        <div style="color:{c_l3};font-size:11px;">{line3}</div>
+                        <div style="color:{c_l3};font-size:11px;">Drive: {line3} / {line4} / Temp: {line5}</div>
                       </td>
                       <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color, high_contrast_switch)}</td>
                     </tr>
