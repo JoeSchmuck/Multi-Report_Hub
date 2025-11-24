@@ -599,9 +599,6 @@ def build_email_css(namespace: str = ".case-email", cols: int = __cols__, high_c
 {ns} .unplaced .slot{{width:240px;height:58px;padding:10px 12px;border-radius:8px;position:relative;
   display:flex;align-items:center;justify-content:flex-start;}}
 {ns} .unplaced .text{{display:flex;flex-direction:column;gap:3px}}
-{ns} .unplaced .line-1{{font-weight:800;color:#fff;font-size:13px;letter-spacing:.2px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
-{ns} .unplaced .line-2{{font-weight:600;color:#cfe7ff;font-size:11px;opacity:.95;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
-{ns} .unplaced .line-3{{font-weight:600;color:#cccccc;font-size:11px;opacity:.9}}
 {ns} .unplaced .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px;}}
 /* right side block before */
 {ns} .slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
@@ -684,11 +681,12 @@ def render_email_snippet(
         parts.append('</div></div>')
     return "\n".join(parts)
 
-
-# helper for simplified outlook 
-
+# OUTLOOK - OR AT LEAST - SIMPLIFIED EMAIL SNIPPLET
 def led_dot(color: str, high_contrast_switch: bool = False) -> str:
-    """Return led element color now handling the high_contrast switch """
+    """Return led element color or the icon if high_contrast switch is enabled"""
+    if high_contrast_switch:
+        i = drive_led_icon(color)    
+        return f'<span style="text-transform:uppercase; font-weight:700">{i} {color}</span>'
     colors = {
         "green": "#00ff55",
         "yellow": "#ffd100",
@@ -697,18 +695,14 @@ def led_dot(color: str, high_contrast_switch: bool = False) -> str:
         "blank": "#9e9e9e",
         }
     i = ""
-    if high_contrast_switch:
-        c =  "#9e9e9e"
-        i = drive_led_icon(color)
-    else:
-        c = colors.get(color, "#9e9e9e")
-    return f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{c};margin-left:6px;">{i}</span>'
+    c = colors.get(color, "#9e9e9e")
+    return f'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{c}; border:2px solid #ffffff"></span>'
 
 def led_background_color(color: str, high_contrast_switch: bool = False) -> str:
     """Return a light cell background color based on LED color."""
     color = (color or "blank").lower()
     if high_contrast_switch:
-        return "#9e9e9e"
+        return "#F0F0F0"
     if color == "green":
         return "#245c34"
     elif color == "yellow":
@@ -761,7 +755,7 @@ def render_outlook_email_snippet(
                     continue                
                 if pos in sep_slots:
                     parts.append(
-                        '<td style="border:1px solid #000;border-radius:6px;'
+                        '<td style="border:1px solid #000000;border-radius:6px;'
                         f'background-color:#7E57C2;width:{colswidth}px;height:58px;">&nbsp;</td>'
                     )
                     continue
@@ -777,25 +771,28 @@ def render_outlook_email_snippet(
                     line5 = escape(drive_temp(d))
                     led_color = d.get("led") or d.get("drive_color") or "blank"
                     led_color = led_color.lower() if isinstance(led_color, str) else "blank"
+                    c_l1 = "#ffffff"
+                    c_l2 = "#cfe7ff"
+                    c_l3 = "#ccc"
                     if high_contrast_switch:
-                        line1 = f"{line1} {led_color}"
+                        c_l1 = c_l2 = c_l3 = "#000000"                    
 
                     parts.append(
                         f"""
-                        <td style="border:1px solid #000;border-radius:6px;background-color:{led_background_color(led_color, high_contrast_switch)};width:{colswidth}px;height:58px;vertical-align:middle;padding:6px 10px;">
+                        <td style="border:1px solid #000000;border-radius:6px;background-color:{led_background_color(led_color, high_contrast_switch)};width:{colswidth}px;height:58px;vertical-align:middle;padding:6px 10px;">
                         <table border="0" width="100%%" cellspacing="0" cellpadding="0">
                             <tr>
                             <td style="vertical-align:top;">
-                                <div style="font-weight:bold;color:#fff;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{line1}</div>
-                                <div style="color:#cfe7ff;font-size:11px;">{line2}</div>
-                                <div style="color:#ccc;font-size:11px;">Drive: {line3} / {line4} / Temp: {line5}</div>
+                                <div style="font-weight:bold;color:{c_l1};font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform: uppercase">{line1} {led_color}</div>
+                                <div style="color:{c_l2};font-size:11px;">{line2}</div>
+                                <div style="color:{c_l3};font-size:11px;">Drive: {line3} / {line4} / Temp: {line5}</div>
                             </td>
                             <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color, high_contrast_switch)}</td>
                             </tr>
                         </table>
                         </td>
                         """
-                    )
+                    )                        
 
                 else:
                     parts.append(
@@ -817,16 +814,20 @@ def render_outlook_email_snippet(
             line3 = b.get("serial", "")
             led_color = b.get("led") or b.get("drive_color") or "blank"
             led_color = led_color.lower() if isinstance(led_color, str) else "blank"
-
+            c_l1 = "#ffffff"
+            c_l2 = "#cfe7ff"
+            c_l3 = "#ccc"
+            if high_contrast_switch:
+                c_l1 = c_l2 = c_l3 = "#000000" 
             parts.append(
                 f"""
-                <tr><td style="border:1px solid #555;border-radius:6px;background-color:#3b3b3b;width:240px;height:58px;padding:6px 10px;">
+                <tr><td style="border:1px solid #000000;border-radius:6px;background-color:{led_background_color(led_color, high_contrast_switch)};width:240px;height:58px;padding:6px 10px;">
                   <table border="0" width="100%%" cellspacing="0" cellpadding="0">
                     <tr>
                       <td style="vertical-align:top;">
-                        <div style="font-weight:bold;color:#fff;font-size:13px;">{line1}</div>
-                        <div style="color:#cfe7ff;font-size:11px;">{line2}</div>
-                        <div style="color:#ccc;font-size:11px;">{line3}</div>
+                        <div style="font-weight:bold;color:{c_l1};font-size:13px;">{line1}</div>
+                        <div style="color:{c_l2};font-size:11px;">{line2}</div>
+                        <div style="color:{c_l3};font-size:11px;">{line3}</div>
                       </td>
                       <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color, high_contrast_switch)}</td>
                     </tr>
