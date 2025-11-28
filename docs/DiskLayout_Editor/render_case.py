@@ -2,39 +2,48 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.10
+##### V 0.11
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.10"
-__cols__ = 4
+__version__ = "0.11"
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
 __script_name__ = os.path.basename(__script_path__)
 __input_default__ = os.path.join(__script_directory__, "disklayout_config.json")
 __output_render__ = os.path.join(__script_directory__, "case_render.html")
 __output_render_snipplet__ = os.path.join(__script_directory__, "case_email_snippet.html")
-__output_render_outlook_snipplet__ = os.path.join(__script_directory__, "case_email_outlook_snippet.html")
-__output_render_email_tablesnippet__ = os.path.join(__script_directory__, "case_email_table_snippet.html")
 
-# --- COLORS ---
+# --- COLORS AND OTHER VARIABLE ---
 __c_placeholder_slot__ = "#7E57C2"
+__c_placeholder_slot_2__ = "#4527A0"
 __c_HC_placeholder_slot__ = "#9FA6B2"
+__cols__ = 4 # just a fallback 
+__cols_width_limit__ = 5 # used to determine the max limit to decrease cols width to 200
+__cols_breakout__ = 8 #8 used to determine the max limit to auto rotate the web rich version
+__cols_w__ = 275 # standard cols width
+__cols_wR__ = 200 # reduced cols width
+__row_h__ = 58 # standard rows height
 
 def assert_outputs_secure_or_abort() -> bool:
     """
     Security check 
     """
-    append_log("testing symlink on output")
-    for out_path in (__output_render__, __output_render_snipplet__, __output_render_outlook_snipplet__):
+    append_log("testing symlink - size on output files")
+    max_output_size = 50 * 1024
+    for out_path in (__output_render__, __output_render_snipplet__):
         if os.path.lexists(out_path) and os.path.islink(out_path):
             process_output(True, f"[SECURITY ERROR]: output file '{out_path}' is a symlink; refusing to write.", 1)
-
+        if os.path.exists(out_path):  
+            try:  
+                st = os.stat(out_path, follow_symlinks=False)       
+            except Exception as e:
+                process_output(True, f"[ERROR]: cannot stat output file '{out_path}': {e}", 1)   
+            if st.st_size > max_output_size:
+                process_output( True, f"[SECURITY ERROR]: output file '{out_path}' is too large ({st.st_size} bytes > {max_output_size}); refusing to write.", 1, )  
     append_log("test pass, checking directory")
     dirs = {
         os.path.dirname(os.path.abspath(__output_render__)) or __script_directory__,
         os.path.dirname(os.path.abspath(__output_render_snipplet__)) or __script_directory__,
-        os.path.dirname(os.path.abspath(__output_render_outlook_snipplet__)) or __script_directory__,
-        os.path.dirname(os.path.abspath(__output_render_email_tablesnippet__)) or __output_render_email_tablesnippet__
     }
     for d in dirs:
         try:
@@ -46,8 +55,6 @@ def assert_outputs_secure_or_abort() -> bool:
         if bool(st.st_mode & stat.S_IWOTH):
             print(f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation will not be aborted, until script is in BETA test .") 
 #            process_output(True, f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation aborted.", 1)
-
-
     return True
 
 def append_log(content):
@@ -99,8 +106,18 @@ def rows_from_case(case: dict, cols: int) -> int:
         return 1
     return max(1, ((max_slot - 1) // cols) + 1)
 
+def handle_rotate_layout(case: dict) -> bool:
+    """ new property to rotate the layout vertically -> true horizontal -> false default """
+    try:
+        rotate = case.get("layout", {}).get("rotate")
+        is_rotate_enabled = str(rotate).lower() in ("true", "1", "yes")
+        cols = get_cols(case)
+        return is_rotate_enabled or cols > __cols_breakout__
+    except Exception:
+        return False    
 
-def safe_case(original_case: dict | None) -> Tuple[dict, bool]:
+
+def validate_case(original_case: dict | None) -> Tuple[dict, bool]:
     """
     Ensure a valid case dict. If missing or invalid activeSlots, return a
     minimal structure and a flag False to indicate it's not a real case.
@@ -191,9 +208,32 @@ def get_sep_slots(case: dict) -> List[int]:
             continue
     return out
 
-def get_cols_width(cols: int = __cols__) -> int:
+def get_cols_width(cols: int) -> int:
     """ centralize the calc of the cols width """
-    return 275 if cols <= 5 else 200
+    return __cols_w__ if cols <= __cols_width_limit__ else __cols_wR__
+
+def get_gap(cols: int) -> int:
+    """ centralize the calc of the gap width """
+    return 22 if cols <= __cols_width_limit__ else 10
+
+def snipplet_rotation(cols: int, rows: int, vertical_rotation: bool): #TODO: now is impossible to have more than 8 cols
+    """ centralize and handle the case rotation """
+    if not vertical_rotation:
+        return ""    
+    col_w = get_cols_width(cols)
+    total_width = cols * col_w + (cols - 1)
+    total_height = rows * __row_h__ + (rows - 1)
+    ratio = total_width / max(total_height, 1) / 2
+    translate_percent = ratio * 100.00
+    return f" transform: rotate(90deg) translateY(-{translate_percent:.2f}%); transform-origin: top left;"
+    
+def slot_rotation(vertical_rotation: bool): #TODO: now is impossible to have more than 8 cols
+    """ centralize the rotation of the active slot on hover """
+    return " transform: rotate(-90deg) scale(1.50); transform-origin: center; z-index: 10; transition: transform 0.15s ease-in-out;" if vertical_rotation else ""
+
+def rotation_wrapper_height(cols: int, vertical_rotation: bool):
+    """ centralize the calc of the wrapper for the case, ensuring there is enought space to render unplaced disks """
+    return "" if not vertical_rotation else f"style= 'height: {__cols_wR__ * (cols+1)}px' "
 
 # ---------- Domain ----------
 def get_field(d: dict, key: str, default: str = "–", fmt_temp: bool = False) -> str:
@@ -229,9 +269,6 @@ def drive_label(d: dict) -> str:
 
 def drive_pool(d: dict) -> str:
     return get_field(d, "pool", "--SPARE--")
-
-def drive_address(d: dict) -> str:
-    return str(d.get("address") or "").strip()
 
 def drive_temp(d: dict) -> str:
     t = d.get("drive_temp")
@@ -275,17 +312,6 @@ def render_placeholder_slot(title: str) -> str:
         '</div>'
     ) 
     
-def render_outlook_placeholder_cell(title: str, colswidth: int, high_contrast_switch: bool = False) -> str:
-    t = escape(title)
-    c = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
-    return (
-        '<td style="border:1px solid #000;border-radius:6px;'
-        f'background-color:{c};width:{colswidth}px;height:58px;vertical-align:middle;'
-        'padding:6px 10px;">'
-        f'<div style="font-weight:bold;color:#fff;font-size:13px;">{t}</div>'
-        '</td>'
-    )
-    
 def render_sep_slot() -> str:
     return (
         '<div class="slot separator box-blank">'
@@ -313,19 +339,29 @@ def led_background_color(color: str, high_contrast_switch: bool = False) -> str:
     color = (color or "blank").lower()
     if high_contrast_switch:
         return "#F0F0F0"
-    if color == "green":
-        return "#3da94f"
-    elif color == "yellow":
-        return "#d6a31e"
-    elif color == "red":
-        return "#b32121"
-    elif color == "orange":
-        return "#D87904"
-    elif color == "blank":
-        return "#444444"
     else:
-        return "#3b3b3b"
-    
+        colors = {
+            "green": "#3da94f",
+            "yellow": "#d6a31e",
+            "red": "#b32121",
+            "orange": "#D87904",
+            "blank": "#9e9e9e",            
+        }
+        c = colors.get(color, "#9e9e9e")
+        return c
+
+def render_row_break(pos: int, cols: int, total_slots: int) -> str:
+    """
+    add on need a row break to accomplish the css rule of the web rich version to work properly
+    """
+    if cols > 0 and pos % cols == 0 and pos < total_slots:
+        return '<div class="row-break" aria-hidden="true">&nbsp;</div>'
+    return ""
+
+# ------------------------------------------------------------------    
+# ------------------------- HTML BUILDING --------------------------
+# ------------------------------------------------------------------
+
 # ---------- WEB: rich document with modal and all detail ----------
 def render_web_html(
     case: dict,
@@ -338,26 +374,38 @@ def render_web_html(
     has_real_case: bool,
     high_contrast_switch: bool
 ) -> str:
+    append_log("getting active slots")
     active = [int(x) for x in case["layout"]["activeSlots"]]
+    append_log("getting case name")
     name = case.get("name", case.get("id", "Case"))
     total_slots = cols * rows
+    append_log("getting bays")
     bays_json = json.dumps(bays_list, ensure_ascii=False)
+    append_log("check for the case orientation")
+    vertical_rotation = handle_rotate_layout(case)    
+    append_log(f"need rotation? {vertical_rotation}")
+    append_log("calculating css variables")
     colswidth = get_cols_width(cols)
+    gap = get_gap(cols)
+    rotate_layout = snipplet_rotation(cols, rows, vertical_rotation)
+    rotate_slot = slot_rotation(vertical_rotation)
     
+    append_log("set main colors")
     colors_block = f"""
 .box-red{{background:linear-gradient(180deg,#b32121,#7a1414);border:1px solid #a32020}}
 .box-yellow{{background:linear-gradient(180deg,#d6a31e,#927213);border:1px solid #c59616}}
 .box-green{{background:linear-gradient(180deg,#3da94f,#237a33);border:1px solid #166b2d}}
 .box-orange{{background:linear-gradient(180deg,#e97822,#a34f0c);border:1px solid #d26510}}
 .box-blank{{background:linear-gradient(180deg,#7b7b7b,#4f4f4f);border:1px solid #5e5e5e}}   
-.slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, {__c_placeholder_slot__}, #4527A0);}}
-.slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, {__c_placeholder_slot__}, #4527A0);}} 
+.slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, {__c_placeholder_slot__}, {__c_placeholder_slot_2__});}}
+.slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, {__c_placeholder_slot__}, {__c_placeholder_slot_2__});}} 
 .slot .line-1{{font-weight:800;color:#fff;font-size:13px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
 .slot .line-2{{font-weight:600;color:#cfe7ff;font-size:11px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
-.slot .line-3{{font-weight:600;color:#cccccc;font-size:11px;opacity:.9}}
+.slot .line-3{{font-weight:600;color:#cccccc;font-size:9px;opacity:.9}}
     """
     
     if high_contrast_switch:
+        append_log("colors swapped for the high contrast version")
         colors_block = f"""
 .box-red{{background:#f0f0f0;border:1px solid #1E3A5F}}
 .box-yellow{{background:#f0f0f0;border:1px solid #9A4F15}}
@@ -368,9 +416,9 @@ def render_web_html(
 .slot.separator.box-blank{{opacity:1; background: {__c_HC_placeholder_slot__};}}
 .slot .line-1{{font-weight:800;color:#000000;font-size:13px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
 .slot .line-2{{font-weight:600;color:#000000;font-size:11px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
-.slot .line-3{{font-weight:600;color:#000000;font-size:11px;opacity:.9}}
+.slot .line-3{{font-weight:600;color:#000000;font-size:9px;opacity:.9}}
         """        
-
+    append_log("set the main structure")
     head = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>{escape(name)}</title>
 <style>
@@ -382,8 +430,8 @@ body {{ margin:0; background:#0f0f0f; }}
 .wrapper{{color:var(--text);font-family:ui-monospace, Menlo, Consolas, monospace;
 display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px;gap:18px}}
 .notice{{background:#241f00;border:1px solid #5a4d00;color:#ffec9c;padding:8px 12px;border-radius:8px;font-size:12px}}
-.case{{display:grid;grid-template-columns:repeat({cols},{colswidth}px);grid-template-rows:repeat({rows},58px);
-gap:22px;padding:18px;background:var(--bg);border-radius:12px;border:3px solid var(--border);
+.case{{display:grid;grid-template-columns:repeat({cols},{colswidth}px);grid-template-rows:repeat({rows},{__row_h__}px);
+gap:{gap}px;padding:18px;background:var(--bg);border-radius:12px;border:3px solid var(--border);{rotate_layout}
 box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot{{border-radius:8px;display:flex;align-items:center;justify-content:flex-start;position:relative;padding:10px 12px;}}
 .slot .text{{display:flex;flex-direction:column;gap:3px}}
@@ -396,7 +444,7 @@ box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot .led.blank{{background:#9e9e9e;box-shadow:0 0 6px rgba(150,150,150,.45)}}
 .slot.empty{{border:1px dashed #333;opacity:.5}}
 .slot.filled{{cursor:pointer;transition:transform .06s ease-out, box-shadow .06s ease-out}}
-.slot.filled:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35)}}
+.slot.filled:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35);{rotate_slot}}}
 .badge{{position:fixed;top:16px;left:16px;color:#aaa;font-size:12px;letter-spacing:.3px}}
 /* right side block before */
 .slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
@@ -417,6 +465,7 @@ box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
   border-top-left-radius: 0;
   border: none!important;
 }}
+.row-break{{display:none;}}
 
 
 /* Modal (animated) */
@@ -441,12 +490,12 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 .kv{{display:grid;grid-template-columns:180px 1fr;gap:8px 14px;align-items:start}}
 .kv .k{{color:#a8a8a8}}
 .kv .v{{color:#e6e6e6;word-break:break-word;white-space:pre-wrap}}
-
+.rotation-wrapper{{ display: inline-block; width: fit-content;}}
 /* Unplaced panel */
 .unplaced{{width:min(900px,92vw);background:#151515;border:1px dashed #3a3a3a;border-radius:10px;padding:12px}}
 .unplaced h4{{margin:0 0 10px 0;color:#cfcfcf;font-size:13px}}
 .unplaced .slots{{display:flex;flex-wrap:wrap;gap:22px}}
-.unplaced .slot{{width:240px;height:58px;padding:10px 12px;border-radius:8px;position:relative;
+.unplaced .slot{{width:240px;height:{__row_h__}px;padding:10px 12px;border-radius:8px;position:relative;
   display:flex;align-items:center;justify-content:flex-start;cursor:pointer;transition:transform .06s ease-out, box-shadow .06s ease-out}}
 .unplaced .slot:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35)}}
 .unplaced .text{{display:flex;flex-direction:column;gap:3px}}
@@ -458,56 +507,74 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 </style></head><body>
 {(f'<div class="badge">{escape(name)}</div>' if has_real_case else '')}
 <div class="wrapper">
+<div class="rotation-wrapper" {rotation_wrapper_height(cols, vertical_rotation)}>
 {("<div class='notice'>No case selected — some drives are unplaced.</div>" if (unplaced_indices and not has_real_case) else "")}
 {("<div class='case'>" if has_real_case else '')}"""
     parts = [head]
 
     total_slots = cols * rows
+    append_log("mapping placeholder slots")
     placeholder_map = get_placeholder_map(case)
+    append_log("mapping active slots")
     active = [int(x) for x in case["layout"]["activeSlots"]]
     active_set = set(active) | set(placeholder_map.keys())
+    append_log("mapping separator slots")
     sep_slots = set(get_sep_slots(case))
     active_set |= sep_slots
+    append_log("all slots have been merged. Start cycling")
 
     for pos in range(1, total_slots + 1):
+        append_log(f">> {pos}")
         if pos not in active_set:
+            append_log("empty bay")
             hide_empty_bay = ' style="display:none;"' if not has_real_case else ''
             parts.append(f'<div class="slot empty"{hide_empty_bay}></div>')
             continue
         
         if pos in placeholder_map:
+            append_log("placeholder bay")
             parts.append(render_placeholder_slot(placeholder_map[pos]))
+            parts.append(render_row_break(pos, cols, total_slots))
             continue    
         
         if pos in sep_slots:
+            append_log("separator bay")
             parts.append(render_sep_slot())
+            parts.append(render_row_break(pos, cols, total_slots))
             continue            
 
+        append_log("real drive!")
         info = pos_to_info.get(pos)
         serial = info.get("serial") if info else None
         bay_idx = info.get("bay_index") if info else None
-
+        append_log(f"{serial}")
         if serial and serial in drive_lookup:
             d = drive_lookup[serial]
             parts.append(render_drive_line(d, bay_idx, high_contrast_switch))
+            append_log("drive generated")
 
         else:
             hide_empty_bay = ' style="display:none;"' if not has_real_case else ''
             parts.append(f'<div class="slot empty"{hide_empty_bay}></div>')
+            append_log("drive not correctly generated")
 
     # Unplaced drives panel (only if present and not hidden)
     if has_real_case:
-        parts.append("</div>")  # close .case
+        parts.append("</div></div>")  # close .case & rotation wrapper
     if unplaced_indices:
+        append_log("some drive are not placed, generating unplaced code")
         parts.append('<div class="unplaced">')
         parts.append('<h4>Unplaced drives</h4>')
         parts.append('<div class="slots">')
         for idx in unplaced_indices:
+            append_log(f"generating {idx}")
             b = bays_list[idx] or {}
             parts.append(render_drive_line(b, idx, high_contrast_switch))
+            append_log("drive generated")
         parts.append('</div></div>')
 
 
+    append_log("building modal and script")
     # Modal + script
     parts.append(f"""</div>
 
@@ -573,275 +640,10 @@ document.addEventListener('keydown', (e) => {{ if (e.key === 'Escape') closeModa
 </script>
 
 </body></html>""")
+    append_log("got the snipplet")
     return "\n".join(parts)
 
-
-# ---------- EMAIL grid version ----------
-def build_email_css(namespace: str = ".case-email", cols: int = __cols__, high_contrast_switch: bool = False) -> str:
-    ns = namespace
-    colswidth = get_cols_width(cols)
-    colors_block = f"""
-{ns} .box-red    {{ background:linear-gradient(180deg,#b32121,#7a1414); border:1px solid #a32020 }}
-{ns} .box-yellow {{ background:linear-gradient(180deg,#d6a31e,#927213); border:1px solid #c59616 }}
-{ns} .box-green  {{ background:linear-gradient(180deg,#3da94f,#237a33); border:1px solid #166b2d }}
-{ns} .box-orange {{ background:linear-gradient(180deg,#e97822,#a34f0c); border:1px solid #d26510 }}
-{ns} .box-blank  {{ background:linear-gradient(180deg,#7b7b7b,#4f4f4f); border:1px solid #5e5e5e }}
-{ns} .slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, {__c_placeholder_slot__}, #4527A0);}}
-{ns} .slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, {__c_placeholder_slot__}, #4527A0);}}
-{ns} .line-1 {{ font-weight:800; color:#fff; font-size:13px; letter-spacing:.2px; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
-{ns} .line-2 {{ font-weight:600; color:#cfe7ff; font-size:11px; opacity:.95; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
-{ns} .line-3 {{ font-weight:600; color:#cccccc; font-size:11px; opacity:.9 }}
-    """
-    
-    if high_contrast_switch:
-        colors_block = f"""
-{ns} .box-red    {{ background:#f0f0f0; border:1px solid #1E3A5F }}
-{ns} .box-yellow {{ background:#f0f0f0; border:1px solid #9A4F15 }}
-{ns} .box-green  {{ background:#f0f0f0; border:1px solid #234F22 }}
-{ns} .box-orange {{ background:#f0f0f0; border:1px solid #802828 }}
-{ns} .box-blank  {{ background:#f0f0f0; border:1px solid #4A4A4A }}
-{ns} .slot.placeholder.box-blank{{opacity:1; background: {__c_HC_placeholder_slot__};}}
-{ns} .slot.separator.box-blank{{opacity:1; background: {__c_HC_placeholder_slot__};}}
-{ns} .line-1 {{ font-weight:800; color:#000000; font-size:13px; letter-spacing:.2px; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
-{ns} .line-2 {{ font-weight:600; color:#000000; font-size:11px; opacity:.95; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }}
-{ns} .line-3 {{ font-weight:600; color:#000000; font-size:11px; opacity:.9 }}
-        """        
-    return f"""
-{ns} {{ color:#ddd; font-family:ui-monospace, Menlo, Consolas, monospace; }}
-{ns} .case {{
-  display:grid;
-  grid-template-columns:repeat(var(--cols,{__cols__}), {colswidth}px);
-  grid-auto-rows:58px;
-  gap:16px;
-  padding:10px;
-  background:#181818;
-  border-radius:12px;
-  border:1px solid #282828;
-  width: fit-content;
-  margin: 0 auto;
-}}
-{ns} .slot {{ border-radius:8px; display:flex; align-items:center; justify-content:flex-start; position:relative; padding:10px 12px; }}
-{ns} .text {{ display:flex; flex-direction:column; gap:3px }}
-{ns} .led {{ width:8px; height:8px; border-radius:50%; position:absolute; top:8px; right:10px; ; border: 1px solid #ffffff}}
-{ns} .led-hc{{position:absolute;top:8px;right:10px;font-weight:700;text-transform: uppercase;color: #000000}}
-{ns} .led.green  {{ background:#00ff55 }}
-{ns} .led.yellow {{ background:#ffd100 }}
-{ns} .led.red    {{ background:#ff3b3b }}
-{ns} .led.orange {{ background:#E4A11B }}
-{ns} .led.blank  {{ background:#9e9e9e }}
-{colors_block}
-{ns} .slot.empty {{ border:1px dashed #444; opacity:.55 }}
-{ns} .unplaced{{margin-top:10px;}}
-{ns} .unplaced .row{{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}}
-{ns} .unplaced .slot{{width:240px;height:58px;padding:10px 12px;border-radius:8px;position:relative;
-  display:flex;align-items:center;justify-content:flex-start;}}
-{ns} .unplaced .text{{display:flex;flex-direction:column;gap:3px}}
-{ns} .unplaced .led{{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:10px;}}
-/* right side block before */
-{ns} .slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
-{ns} .slot.placeholder.box-blank:has(+ .slot.separator.box-blank),
-{ns} .slot.separator.box-blank:has(+ .slot.placeholder.box-blank),
-{ns} .slot.separator.box-blank:has(+ .slot.separator.box-blank) {{
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  margin-right: -16px;
-  border: none!important;
-}}
-/* left side block after */
-{ns} .slot.placeholder.box-blank + .slot.placeholder.box-blank,
-{ns} .slot.placeholder.box-blank + .slot.separator.box-blank,
-{ns} .slot.separator.box-blank + .slot.placeholder.box-blank,
-{ns} .slot.separator.box-blank + .slot.separator.box-blank {{
-  margin-left: -16px;
-  border-top-left-radius: 0;
-  border: none!important;
-}}
-
-
-""".strip()
-
-def render_email_snippet(
-    case: dict,
-    rows: int,
-    cols: int,
-    pos_to_info: dict,
-    drive_lookup: dict,
-    bays_list: list,
-    unplaced_indices: List[int],
-    has_real_case: bool,
-    high_contrast_switch: bool
-) -> str:
-    placeholder_map = get_placeholder_map(case)
-    sep_slots = set(get_sep_slots(case))
-    active = set(int(x) for x in case["layout"]["activeSlots"])
-    active_set = active | set(placeholder_map.keys()) | sep_slots
-    total_slots = rows * cols
-    css = build_email_css(".case-email", cols, high_contrast_switch)
-
-    parts = [f"<style>{css}</style>"]
-    parts.append(f'<div class="case-email" style="--cols:{cols};">')
-    if has_real_case:
-        parts.append('  <div class="case">')
-
-        for pos in range(1, total_slots + 1):
-            if pos not in active_set:
-                parts.append('    <div class="slot empty"></div>')
-                continue
-            
-            if pos in placeholder_map:
-                parts.append(render_placeholder_slot(placeholder_map[pos]))
-                continue            
-            
-            if pos in sep_slots:
-                parts.append(render_sep_slot())
-                continue
-
-            info = pos_to_info.get(pos)
-            serial = info.get("serial") if info else None
-
-            if serial and serial in drive_lookup:
-                d = drive_lookup[serial]
-                parts.append(render_drive_line(d, -1, high_contrast_switch))
-            else:
-                parts.append('    <div class="slot empty"></div>')
-    if has_real_case:
-        parts.append('  </div>')
-
-    # Unplaced table
-    if unplaced_indices:
-        parts.append('<div class="unplaced">')
-        parts.append('<div class="row">')
-        for idx in unplaced_indices:
-            b = bays_list[idx] or {}
-            parts.append(render_drive_line(b, -1, high_contrast_switch))
-        parts.append('</div></div>')
-    return "\n".join(parts)
- 
-# ---------- EMAIL: first inline version ----------
-def render_outlook_email_snippet(
-    case: dict,
-    rows: int,
-    cols: int,
-    pos_to_info: dict,
-    drive_lookup: dict,
-    bays_list: list,
-    unplaced_indices: list[int],
-    has_real_case: bool,
-    high_contrast_switch: bool
-) -> str:
-    """Render a simplified, Outlook-compatible HTML email version with LED colors."""
-    placeholder_map = get_placeholder_map(case)
-    sep_slots = set(get_sep_slots(case))
-    active = set(int(x) for x in case["layout"].get("activeSlots", []))
-    active_set = active | set(placeholder_map.keys()) | sep_slots
-
-    parts = []
-    parts.append(
-        '<table align="center" border="0" cellpadding="6" cellspacing="0" style="border-collapse:collapse;background-color:#181818;border:1px solid #282828;border-radius:8px;">'
-    )
-
-    if has_real_case:
-        colswidth = get_cols_width(cols)
-        for r in range(rows):
-            parts.append("<tr>")
-            for c in range(cols):
-                pos = r * cols + c + 1
-                if pos not in active_set:
-                    parts.append(
-                        f'<td style="border:1px dashed #444;width:{colswidth}px;height:58px;text-align:center;vertical-align:middle;color:#777;font-family:Consolas,monospace;">&nbsp;</td>'
-                    )
-                    continue
-                if pos in placeholder_map:
-                    parts.append(render_outlook_placeholder_cell(placeholder_map[pos], colswidth, high_contrast_switch))
-                    continue                
-                if pos in sep_slots:
-                    parts.append(
-                        '<td style="border:1px solid #000000;border-radius:6px;'
-                        f'background-color:{__c_placeholder_slot__};width:{colswidth}px;height:58px;">&nbsp;</td>'
-                    )
-                    continue
-
-                info = pos_to_info.get(pos)
-                serial = info.get("serial") if info else None
-                if serial and serial in drive_lookup:
-                    d = drive_lookup[serial]
-                    line1 = escape(drive_label(d))
-                    line2 = escape(drive_pool(d))
-                    line3 = escape(drive_id(d))
-                    line4 = escape(drive_capacity(d))
-                    line5 = escape(drive_temp(d))
-                    led_color = d.get("led") or d.get("drive_color") or "blank"
-                    led_color = led_color.lower() if isinstance(led_color, str) else "blank"
-                    c_l1 = "#ffffff"
-                    c_l2 = "#cfe7ff"
-                    c_l3 = "#ccc"
-                    if high_contrast_switch:
-                        c_l1 = c_l2 = c_l3 = "#000000"                    
-
-                    parts.append(
-                        f"""
-                        <td style="border:1px solid #000000;border-radius:6px;background-color:{led_background_color(led_color, high_contrast_switch)};width:{colswidth}px;height:58px;vertical-align:middle;padding:6px 10px;">
-                        <table border="0" width="100%%" cellspacing="0" cellpadding="0">
-                            <tr>
-                            <td style="vertical-align:top;">
-                                <div style="font-weight:bold;color:{c_l1};font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform: uppercase">{line1}</div>
-                                <div style="color:{c_l2};font-size:11px;">{line2}</div>
-                                <div style="color:{c_l3};font-size:11px;">Drive: {line3} / {line4} / Temp: {line5}</div>
-                            </td>
-                            <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color, high_contrast_switch)}</td>
-                            </tr>
-                        </table>
-                        </td>
-                        """
-                    )                        
-
-                else:
-                    parts.append(
-                        f'<td style="border:1px dashed #444;width:{colswidth}px;height:58px;text-align:center;vertical-align:middle;color:#777;">&nbsp;</td>'
-                    )
-            parts.append("</tr>")
-    parts.append("</table>")
-
-    # Unplaced drives section
-    if unplaced_indices:
-        parts.append('<div style="margin-top:10px;text-align:center;">')
-        parts.append(
-            '<table border="0" cellpadding="6" cellspacing="0" align="center" style="border-collapse:collapse;">'
-        )
-        for idx in unplaced_indices:
-            b = bays_list[idx] or {}
-            line1 = escape(drive_label(b))
-            line2 = escape(drive_pool(b))
-            line3 = escape(drive_id(b))
-            line4 = escape(drive_capacity(b))
-            line5 = escape(drive_temp(b))            
-            led_color = b.get("led") or b.get("drive_color") or "blank"
-            led_color = led_color.lower() if isinstance(led_color, str) else "blank"
-            c_l1 = "#ffffff"
-            c_l2 = "#cfe7ff"
-            c_l3 = "#ccc"
-            if high_contrast_switch:
-                c_l1 = c_l2 = c_l3 = "#000000" 
-            parts.append(
-                f"""
-                <tr><td style="border:1px solid #000000;border-radius:6px;background-color:{led_background_color(led_color, high_contrast_switch)};width:240px;height:58px;padding:6px 10px;">
-                  <table border="0" width="100%%" cellspacing="0" cellpadding="0">
-                    <tr>
-                      <td style="vertical-align:top;">
-                        <div style="font-weight:bold;color:{c_l1};font-size:13px;">{line1}</div>
-                        <div style="color:{c_l2};font-size:11px;">{line2}</div>
-                        <div style="color:{c_l3};font-size:11px;">Drive: {line3} / {line4} / Temp: {line5}</div>
-                      </td>
-                      <td style="width:16px;text-align:right;vertical-align:top;">{led_dot(led_color, high_contrast_switch)}</td>
-                    </tr>
-                  </table>
-                </td></tr>
-                """
-            )
-        parts.append("</table></div>")
-
-    return "\n".join(parts)
-
+# -----------------------------------------------------------
 # ---------- EMAIL: second improved inline version ----------
 def render_table_email_snippet(
     case: dict,
@@ -857,42 +659,54 @@ def render_table_email_snippet(
     """
     Table-based email snippet inline version
     """
+    append_log("mapping placeholder slots")
     placeholder_map = get_placeholder_map(case)
+    append_log("mapping separator slots")
     sep_slots = set(get_sep_slots(case))
+    append_log("getting active slots")
     active = set(int(x) for x in case["layout"].get("activeSlots", []))
     active_set = active | set(placeholder_map.keys()) | sep_slots
+    append_log("all slots have been merged. Start cycling")
 
+    append_log("calculating inline style variables")
     colswidth = get_cols_width(cols)
+    colsheight = __row_h__
 
     parts: list[str] = []
 
+    append_log("building main table")
     parts.append(
-        '<table align="center" border="0" cellpadding="0" cellspacing="0" '
-        'style="border-collapse:separate;border-spacing:8px;'
-        'background-color:#181818;border:1px solid #282828;'
-        'border-radius:12px;padding:10px;">'
+        """
+        <table align="center" border="0" cellpadding="0" cellspacing="0"
+        style="border-collapse:separate;border-spacing:8px;
+        background-color:#181818;border:1px solid #282828;
+        border-radius:12px;padding:10px;">
+        """
     )
 
     if has_real_case:
+        append_log("start cycling")
         for r in range(rows):
             parts.append("<tr>")
             for c in range(cols):
                 pos = r * cols + c + 1
-
+                append_log(f">> {pos}")
                 if pos not in active_set:
+                    append_log("empty bay")
                     parts.append(
-                        f'<td style="width:{colswidth}px;height:58px;'
+                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px;'
                         'border:1px dashed #444444;border-radius:8px;'
                         'text-align:center;vertical-align:middle;">&nbsp;</td>'
                     )
                     continue
 
                 if pos in placeholder_map:
+                    append_log("placeholder bay")
                     title = escape(placeholder_map[pos])
                     bg = border = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
                     text_color = "#000000" if high_contrast_switch else "#FFFFFF"
                     parts.append(
-                        f'<td style="width:{colswidth}px;height:58px;'
+                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px;'
                         f'border:1px solid {border};border-radius:8px;'
                         f'background-color:{bg};padding:8px 12px;vertical-align:middle;">'
                         f'<div style="font-weight:800;font-size:13px;'
@@ -903,18 +717,20 @@ def render_table_email_snippet(
                     continue
 
                 if pos in sep_slots:
+                    append_log("separator bay")
                     bg = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
                     parts.append(
-                        f'<td style="width:{colswidth}px;height:58px;'
+                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px;'
                         f'border:1px solid {bg};border-radius:8px;'
                         f'background-color:{bg};">&nbsp;</td>'
                     )
                     continue
-
+                append_log("real drive!")
                 info = pos_to_info.get(pos)
                 serial = info.get("serial") if info else None
                 if serial and serial in drive_lookup:
                     d = drive_lookup[serial]
+                    append_log(f"{drive_label(d)}")
                     line1 = escape(drive_label(d))
                     line2 = escape(drive_pool(d))
                     line3 = escape(drive_id(d))
@@ -929,7 +745,7 @@ def render_table_email_snippet(
                     text_color_2 = "#000000" if high_contrast_switch else "#FFFFFF"
 
                     parts.append(
-                        f'<td style="width:{colswidth}px;height:58px;'
+                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px;'
                         f'border:1px solid {border};border-radius:8px;'
                         f'background-color:{bg};padding:8px 12px;vertical-align:middle;">'
                         '<table border="0" cellpadding="0" cellspacing="0" width="100%">'
@@ -941,7 +757,7 @@ def render_table_email_snippet(
                         f'<div style="font-weight:600;font-size:11px;'
                         f'color:{text_color_2};white-space:nowrap;overflow:hidden;'
                         f'text-overflow:ellipsis;">{line2}</div>'
-                        f'<div style="font-weight:600;font-size:11px;'
+                        f'<div style="font-weight:600;font-size:9px;'
                         f'color:{text_color_2};">Drive: {line3} / {line4} / Temp: {line5}</div>'
                         '</td>'
                         '<td style="width:40px;text-align:right;vertical-align:top;">'
@@ -951,23 +767,28 @@ def render_table_email_snippet(
                         '</table>'
                         '</td>'
                     )
+                    append_log("drive generated")
                 else:
                     parts.append(
-                        f'<td style="width:{colswidth}px;height:58px;'
+                        f'<td style="width:{colswidth}px;height:{colsheight}px;'
                         'border:1px dashed #444444;border-radius:8px;'
                         'text-align:center;vertical-align:middle;">&nbsp;</td>'
                     )
+                    append_log("drive not correctly generated")
             parts.append("</tr>")
 
     parts.append("</table>")
+    append_log("first table generated")
 
     # Unplaced drives
     if unplaced_indices:
+        append_log("some drive are not placed, generating unplaced table")
         parts.append(
             '<table border="0" cellpadding="0" cellspacing="0" align="center" '
             'style="margin-top:10px;border-collapse:separate;border-spacing:8px;">'
         )
         for i, idx in enumerate(unplaced_indices):
+            append_log(f"generating {idx}")
             if i % 2 == 0:
                 parts.append("<tr>")
             b = bays_list[idx] or {}
@@ -982,9 +803,9 @@ def render_table_email_snippet(
 
             bg = border = led_background_color(led_color, high_contrast_switch)
             text_color = "#000000" if high_contrast_switch else "#FFFFFF"
-
+ 
             parts.append(
-                '<td style="width:260px;height:58px;'
+                f'<td style="width:{colswidth}px;height:{colsheight}px;'
                 f'border:1px solid {border};border-radius:8px;'
                 f'background-color:{bg};padding:8px 12px;vertical-align:middle;">'
                 '<table border="0" cellpadding="0" cellspacing="0" width="100%">'
@@ -1006,12 +827,14 @@ def render_table_email_snippet(
                 '</table>'
                 '</td>'
             )
+            append_log("drive generated")
             if i % 2 == 1:
                 parts.append("</tr>")
         if len(unplaced_indices) % 2 == 1:
             parts.append("</tr>")
         parts.append("</table>")
-
+        append_log("unplaced table generated")
+    append_log("got the snipplet")
     return "\n".join(parts)
 
 # ---------- CLI ----------
@@ -1037,7 +860,7 @@ def main():
     append_log(f"preparing data...")
     # Safe case selection (handles missing/empty activeSlots)
     case_raw = cfg.get("case")
-    case, has_real_case = safe_case(case_raw)
+    case, has_real_case = validate_case(case_raw)
 
     cols = get_cols(case)
     rows = rows_from_case(case, cols)
@@ -1050,7 +873,7 @@ def main():
         unplaced_indices = [i for i, b in enumerate(bays_list) if is_real_drive(b)]
         pos_to_info = {}
 
-    # check for high contrast swtich, #TO-DO use bool in MR instad of string
+    # check for high contrast swtich, #TODO use bool in MR instad of string
     high_contrast_switch = str(cfg.get("high_contrast", "false")).lower() == "true"
 
     append_log(f"rendering rich text file")
@@ -1061,31 +884,12 @@ def main():
             f.write(web_html)
     except Exception as e:
         process_output(True, f"Something wrong on rendering richt text file {e}", 1)  
-        
-    append_log(f"rendering snipplet file")
-    try:
-        email_html = render_email_snippet(
-            case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case, high_contrast_switch)
-        with open(__output_render_snipplet__, "w", encoding="utf-8") as f:
-            f.write(email_html)
-    except Exception as e:
-        process_output(True, f"Something wrong on rendering snipplet file {e}", 1)              
-
-    append_log(f"rendering Outlook-compatible file")
-    try:
-        outlook_html = render_outlook_email_snippet(
-            case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case, high_contrast_switch)
-        with open(__output_render_outlook_snipplet__, "w", encoding="utf-8") as f:
-            f.write(outlook_html)
-    except Exception as e:
-        process_output(True, f"Something wrong on rendering Outlook snipplet file {e}", 1)
     
     append_log(f"rendering table-based email snipplet")
     try:
         table_email_html = render_table_email_snippet(
             case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case, high_contrast_switch)
-        #with open(__output_render_email_tablesnippet__, "w", encoding="utf-8") as f:
-        with open(__output_render_outlook_snipplet__, "w", encoding="utf-8") as f:    
+        with open(__output_render_snipplet__, "w", encoding="utf-8") as f:    
             f.write(table_email_html)
     except Exception as e:
         process_output(True, f"Something wrong on rendering table-based email snipplet file {e}", 1)     
