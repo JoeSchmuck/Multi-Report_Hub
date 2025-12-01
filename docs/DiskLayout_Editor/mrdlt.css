@@ -663,10 +663,6 @@ header.container.animate-in {
     transform-origin: top center;    
 }
 
-.bay-wide .meta:hover {
-    display: block;   
-}
-
 .bay-wide .ph-input:hover {
   transform: scale(1.5);
   width: 200px;

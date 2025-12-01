@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.12
+##### V 0.13
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.12"
+__version__ = "0.13"
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
 __script_name__ = os.path.basename(__script_path__)
@@ -24,6 +24,7 @@ __cols_breakout__ = 8 #8 used to determine the max limit to auto rotate the web 
 __cols_w__ = 275 # standard cols width
 __cols_wR__ = 200 # reduced cols width
 __row_h__ = 58 # standard rows height
+__row_hR__ = 70 # increased rows height
 
 def assert_outputs_secure_or_abort() -> bool:
     """
@@ -214,7 +215,7 @@ def get_cols_width(cols: int) -> int:
 
 def get_rows_height(vertical_rotation: bool) -> int:
     """ centralize the calc of the rows height """  
-    return __row_h__ if not vertical_rotation else 70 
+    return __row_h__ if not vertical_rotation else __row_hR__ 
 
 def get_gap(cols: int, rows: int) -> int:
     """ centralize the calc of the gap width """
@@ -346,6 +347,11 @@ def render_row_break(pos: int, cols: int, total_slots: int) -> str:
     if cols > 0 and pos % cols == 0 and pos < total_slots:
         return '<div class="row-break" aria-hidden="true">&nbsp;</div>'
     return ""
+
+def break_string(val: str) -> str:
+    if not val:
+        return ""
+    return "<br/>".join(val)    
 
 # ------------------------------------------------------------------    
 # ------------------------- HTML BUILDING --------------------------
@@ -662,18 +668,24 @@ def render_table_email_snippet(
     append_log("all slots have been merged. Start cycling")
 
     append_log("calculating inline style variables")
+    vertical_rotation = handle_rotate_layout(case)
     colswidth = get_cols_width(cols)
-    colsheight = __row_h__
+    colsheight = get_rows_height(cols)
+    cellpadding = 0 if not vertical_rotation else 10
+    unpl_colswidth, unpl_rowsheight = colswidth+30, colsheight
+    if vertical_rotation:
+        append_log("swapping col-row")
+        colswidth, colsheight = colsheight, colswidth    
 
     parts: list[str] = []
 
     append_log("building main table")
     parts.append(
-        """
-        <table align="center" border="0" cellpadding="0" cellspacing="0"
-        style="border-collapse:separate;border-spacing:8px;
+        f"""
+        <table align="center" border="0" cellpadding="{cellpadding}" cellspacing="0"
+        style="border-collapse:separate;border-spacing:5px;
         background-color:#181818;border:1px solid #282828;
-        border-radius:12px;padding:10px;">
+        border-radius:12px;padding:5px;">
         """
     )
 
@@ -687,7 +699,7 @@ def render_table_email_snippet(
                 if pos not in active_set:
                     append_log("empty bay")
                     parts.append(
-                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px;'
+                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px; min-height:{colsheight}px;'
                         'border:1px dashed #444444;border-radius:8px;'
                         'text-align:center;vertical-align:middle;">&nbsp;</td>'
                     )
@@ -696,13 +708,15 @@ def render_table_email_snippet(
                 if pos in placeholder_map:
                     append_log("placeholder bay")
                     title = escape(placeholder_map[pos])
+                    if vertical_rotation:
+                        title = break_string(title)
                     bg = border = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
                     text_color = "#000000" if high_contrast_switch else "#FFFFFF"
                     parts.append(
-                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px;'
+                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px; min-height:{colsheight}px;'
                         f'border:1px solid {border};border-radius:8px;'
                         f'background-color:{bg};padding:8px 12px;vertical-align:middle;">'
-                        f'<div style="font-weight:800;font-size:13px;'
+                        f'<div style="font-weight:800;font-size:{'10' if vertical_rotation else '13'}px;'
                         f'color:{text_color};white-space:nowrap;overflow:hidden;'
                         f'text-overflow:ellipsis;">{title}</div>'
                         '</td>'
@@ -713,7 +727,7 @@ def render_table_email_snippet(
                     append_log("separator bay")
                     bg = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
                     parts.append(
-                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px;'
+                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px; min-height:{colsheight}px;'
                         f'border:1px solid {bg};border-radius:8px;'
                         f'background-color:{bg};">&nbsp;</td>'
                     )
@@ -725,6 +739,8 @@ def render_table_email_snippet(
                     d = drive_lookup[serial]
                     append_log(f"{drive_label(d)}")
                     line1 = escape(drive_label(d))
+                    if vertical_rotation:
+                        line1 = break_string(line1)
                     line2 = escape(drive_pool(d))
                     line3 = escape(drive_id(d))
                     line4 = escape(drive_capacity(d))
@@ -738,20 +754,20 @@ def render_table_email_snippet(
                     text_color_2 = "#000000" if high_contrast_switch else "#FFFFFF"
 
                     parts.append(
-                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px;'
+                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px; min-height:{colsheight}px;'
                         f'border:1px solid {border};border-radius:8px;'
                         f'background-color:{bg};padding:8px 12px;vertical-align:middle;">'
                         '<table border="0" cellpadding="0" cellspacing="0" width="100%">'
                         '<tr>'
                         '<td style="vertical-align:top;">'
-                        f'<div style="font-weight:800;font-size:13px;'
+                        f'<div style="font-weight:800;font-size:{11 if vertical_rotation else 10}px;'
                         f'color:{text_color_1};white-space:nowrap;overflow:hidden;'
                         f'text-overflow:ellipsis;">{line1}</div>'
-                        f'<div style="font-weight:600;font-size:11px;'
+                        f'<div style="font-weight:600;'
                         f'color:{text_color_2};white-space:nowrap;overflow:hidden;'
-                        f'text-overflow:ellipsis;">{line2}</div>'
-                        f'<div style="font-weight:600;font-size:9px;'
-                        f'color:{text_color_2};">Drive: {line3} / {line4} / Temp: {line5}</div>'
+                        f'text-overflow:ellipsis;{' font-size:9px;' if vertical_rotation else 'font-size:11px;'}">{'</br>' if vertical_rotation else ''}{line2}</div>'
+                        f'<div style="font-weight:600;font-size:9px; '
+                        f'color:{text_color_2};">Drive: {line3} {'</br>' if vertical_rotation else '/'} {line4} {'</br>' if vertical_rotation else '/'} Temp: {line5}</div>'
                         '</td>'
                         '<td style="width:40px;text-align:right;vertical-align:top;">'
                         f'{led_dot(led_color, high_contrast_switch)}'
@@ -798,7 +814,7 @@ def render_table_email_snippet(
             text_color = "#000000" if high_contrast_switch else "#FFFFFF"
  
             parts.append(
-                f'<td style="width:{colswidth}px;height:{colsheight}px;'
+                f'<td style="width:{unpl_colswidth}px;height:{unpl_rowsheight}px;'
                 f'border:1px solid {border};border-radius:8px;'
                 f'background-color:{bg};padding:8px 12px;vertical-align:middle;">'
                 '<table border="0" cellpadding="0" cellspacing="0" width="100%">'
