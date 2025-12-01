@@ -103,6 +103,19 @@
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <span>Case</span>
             <input type="text" id="current-case-label" class="form-control form-control-sm d-inline-block" style="width: 300px;" maxlength="50" value="No Case"/>
+            <div class="form-check form-check-inline align-items-center">
+              <input class="form-check-input" type="checkbox" id="rotate-layout-switch">
+              <label class="form-check-label" for="rotate-layout-switch" title="vertical rotation, output only">Rotate layout</label>
+              <button
+                type="button"
+                class="btn btn-link btn-sm p-0 ms-1 text-muted"
+                id="rotate-layout-help-btn"
+                aria-label="Rotate layout help"
+                data-bs-toggle="modal"
+                data-bs-target="#rotateLayoutHelpModal">
+                <i class="fa-solid fa-circle-question"></i>
+              </button>              
+            </div>
           </div>
         </div>
         <div class="card-body" id="mr-case-body-container">
@@ -135,9 +148,9 @@
           <div class="col-6 col-md-4">
             <label class="form-label small mb-1">Bays (min/max)</label>
             <div class="input-group input-group-sm">
-              <input id="case-search-bays-min" type="number" min="1" max="48" class="form-control" placeholder="min">
+              <input id="case-search-bays-min" type="number" min="1" max="360" class="form-control" placeholder="min">
               <span class="input-group-text">–</span>
-              <input id="case-search-bays-max" type="number" min="1" max="48" class="form-control" placeholder="max">
+              <input id="case-search-bays-max" type="number" min="1" max="360" class="form-control" placeholder="max">
             </div>
           </div>
           <div class="col-6 col-md-2 d-flex">
@@ -195,11 +208,15 @@
           <li><b>Drag & Drop</b> disks from the <em>Unassigned</em> section into available bays.</li>
           <li><b>Double-click</b> a disk in a bay to unassign it.</li>
           <li>Use <b>Choose Case</b> to select a case model before assigning disks.</li>
-          <li>Use <b>Build custom case</b> to build from scratch your layout</li>
-          <li>Use <b>Choose Case</b> and then <b>Build custom case</b> to take little adjustment on existing layout</li>
           <li><b>Save Config</b> to export your current layout to JSON.</li>
           <li><b>Load Config</b> to import a previously saved layout.</li>
         </ul>
+        <h6 class="fw-bold mt-4 mb-2">🪛 Advanced options</h6>
+        <ul class="small">
+          <li>Use <b>Build custom case</b> to build from scratch your layout</li>
+          <li>Use <b>Choose Case</b> and then <b>Build custom case</b> to take little adjustment on existing layout</li>
+          <li>Check <b>Rotate layout</b> to perform a 90° slot rotation (output only)</li>
+        </ul>        
         <h6 class="fw-bold mt-4 mb-2">🧩 Need more?</h6>
         <p>For documentation, updates or issues, visit the main project page:</p>
         <a href="https://github.com/JoeSchmuck/Multi-Report" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
@@ -261,6 +278,37 @@
 
     <div class="mr-modal__footer">
       <button class="btn" id="ccm-cancel">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- help modal for vertical layout -->
+<div class="modal fade" id="rotateLayoutHelpModal" tabindex="-1"
+     aria-labelledby="rotateLayoutHelpLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fs-6" id="rotateLayoutHelpLabel">
+          Rotate layout helper
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <h6 class="fw-bold mb-2">🔁 How this setting works?</h6>
+        <p class="mb-2">
+          To give you more layout flexibility, you can choose to orient your bay slots vertically instead of horizontally.<br><br>
+          For stylistic and compatibility reasons, there is a forced breakout: any layout <strong>with 9 or more columns</strong> will always be rotated automatically.<br>
+          Layouts with 6, 7, or 8 columns will be rotated here in the GUI to avoid as possible scrolls, but they can still be displayed horizontally in the final rendered output just leaving the box unchecked.
+        </p>
+      </div>
+
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
     </div>
   </div>
 </div>

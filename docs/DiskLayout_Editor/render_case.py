@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.11
+##### V 0.12
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.11"
+__version__ = "0.12"
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
 __script_name__ = os.path.basename(__script_path__)
@@ -18,7 +18,8 @@ __c_placeholder_slot__ = "#7E57C2"
 __c_placeholder_slot_2__ = "#4527A0"
 __c_HC_placeholder_slot__ = "#9FA6B2"
 __cols__ = 4 # just a fallback 
-__cols_width_limit__ = 5 # used to determine the max limit to decrease cols width to 200
+__cols_n_limit__ = 5 # used to determine the max limit to decrease cols width to 200
+__rows_n_limit__ = 10 # used to determine the max number to decrease gap
 __cols_breakout__ = 8 #8 used to determine the max limit to auto rotate the web rich version
 __cols_w__ = 275 # standard cols width
 __cols_wR__ = 200 # reduced cols width
@@ -29,7 +30,7 @@ def assert_outputs_secure_or_abort() -> bool:
     Security check 
     """
     append_log("testing symlink - size on output files")
-    max_output_size = 50 * 1024
+    max_output_size = 100 * 1024
     for out_path in (__output_render__, __output_render_snipplet__):
         if os.path.lexists(out_path) and os.path.islink(out_path):
             process_output(True, f"[SECURITY ERROR]: output file '{out_path}' is a symlink; refusing to write.", 1)
@@ -115,7 +116,6 @@ def handle_rotate_layout(case: dict) -> bool:
         return is_rotate_enabled or cols > __cols_breakout__
     except Exception:
         return False    
-
 
 def validate_case(original_case: dict | None) -> Tuple[dict, bool]:
     """
@@ -210,30 +210,19 @@ def get_sep_slots(case: dict) -> List[int]:
 
 def get_cols_width(cols: int) -> int:
     """ centralize the calc of the cols width """
-    return __cols_w__ if cols <= __cols_width_limit__ else __cols_wR__
+    return __cols_w__ if cols <= __cols_n_limit__ else __cols_wR__
 
-def get_gap(cols: int) -> int:
+def get_rows_height(vertical_rotation: bool) -> int:
+    """ centralize the calc of the rows height """  
+    return __row_h__ if not vertical_rotation else 70 
+
+def get_gap(cols: int, rows: int) -> int:
     """ centralize the calc of the gap width """
-    return 22 if cols <= __cols_width_limit__ else 10
-
-def snipplet_rotation(cols: int, rows: int, vertical_rotation: bool): #TODO: now is impossible to have more than 8 cols
-    """ centralize and handle the case rotation """
-    if not vertical_rotation:
-        return ""    
-    col_w = get_cols_width(cols)
-    total_width = cols * col_w + (cols - 1)
-    total_height = rows * __row_h__ + (rows - 1)
-    ratio = total_width / max(total_height, 1) / 2
-    translate_percent = ratio * 100.00
-    return f" transform: rotate(90deg) translateY(-{translate_percent:.2f}%); transform-origin: top left;"
+    return 22 if cols <= __cols_n_limit__ and rows <= __rows_n_limit__ else 10
     
-def slot_rotation(vertical_rotation: bool): #TODO: now is impossible to have more than 8 cols
+def slot_rotation(vertical_rotation: bool):
     """ centralize the rotation of the active slot on hover """
     return " transform: rotate(-90deg) scale(1.50); transform-origin: center; z-index: 10; transition: transform 0.15s ease-in-out;" if vertical_rotation else ""
-
-def rotation_wrapper_height(cols: int, vertical_rotation: bool):
-    """ centralize the calc of the wrapper for the case, ensuring there is enought space to render unplaced disks """
-    return "" if not vertical_rotation else f"style= 'height: {__cols_wR__ * (cols+1)}px' "
 
 # ---------- Domain ----------
 def get_field(d: dict, key: str, default: str = "–", fmt_temp: bool = False) -> str:
@@ -385,9 +374,13 @@ def render_web_html(
     vertical_rotation = handle_rotate_layout(case)    
     append_log(f"need rotation? {vertical_rotation}")
     append_log("calculating css variables")
+    gap = get_gap(cols, rows)
     colswidth = get_cols_width(cols)
-    gap = get_gap(cols)
-    rotate_layout = snipplet_rotation(cols, rows, vertical_rotation)
+    rowsheight = get_rows_height(vertical_rotation) #__row_h__
+    unpl_colswidth, unpl_rowsheight = colswidth, rowsheight
+    if vertical_rotation:
+        append_log("swapping col-row")
+        colswidth, rowsheight = rowsheight, colswidth
     rotate_slot = slot_rotation(vertical_rotation)
     
     append_log("set main colors")
@@ -430,8 +423,8 @@ body {{ margin:0; background:#0f0f0f; }}
 .wrapper{{color:var(--text);font-family:ui-monospace, Menlo, Consolas, monospace;
 display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px;gap:18px}}
 .notice{{background:#241f00;border:1px solid #5a4d00;color:#ffec9c;padding:8px 12px;border-radius:8px;font-size:12px}}
-.case{{display:grid;grid-template-columns:repeat({cols},{colswidth}px);grid-template-rows:repeat({rows},{__row_h__}px);
-gap:{gap}px;padding:18px;background:var(--bg);border-radius:12px;border:3px solid var(--border);{rotate_layout}
+.case{{display:grid;grid-template-columns:repeat({cols},{colswidth}px);grid-template-rows:repeat({rows},{rowsheight}px);
+gap:{gap}px;padding:18px;background:var(--bg);border-radius:12px;border:3px solid var(--border);
 box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot{{border-radius:8px;display:flex;align-items:center;justify-content:flex-start;position:relative;padding:10px 12px;}}
 .slot .text{{display:flex;flex-direction:column;gap:3px}}
@@ -445,6 +438,7 @@ box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot.empty{{border:1px dashed #333;opacity:.5}}
 .slot.filled{{cursor:pointer;transition:transform .06s ease-out, box-shadow .06s ease-out}}
 .slot.filled:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35);{rotate_slot}}}
+{('.case .slot.filled .text { transform: rotate(90deg) translate(5%, 0%); transform-origin: top center; }' if vertical_rotation else '')}
 .badge{{position:fixed;top:16px;left:16px;color:#aaa;font-size:12px;letter-spacing:.3px}}
 /* right side block before */
 .slot.placeholder.box-blank:has(+ .slot.placeholder.box-blank),
@@ -495,7 +489,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 .unplaced{{width:min(900px,92vw);background:#151515;border:1px dashed #3a3a3a;border-radius:10px;padding:12px}}
 .unplaced h4{{margin:0 0 10px 0;color:#cfcfcf;font-size:13px}}
 .unplaced .slots{{display:flex;flex-wrap:wrap;gap:22px}}
-.unplaced .slot{{width:240px;height:{__row_h__}px;padding:10px 12px;border-radius:8px;position:relative;
+.unplaced .slot{{width:{unpl_colswidth}px;height:{unpl_rowsheight}px;padding:10px 12px;border-radius:8px;position:relative;
   display:flex;align-items:center;justify-content:flex-start;cursor:pointer;transition:transform .06s ease-out, box-shadow .06s ease-out}}
 .unplaced .slot:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35)}}
 .unplaced .text{{display:flex;flex-direction:column;gap:3px}}
@@ -507,7 +501,6 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 </style></head><body>
 {(f'<div class="badge">{escape(name)}</div>' if has_real_case else '')}
 <div class="wrapper">
-<div class="rotation-wrapper" {rotation_wrapper_height(cols, vertical_rotation)}>
 {("<div class='notice'>No case selected — some drives are unplaced.</div>" if (unplaced_indices and not has_real_case) else "")}
 {("<div class='case'>" if has_real_case else '')}"""
     parts = [head]
@@ -560,7 +553,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
 
     # Unplaced drives panel (only if present and not hidden)
     if has_real_case:
-        parts.append("</div></div>")  # close .case & rotation wrapper
+        parts.append("</div>")  # close .case
     if unplaced_indices:
         append_log("some drive are not placed, generating unplaced code")
         parts.append('<div class="unplaced">')
@@ -873,7 +866,7 @@ def main():
         unplaced_indices = [i for i, b in enumerate(bays_list) if is_real_drive(b)]
         pos_to_info = {}
 
-    # check for high contrast swtich, #TODO use bool in MR instad of string
+    # check for high contrast swtich - unused from case defintion bool(cfg.get("case", {}).get("high_contrast", False)) 
     high_contrast_switch = str(cfg.get("high_contrast", "false")).lower() == "true"
 
     append_log(f"rendering rich text file")

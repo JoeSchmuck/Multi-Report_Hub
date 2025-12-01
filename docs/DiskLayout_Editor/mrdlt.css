@@ -92,7 +92,7 @@ html {
   left: 0;
   top: -1px;
   bottom: -1px;
-  width: 6px;
+  /*width: 6px;*/
   border-radius: .5rem 0 0 .5rem;
   background: #9e9e9e;
 }
@@ -102,9 +102,17 @@ html {
   width: 25px;
 }
 
+.bay-wide .disk.clr-green::before {
+  width: 0;
+}
+
 .disk.clr-yellow::before {
   background: #f1c40f;
   width: 25px;
+}
+
+.bay-wide .disk.clr-yellow::before {
+  width: 0;
 }
 
 .disk.clr-red::before {
@@ -112,14 +120,26 @@ html {
   width: 25px;
 }
 
+.bay-wide .disk.clr-red::before {
+  width: 0;
+}
+
 .disk.clr-orange::before {
   background: #e67e22;
   width: 25px;
 }
 
+.bay-wide .disk.clr-orange::before {
+  width: 0;
+}
+
 .disk.clr-blank::before {
   background: #9e9e9e;
   width: 25px;
+}
+
+.bay-wide .disk.clr-blank::before {
+  width: 0;
 }
 
 [data-bs-theme="dark"] .disk:hover {
@@ -444,6 +464,7 @@ header.container.animate-in {
 }
 
 .bay.slot-placeholder .ph-input {
+  position: relative;
   width: 100%;
   height: 60px;
   padding: .35rem .6rem;
@@ -626,9 +647,11 @@ header.container.animate-in {
 }
 
 /* attempt to fix wide layout */
+/*
 .bay-wide {
   width: 230px;
 }
+*/
 
 .bay-wide .meta {
     display: none;
@@ -636,8 +659,21 @@ header.container.animate-in {
 
 .bay-wide .fw-semibold {
     font-size:11px;
+    transform: rotate(90deg) translate(0%, 100%);
+    transform-origin: top center;    
+}
+
+.bay-wide .meta:hover {
+    display: block;   
+}
+
+.bay-wide .ph-input:hover {
+  transform: scale(1.5);
+  width: 200px;
+  z-index: 9999;
 }
 
 .scroll-x {
   overflow-x: auto;  
 }
+

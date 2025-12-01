@@ -69,8 +69,19 @@ function loadCaseModels(){
 
 function setCaseLabel(){
   const $label = $('#current-case-label');
-  if (!currentCase) { $label.val('No case'); return; }
-  $label.val(currentCase.name || currentCase.id);
+  const $rot   = $('#rotate-layout-switch');
+
+  if (!currentCase) { 
+    $label.val('No case');
+    if ($rot.length)   $rot.prop('checked', false);
+    return;
+  }
+  $label.val(currentCase.name || currentCase.id); 
+  if ($rot.length) {
+    const rotateFlag = !!(currentCase.layout && currentCase.layout.rotate);
+    $rot.prop('checked', rotateFlag);
+  }
+
 }
 
 function buildEmptyCaseHint(){
@@ -144,20 +155,40 @@ function computeActivePositions(model){
   return { rows, cols, active: positions }; 
 }
 
-// --- helper to better handle huge case TODO--> ADJUST THIS IN CASE INDEX.HTML CHANGE
-function apply8colpatch(cols) {
-  const isWide = cols >= 6;
+// --- helper to better handle huge case and now vertical orientation
+// the render py can handle smoothly 8 orizontal cols, instead the GUI break at 6, the goal is to preserve consistent output for both
+function apply8colpatch(cols,rows) {
+  const $rot = $('#rotate-layout-switch');
+  const rotateChecked = $rot.length ? $rot.is(':checked') : false;  
+  const isBreakout = cols > 8;
+  var isWide = cols >= 6;
+  if (isWide && isBreakout && !rotateChecked) {
+    $rot.prop('checked', true);
+    if (currentCase && currentCase.layout) {
+      currentCase.layout.rotate = true;
+    }
+  }  
+  if (!isWide && rotateChecked) {
+    isWide = true;
+  }  
   const $containerbody = $('#mr-case-body-container');
   const $left  = $('#mr-unassigned-disk-container');
   const $right = $('#mr-case-container');  
   $left.removeClass('col-lg-12 col-lg-3 col-lg-2');
   $right.removeClass('col-lg-12 col-lg-9 col-lg-10');  
-  $containerbody.removeClass('.scroll-x');
+  $containerbody.removeClass('scroll-x');
+  const $grid = $containerbody.find('#case');
+  var gridcols = "1fr"
+  var gridrows = "80px"
+
   if (isWide) {
     setTimeout(() => { $('.bay').addClass('bay-wide');}, 50);
     $left.addClass('col-lg-2');
     $right.addClass('col-lg-10');
     $containerbody.addClass('scroll-x');
+    if(cols >10) { gridcols = "80px";}
+    else {gridcols = "120px";}
+    gridrows = "220px"; 
     toastr.info(
       'The layout was adjusted to allow dragging across all columns.',
       'Wide layout enabled',
@@ -165,9 +196,14 @@ function apply8colpatch(cols) {
   }
   else {
     $left.addClass('col-lg-3');
-    $right.addClass('col-lg-9');
+    $right.addClass('col-lg-9');        
     setTimeout(() => { $('.bay').removeClass('bay-wide');}, 50);
-  }
+  } 
+
+  $grid.css({
+    'grid-template-columns': `repeat(${cols}, ${gridcols})`,
+    'grid-template-rows':    `repeat(${rows}, ${gridrows})`
+  });    
 
 }
 
@@ -181,14 +217,14 @@ function buildCase(){
   catch(err){ toastr.error(String(err)); return; }
 
   const { rows, cols, active } = layout;
-  apply8colpatch(cols);
+  apply8colpatch(cols,rows);
   const actSet = new Set(active.map(p=>`${p.row}-${p.col}`));
   const sepSet = (currentCase?.layout?.sepSlots && Array.isArray(currentCase.layout.sepSlots))
     ? new Set(currentCase.layout.sepSlots.map(n => parseInt(n, 10)))
     : null;
   $case.removeClass('empty-hint').addClass('grid')
-    .css({'grid-template-columns': `repeat(${cols}, 1fr)`, //
-    'grid-template-rows': `repeat(${rows}, 70px)`})  
+    //.css({'grid-template-columns': `repeat(${cols}, 1fr)`, //
+    //'grid-template-rows': `repeat(${rows}, 70px)`})  
     .empty();
 
   let bayIndex = 0;
@@ -369,6 +405,7 @@ function buildModelFromFileCase(fileCase, fallbackBaysCount){
     bays: active.length,
     description: 'Loaded from config file',
     layout: {
+      rotate: !!L.rotate,
       rows, cols,
       activeSlots: active,
       placeholderSlots: Array.isArray(L.placeholderSlots) ? L.placeholderSlots : [],
@@ -392,8 +429,8 @@ function buildModelFromFileCase(fileCase, fallbackBaysCount){
   if (!openBtn || !modal) return;
 
   // Populate R/C options (12x8 MAX)
-  fillNumericSelect(rowsSel, 1, 12, 6); // default 6 max 12
-  fillNumericSelect(colsSel, 1, 8, 4);   // default 4 max 8
+  fillNumericSelect(rowsSel, 1, 24, 6); // default 6 max 24
+  fillNumericSelect(colsSel, 1, 24, 4);   // default 4 max 24
 
   //openBtn.addEventListener('click', () => openModal(modal));
   openBtn.addEventListener('click', () => {
@@ -503,8 +540,8 @@ function buildCustomCaseFromGrid(){
   const colsSel = document.getElementById('ccm-cols');
   const gridEl  = document.getElementById('ccm-grid');
 
-  const rows = Math.max(1, Math.min(12, parseInt(rowsSel?.value,10)||1));
-  const cols = Math.max(1, Math.min(8,  parseInt(colsSel?.value,10)||1));
+  const rows = Math.max(1, Math.min(24, parseInt(rowsSel?.value,10)||1));
+  const cols = Math.max(1, Math.min(24,  parseInt(colsSel?.value,10)||1));
 
   const selects = gridEl ? gridEl.querySelectorAll('.ccm-slot-kind') : [];
   const activeSlots = [];
@@ -593,7 +630,7 @@ function buildStateMapFromCaseModel(model){
 }
 
 function loadCaseIntoBuilder(container, rowsSel, colsSel, model){
-  const maxRows = 12, maxCols = 8;
+  const maxRows = 24, maxCols = 24;
 
   if (model && model.layout){
     const R = Math.max(1, Math.min(maxRows, parseInt(model.layout.rows,10) || 6));
@@ -998,7 +1035,7 @@ function populateCaseModal(){
 
 
 // MRCE-style version badge (optional)
-(function(){var el=document.getElementById('mr-v'); if(el){el.textContent='v1.2 BETA';}})();
+(function(){var el=document.getElementById('mr-v'); if(el){el.textContent='v1.3 BETA';}})();
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1039,4 +1076,20 @@ $(document).on('click', '#btn-start-from-scratch', function () {
     const cm = bootstrap.Modal.getInstance(document.getElementById('mr-caseModal'));
     cm?.hide();
     setTimeout(() => { $('#open-custom-case-modal')[0].click(); }, 500);
+});
+
+$(document).on('change', '#rotate-layout-switch', function () {
+  if (!currentCase || !currentCase.layout) return;
+  const checked = $(this).is(':checked');
+  currentCase.layout.rotate = checked;
+  const cols = getColsFromModel(currentCase);
+  let rows = currentCase.layout.rows;
+  if (!rows) {
+    try {
+      rows = computeActivePositions(currentCase).rows;
+    } catch (e) {
+      rows = 1;
+    }
+  }
+  apply8colpatch(cols, rows);
 });
