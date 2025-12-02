@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.13
+##### V 0.14
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.13"
+__version__ = "0.14"
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
 __script_name__ = os.path.basename(__script_path__)
@@ -716,7 +716,7 @@ def render_table_email_snippet(
                         f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px; min-height:{colsheight}px;'
                         f'border:1px solid {border};border-radius:8px;'
                         f'background-color:{bg};padding:8px 12px;vertical-align:middle;">'
-                        f'<div style="font-weight:800;font-size:{'10' if vertical_rotation else '13'}px;'
+                        f'<div style="font-weight:800;font-size:{"10" if vertical_rotation else "13"}px;'
                         f'color:{text_color};white-space:nowrap;overflow:hidden;'
                         f'text-overflow:ellipsis;">{title}</div>'
                         '</td>'
@@ -765,9 +765,9 @@ def render_table_email_snippet(
                         f'text-overflow:ellipsis;">{line1}</div>'
                         f'<div style="font-weight:600;'
                         f'color:{text_color_2};white-space:nowrap;overflow:hidden;'
-                        f'text-overflow:ellipsis;{' font-size:9px;' if vertical_rotation else 'font-size:11px;'}">{'</br>' if vertical_rotation else ''}{line2}</div>'
+                        f'text-overflow:ellipsis;{" font-size:9px;" if vertical_rotation else "font-size:11px;"}">{"</br>" if vertical_rotation else ""}{line2}</div>'
                         f'<div style="font-weight:600;font-size:9px; '
-                        f'color:{text_color_2};">Drive: {line3} {'</br>' if vertical_rotation else '/'} {line4} {'</br>' if vertical_rotation else '/'} Temp: {line5}</div>'
+                        f'color:{text_color_2};">Drive: {line3} {"</br>" if vertical_rotation else "/"} {line4} {"</br>" if vertical_rotation else "/"} Temp: {line5}</div>'
                         '</td>'
                         '<td style="width:40px;text-align:right;vertical-align:top;">'
                         f'{led_dot(led_color, high_contrast_switch)}'
