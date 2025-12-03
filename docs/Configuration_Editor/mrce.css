@@ -1,5 +1,5 @@
 [data-bs-theme="dark"] {
-  --mr-hero-gradient: linear-gradient(135deg, #7E57C2 0%, #26C6DA 100%);
+  --mr-hero-gradient: linear-gradient(135deg, #1A237E 0%, #7986CB 100%);
   --mr-hero-color: #ffffff;
   --mr-tsc: #ffffff;
   --mr-body-bg: #332D2D;
@@ -10,7 +10,7 @@
 }
 
 [data-bs-theme="light"] {
-  --mr-hero-gradient: linear-gradient(135deg, #42A5F5 0%, #66BB6A 100%);
+  --mr-hero-gradient: linear-gradient(135deg, #2E7D32 0%, #C8E6C9 100%);
   --mr-hero-color: #ffffff;
   --mr-tsc: #000000;
   --mr-body-bg: #cbcfd6;
