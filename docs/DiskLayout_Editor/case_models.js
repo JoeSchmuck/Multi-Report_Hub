@@ -127,5 +127,64 @@ window.CASE_MODELS = [
         {"id": 1, "title": "Front Bays"}
       ]
     }
-  }
+  },
+{
+    "id":"supermicro_12x4x2",
+    "manufacturer": "Supermicro",
+    "name": "Supermicro Case 12x4x2",
+    "bays": 18,
+    "description": "Supermicro Case 12x4x2 - by PhilD13",
+    "layout": {
+      "rows": 8,
+      "cols": 4,
+      "placeholderSlots": [
+        {
+          "id": 1,
+          "title": "Front of Case - 12 Drives"
+        },
+        {
+          "id": 17,
+          "title": "Inside Top of Case - 4 drivess"
+        },
+        {
+          "id": 25,
+          "title": "Rear of Case - 2 Drives"
+        }
+      ],
+      "sepSlots": [
+        1,
+        2,
+        3,
+        4,
+        17,
+        18,
+        19,
+        20,
+        25,
+        26,
+        27,
+        28
+      ],
+      "activeSlots": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        21,
+        22,
+        23,
+        24,
+        29,
+        30
+      ]
+    }
+  }  
 ];
