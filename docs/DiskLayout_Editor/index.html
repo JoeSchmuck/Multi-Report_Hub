@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="mrdlt.css">
 </head>
 <body>
+  <div id="snow"></div>
 <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top border-bottom">
   <div class="container">
     <a class="navbar-brand d-flex align-items-center gap-2" href="#">
@@ -313,20 +314,6 @@
   </div>
 </div>
 
-
-<!-- jQuery / Sortable / Bootstrap / Toastr / SweetAlert -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/bootstrap-table@1.22.4/dist/bootstrap-table.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/gh/admsev/jquery-play-sound/jquery.playSound.min.js"></script>
-
-<!-- Case models (global) -->
-<script src="case_models.js"></script>
-<!-- App -->
-<script src="mrdlt.app.js"></script>
 <footer class="container py-4">
   <div class="d-flex flex-column flex-md-row align-items-center gap-2 justify-content-between">
     <small class="text-muted">© <span id="year"></span> <b>Multi-Report Disk Layout Tool</b><br>
@@ -337,6 +324,17 @@
     </small>
   </div>
 </footer>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.22.4/dist/bootstrap-table.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/gh/admsev/jquery-play-sound/jquery.playSound.min.js"></script>
+<script src="case_models.js"></script>
+<script src="mrdlt.app.js"></script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script>
@@ -349,5 +347,45 @@ function googleTranslateElementInit() {
   }, 'google_translate_element');
 }
 </script>
+<script>
+particlesJS("snow", {
+  "particles": {
+    "number": {
+      "value": 150,
+      "density": { "enable": true, "value_area": 800 }
+    },
+    "color": { "value": "#ffffff" },
+    "shape": { "type": "circle" },
+    "opacity": {
+      "value": 0.8,
+      "random": true
+    },
+    "size": {
+      "value": 4,
+      "random": true
+    },
+    "line_linked": {
+      "enable": false
+    },
+    "move": {
+      "enable": true,
+      "speed": 1.5,
+      "direction": "bottom",
+      "random": false,
+      "straight": false,
+      "out_mode": "out"
+    }
+  },
+  "interactivity": {
+    "events": {
+      "onhover": { "enable": false },
+      "onclick": { "enable": false },
+      "resize": true
+    }
+  },
+  "retina_detect": true
+});
+</script>
+
 </body>
 </html>

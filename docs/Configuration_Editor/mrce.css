@@ -139,3 +139,9 @@ header.container.animate-in {
   border-width: 2px;
   border-color: var(--mr-checkbox-linecolor);  
 }
+
+/* christimas time! */
+#snow {
+  position: fixed;
+  inset: 0;
+}

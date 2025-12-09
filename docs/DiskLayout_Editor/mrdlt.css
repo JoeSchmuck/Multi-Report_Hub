@@ -673,3 +673,8 @@ header.container.animate-in {
   overflow-x: auto;  
 }
 
+/* christimas time! */
+#snow {
+  position: fixed;
+  inset: 0;
+}

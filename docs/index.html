@@ -23,6 +23,7 @@
 </head>
 
 <body>
+  <div id="snow"></div>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top border-bottom">
     <div class="container">
@@ -114,6 +115,7 @@
 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
@@ -188,5 +190,45 @@
 
 
   </script>
+
+<script>
+particlesJS("snow", {
+  "particles": {
+    "number": {
+      "value": 150,
+      "density": { "enable": true, "value_area": 800 }
+    },
+    "color": { "value": "#ffffff" },
+    "shape": { "type": "circle" },
+    "opacity": {
+      "value": 0.8,
+      "random": true
+    },
+    "size": {
+      "value": 4,
+      "random": true
+    },
+    "line_linked": {
+      "enable": false
+    },
+    "move": {
+      "enable": true,
+      "speed": 1.5,
+      "direction": "bottom",
+      "random": false,
+      "straight": false,
+      "out_mode": "out"
+    }
+  },
+  "interactivity": {
+    "events": {
+      "onhover": { "enable": false },
+      "onclick": { "enable": false },
+      "resize": true
+    }
+  },
+  "retina_detect": true
+});
+</script>  
 </body>
 </html>

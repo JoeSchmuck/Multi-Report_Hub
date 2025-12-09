@@ -84,3 +84,8 @@ header.container.animate-in {
 .img-tool-preview {
   max-height: 250px;
 }
+/* christimas time! */
+#snow {
+  position: fixed;
+  inset: 0;
+}
