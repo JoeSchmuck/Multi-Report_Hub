@@ -55,7 +55,7 @@ def assert_outputs_secure_or_abort() -> bool:
             
         append_log("test pass, checking permission")
         if bool(st.st_mode & stat.S_IWOTH):
-            print(f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation will not be aborted, until script is in BETA test .") 
+            print(f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation will not be aborted, until script is in BETA test .")
 #            process_output(True, f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation aborted.", 1)
     return True
 
