@@ -145,3 +145,29 @@ header.container.animate-in {
   position: fixed;
   inset: 0;
 }
+.christmas-logo {
+    position: relative;
+    display: inline-block;
+}
+
+.christmas-logo::after {
+    content: "";
+    background-image: url('/Multi-Report_Hub/assets/santa-hat.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    top: -20px;
+    left: -10px;
+    transform: rotate(-15deg);
+    pointer-events: none;
+}
+
+@keyframes hatwiggle {
+  0%,100% { transform: rotate(-15deg) translateY(0); }
+  50% { transform: rotate(-10deg) translateY(-3px); }
+}
+.christmas-logo::after {
+    animation: hatwiggle 2s ease-in-out infinite;
+}
