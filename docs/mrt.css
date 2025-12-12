@@ -84,6 +84,27 @@ header.container.animate-in {
 .img-tool-preview {
   max-height: 250px;
 }
+
+/* media query */
+
+/* breakpoint bs xs */
+@media (max-width: 576px) { 
+  .mr-hide-mobile {
+    display: none !important;
+  }
+
+  #top-menu {
+    font-size: 0.9rem;
+  }
+}
+
+/* breakpoint 360px */
+@media (max-width: 360px) { 
+  #top-menu {
+    font-size: 0.7rem;
+  }
+}
+
 /* christimas time! */
 #snow {
   position: fixed;

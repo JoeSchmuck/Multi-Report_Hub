@@ -3,7 +3,7 @@
     "use strict";
 
     // MR latest version
-    const MRV = "3.22";
+    const MRV = "3.28";
     const startdtd = "2025-08-25";    
 
     //  Namespace 

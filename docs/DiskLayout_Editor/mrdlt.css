@@ -704,3 +704,23 @@ header.container.animate-in {
 .christmas-logo::after {
     animation: hatwiggle 2s ease-in-out infinite;
 }
+
+/* media query */
+
+/* breakpoint bs xs */
+@media (max-width: 576px) { 
+  .mr-hide-mobile {
+    display: none !important;
+  }
+
+  #top-menu {
+    font-size: 0.9rem;
+  }
+}
+
+/* breakpoint 360px */
+@media (max-width: 360px) { 
+  #top-menu {
+    font-size: 0.7rem;
+  }
+}

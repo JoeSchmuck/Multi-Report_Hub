@@ -1,6 +1,3 @@
-# 🚨🚨 WORK IN PROGRESS 🚨🚨
----
-
 # ✨ Multi Report HUB
 Those tools are designed to improve the Multi Report users experience.<br>
 Choose which tool you need from [HERE](https://joeschmuck.github.io/Multi-Report_Hub) or from the list above
@@ -26,4 +23,3 @@ We do not raccomend but you can also run it locally in your pc (better use the l
 ---
 
 ## 🙋‍♂️ For any problem or improvements let us know!
-

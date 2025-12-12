@@ -1035,7 +1035,7 @@ function populateCaseModal(){
 
 
 // MRCE-style version badge (optional)
-(function(){var el=document.getElementById('mr-v'); if(el){el.textContent='v1.3 BETA';}})();
+(function(){var el=document.getElementById('mr-v'); if(el){el.textContent='v1.3';}})();
 
 
 document.addEventListener('DOMContentLoaded', () => {
