@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.14
+##### V 0.15
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.14"
+__version__ = "0.15"
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
 __script_name__ = os.path.basename(__script_path__)
@@ -17,6 +17,7 @@ __output_render_snipplet__ = os.path.join(__script_directory__, "case_email_snip
 __c_placeholder_slot__ = "#7E57C2"
 __c_placeholder_slot_2__ = "#4527A0"
 __c_HC_placeholder_slot__ = "#9FA6B2"
+__c_notfilled_slot__ = "#E8F5E9"
 __cols__ = 4 # just a fallback 
 __cols_n_limit__ = 5 # used to determine the max limit to decrease cols width to 200
 __rows_n_limit__ = 10 # used to determine the max number to decrease gap
@@ -442,6 +443,7 @@ box-shadow:inset 0 0 15px rgba(255,255,255,.05),inset 0 0 30px rgba(0,0,0,.8)}}
 .slot .led.orange{{background:#E4A11B;box-shadow:0 0 8px rgba(255,150,60,.55)}}
 .slot .led.blank{{background:#9e9e9e;box-shadow:0 0 6px rgba(150,150,150,.45)}}
 .slot.empty{{border:1px dashed #333;opacity:.5}}
+.slot.empty.not-filled {{background: {__c_notfilled_slot__}; opacity: 1;}}
 .slot.filled{{cursor:pointer;transition:transform .06s ease-out, box-shadow .06s ease-out}}
 .slot.filled:hover{{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.35);{rotate_slot}}}
 {('.case .slot.filled .text { transform: rotate(90deg) translate(5%, 0%); transform-origin: top center; }' if vertical_rotation else '')}
@@ -542,7 +544,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
             parts.append(render_row_break(pos, cols, total_slots))
             continue            
 
-        append_log("real drive!")
+        append_log("active slot")
         info = pos_to_info.get(pos)
         serial = info.get("serial") if info else None
         bay_idx = info.get("bay_index") if info else None
@@ -551,11 +553,10 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
             d = drive_lookup[serial]
             parts.append(render_drive_line(d, bay_idx, high_contrast_switch))
             append_log("drive generated")
-
         else:
             hide_empty_bay = ' style="display:none;"' if not has_real_case else ''
-            parts.append(f'<div class="slot empty"{hide_empty_bay}></div>')
-            append_log("drive not correctly generated")
+            parts.append(f'<div class="slot empty not-filled"{hide_empty_bay}>{'⭕' if high_contrast_switch else '&nbsp;'}</div>')
+            append_log("drive not correctly generated or slot not filled")
 
     # Unplaced drives panel (only if present and not hidden)
     if has_real_case:
@@ -732,7 +733,7 @@ def render_table_email_snippet(
                         f'background-color:{bg};">&nbsp;</td>'
                     )
                     continue
-                append_log("real drive!")
+                append_log("active slot")
                 info = pos_to_info.get(pos)
                 serial = info.get("serial") if info else None
                 if serial and serial in drive_lookup:
@@ -779,11 +780,11 @@ def render_table_email_snippet(
                     append_log("drive generated")
                 else:
                     parts.append(
-                        f'<td style="width:{colswidth}px;height:{colsheight}px;'
+                        f'<td style="width:{colswidth}px;height:{colsheight}px;background:{__c_notfilled_slot__};'
                         'border:1px dashed #444444;border-radius:8px;'
-                        'text-align:center;vertical-align:middle;">&nbsp;</td>'
+                        f'text-align:center;vertical-align:middle;">{'⭕' if high_contrast_switch else '&nbsp;'}</td>'
                     )
-                    append_log("drive not correctly generated")
+                    append_log("drive not correctly generated or slot not filled")
             parts.append("</tr>")
 
     parts.append("</table>")
