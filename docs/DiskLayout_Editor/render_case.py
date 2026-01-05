@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.15
+##### V 0.16
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.15"
+__version__ = "0.16"
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
 __script_name__ = os.path.basename(__script_path__)
@@ -555,7 +555,7 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
             append_log("drive generated")
         else:
             hide_empty_bay = ' style="display:none;"' if not has_real_case else ''
-            parts.append(f'<div class="slot empty not-filled"{hide_empty_bay}>{'⭕' if high_contrast_switch else '&nbsp;'}</div>')
+            parts.append(f'<div class="slot empty not-filled"{hide_empty_bay}> {"⭕" if high_contrast_switch else "&nbsp;"} </div>')
             append_log("drive not correctly generated or slot not filled")
 
     # Unplaced drives panel (only if present and not hidden)
@@ -782,7 +782,7 @@ def render_table_email_snippet(
                     parts.append(
                         f'<td style="width:{colswidth}px;height:{colsheight}px;background:{__c_notfilled_slot__};'
                         'border:1px dashed #444444;border-radius:8px;'
-                        f'text-align:center;vertical-align:middle;">{'⭕' if high_contrast_switch else '&nbsp;'}</td>'
+                        f'text-align:center;vertical-align:middle;">{"⭕" if high_contrast_switch else "&nbsp;"}</td>'
                     )
                     append_log("drive not correctly generated or slot not filled")
             parts.append("</tr>")
