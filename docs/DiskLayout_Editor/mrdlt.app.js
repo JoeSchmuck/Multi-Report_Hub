@@ -95,8 +95,11 @@ function makeDiskEl(rec){
   let color = (rec.drive_color || 'blank').toLowerCase();
   const validColors = ['green', 'yellow', 'red', 'orange', 'blank'];
   if (!validColors.includes(color)) { color = 'blank'; }
+  var seriallabel = rec.serial.replace(/-/g, ''); // - is breaking layout?
   const colorClass = `clr-${color}`; // clr-green / clr-yellow / clr-red / clr-orange / clr-blank
-  const pill = $(`<div class=\"disk ${colorClass}\" data-serial=\"${rec.serial}\"><span class=\"fw-semibold\">${rec.serial|| rec.drive_id} <i class="small hide-filled">-  ${rec.address}</i></span><span class=\"meta\">${rec.capacity || ''}</span></div>`);
+  const pin = `</br><i class="small">${rec.address } </i>`; //hide-filled -- + (rec.pool ? ' - '+rec.pool : '')
+  const meta = `<span class="meta">${(rec.type || '') + (rec.capacity ? ' </br> '+rec.capacity : '') }</span>`;
+  const pill = $(`<div class=\"disk ${colorClass}\" data-serial=\"${rec.serial}\"><span class=\"fw-semibold\">${seriallabel|| rec.drive_id} ${pin}</span>${meta}</div>`);
   return pill;
 }
 
@@ -179,7 +182,7 @@ function apply8colpatch(cols,rows) {
   $containerbody.removeClass('scroll-x');
   const $grid = $containerbody.find('#case');
   var gridcols = "1fr"
-  var gridrows = "80px"
+  var gridrows = "100px" //"80px"
 
   if (isWide) {
     setTimeout(() => { $('.bay').addClass('bay-wide');}, 50);
@@ -188,7 +191,7 @@ function apply8colpatch(cols,rows) {
     $containerbody.addClass('scroll-x');
     if(cols >10) { gridcols = "80px";}
     else {gridcols = "120px";}
-    gridrows = "220px"; 
+    gridrows = "250px"; //"220px"
     toastr.info(
       'The layout was adjusted to allow dragging across all columns.',
       'Wide layout enabled',

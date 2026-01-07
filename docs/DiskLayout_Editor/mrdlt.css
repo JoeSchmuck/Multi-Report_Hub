@@ -65,6 +65,7 @@ html {
 .disk .meta {
   font-size: .8rem;
   color: #495057;
+  text-transform: uppercase;
 }
 
 /* status accents */
@@ -103,7 +104,7 @@ html {
 }
 
 .bay-wide .disk.clr-green::before {
-  width: 0;
+  width: 5px;
 }
 
 .disk.clr-yellow::before {
@@ -112,7 +113,7 @@ html {
 }
 
 .bay-wide .disk.clr-yellow::before {
-  width: 0;
+  width: 5px;
 }
 
 .disk.clr-red::before {
@@ -121,7 +122,7 @@ html {
 }
 
 .bay-wide .disk.clr-red::before {
-  width: 0;
+  width: 5px;
 }
 
 .disk.clr-orange::before {
@@ -130,7 +131,7 @@ html {
 }
 
 .bay-wide .disk.clr-orange::before {
-  width: 0;
+  width: 5px;
 }
 
 .disk.clr-blank::before {
@@ -139,7 +140,7 @@ html {
 }
 
 .bay-wide .disk.clr-blank::before {
-  width: 0;
+  width: 5px;
 }
 
 [data-bs-theme="dark"] .disk:hover {
@@ -654,13 +655,20 @@ header.container.animate-in {
 */
 
 .bay-wide .meta {
-    display: none;
+    /*display: none;
+    transform: rotate(90deg) translate(160%, 400%);*/
+    transform: translate(-380%, 220%);
+    font-size: .875em; 
 }
 
 .bay-wide .fw-semibold {
-    font-size:11px;
+    /*font-size:11px;*/
     transform: rotate(90deg) translate(0%, 100%);
     transform-origin: top center;    
+}
+
+.bay-wide .fw-semibold .small {
+  font-size: .675em;
 }
 
 .bay-wide .ph-input:hover {
