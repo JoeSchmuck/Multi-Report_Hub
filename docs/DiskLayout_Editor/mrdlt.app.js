@@ -71,12 +71,12 @@ function setCaseLabel(){
   const $label = $('#current-case-label');
   const $rot   = $('#rotate-layout-switch');
 
-  if (!currentCase) { 
+  if (!currentCase) {
     $label.val('No case');
     if ($rot.length)   $rot.prop('checked', false);
     return;
   }
-  $label.val(currentCase.name || currentCase.id); 
+  $label.val(currentCase.name || currentCase.id);
   if ($rot.length) {
     const rotateFlag = !!(currentCase.layout && currentCase.layout.rotate);
     $rot.prop('checked', rotateFlag);
@@ -139,12 +139,12 @@ function resetAllState(){
 }
 
 // --- Case building NEW ---
-function getColsFromModel(model){ 
+function getColsFromModel(model){
   const cols = parseInt(model?.layout?.cols, 10);
   return (Number.isInteger(cols) && cols > 0) ? cols : 4;
 }
-function idxToRowCol(idx, cols){ 
-  const n = parseInt(idx,10); 
+function idxToRowCol(idx, cols){
+  const n = parseInt(idx,10);
   const C = Number.isInteger(cols) && cols>0 ? cols : 4; // need a fallback
   return { row: Math.ceil(n / C), col: ((n-1) % C) + 1 };
 }
@@ -155,14 +155,15 @@ function computeActivePositions(model){
   const cols = getColsFromModel(model);
   const positions = L.activeSlots.map(idx => idxToRowCol(idx, cols));
   const rows = L.rows || Math.max(...positions.map(p=>p.row));
-  return { rows, cols, active: positions }; 
+  return { rows, cols, active: positions };
 }
 
 // --- helper to better handle huge case and now vertical orientation
-// the render py can handle smoothly 8 orizontal cols, instead the GUI break at 6, the goal is to preserve consistent output for both
+// the render py can handle smoothly 8 horizontal cols
+// instead of the GUI break at 6 the goal is to preserve consistent output for both
 function apply8colpatch(cols,rows) {
   const $rot = $('#rotate-layout-switch');
-  const rotateChecked = $rot.length ? $rot.is(':checked') : false;  
+  const rotateChecked = $rot.length ? $rot.is(':checked') : false;
   const isBreakout = cols > 8;
   var isWide = cols >= 6;
   if (isWide && isBreakout && !rotateChecked) {
@@ -170,19 +171,19 @@ function apply8colpatch(cols,rows) {
     if (currentCase && currentCase.layout) {
       currentCase.layout.rotate = true;
     }
-  }  
+  }
   if (!isWide && rotateChecked) {
     isWide = true;
-  }  
+  }
   const $containerbody = $('#mr-case-body-container');
   const $left  = $('#mr-unassigned-disk-container');
-  const $right = $('#mr-case-container');  
+  const $right = $('#mr-case-container');
   $left.removeClass('col-lg-12 col-lg-3 col-lg-2');
-  $right.removeClass('col-lg-12 col-lg-9 col-lg-10');  
+  $right.removeClass('col-lg-12 col-lg-9 col-lg-10');
   $containerbody.removeClass('scroll-x');
   const $grid = $containerbody.find('#case');
   var gridcols = "1fr"
-  var gridrows = "100px" //"80px"
+  var gridrows = "100px"
 
   if (isWide) {
     setTimeout(() => { $('.bay').addClass('bay-wide');}, 50);
@@ -195,19 +196,21 @@ function apply8colpatch(cols,rows) {
     toastr.info(
       'The layout was adjusted to allow dragging across all columns.',
       'Wide layout enabled',
-      { timeOut: 3500, positionClass: 'toast-top-right', preventDuplicates: true } );   
+      { timeOut: 3500, positionClass: 'toast-top-right', preventDuplicates: true } );
   }
   else {
     $left.addClass('col-lg-3');
-    $right.addClass('col-lg-9');        
+    $right.addClass('col-lg-9');
     setTimeout(() => { $('.bay').removeClass('bay-wide');}, 50);
-  } 
+  }
 
   $grid.css({
     'grid-template-columns': `repeat(${cols}, ${gridcols})`,
-    'grid-template-rows':    `repeat(${rows}, ${gridrows})`
-  });    
+//    'grid-template-rows':    `repeat(${rows}, ${gridrows})`
+    'grid-template-rows':    `repeat(${rows}, auto)`
+  });
 
+  return gridrows;
 }
 
 function buildCase(){
@@ -220,14 +223,15 @@ function buildCase(){
   catch(err){ toastr.error(String(err)); return; }
 
   const { rows, cols, active } = layout;
-  apply8colpatch(cols,rows);
+  const height = apply8colpatch(cols, rows);
+
   const actSet = new Set(active.map(p=>`${p.row}-${p.col}`));
   const sepSet = (currentCase?.layout?.sepSlots && Array.isArray(currentCase.layout.sepSlots))
     ? new Set(currentCase.layout.sepSlots.map(n => parseInt(n, 10)))
     : null;
   $case.removeClass('empty-hint').addClass('grid')
     //.css({'grid-template-columns': `repeat(${cols}, 1fr)`, //
-    //'grid-template-rows': `repeat(${rows}, 70px)`})  
+    //'grid-template-rows': `repeat(${rows}, 70px)`})
     .empty();
 
   let bayIndex = 0;
@@ -238,7 +242,7 @@ function buildCase(){
       let bayHtml = '';
       if (isActive){
         bayIndex++;
-        bayHtml = `<div class="bay" data-bay="${bayIndex}" data-slot="${slotIndex}">
+        bayHtml = `<div class="bay" data-bay="${bayIndex}" data-slot="${slotIndex}" style="height:${height}">
                       <span class="bay-label">Bay ${bayIndex}</span>
                       <span class="placeholder">Drop disk here</span>
                    </div>`;
@@ -249,18 +253,17 @@ function buildCase(){
           const modelPH = getModelPlaceholderMap(currentCase);
           const filePH  = getFilePlaceholderMap();
           const ph = modelPH.get(slotIndex) || filePH.get(slotIndex);
-          if (ph){ 
+          if (ph){
             const val = getPlaceholderValue(slotIndex, modelPH, filePH);
             extra += ' has-input';
             bayHtml = `
-              <div class="bay ${extra}" data-slot="${slotIndex}">
+              <div class="bay ${extra}" data-slot="${slotIndex}" style="height:100px;grid-column-end:span ${cols};">
                 <div class="ph-wrapper">
                   <input
                     id="ph-${slotIndex}"
                     name="ph-${slotIndex}"
                     class="ph-input"
                     type="text"
-                    maxlength="50"
                     placeholder="${(ph?.title || '').replaceAll('"','&quot;')}"
                     value="${String(val).replaceAll('"','&quot;')}"
                   >
@@ -269,7 +272,7 @@ function buildCase(){
                 </div>
               </div>`;
           } else {
-            bayHtml = `<div class="bay disabled${extra}" data-slot="${slotIndex}"><span class="bay-label">—</span></div>`;
+            // bayHtml = `<div class="bay disabled${extra}" data-slot="${slotIndex}"><span class="bay-label">—</span></div>`;
           }
         } else {
           bayHtml = `<div class="bay disabled${extra}" data-slot="${slotIndex}"><span class="bay-label">—</span></div>`;
@@ -317,7 +320,7 @@ function initSortableForBay(bayEl){
     emptyInsertThreshold: 30,
     scroll: true,
     scrollSensitivity: 25,
-    scrollSpeed: 15,  
+    scrollSpeed: 15,
     onMove(evt){
       const to = evt.to; if (to && to.classList.contains('bay')) to.classList.add('highlight');
       return true;
@@ -521,7 +524,7 @@ function renderCustomGrid(container, rows, cols){
       ]
       options.forEach(o=>{
         const opt = document.createElement('option');
-        opt.value = o.v; 
+        opt.value = o.v;
         opt.textContent = o.t;
         select.appendChild(opt);
       });
@@ -529,7 +532,7 @@ function renderCustomGrid(container, rows, cols){
       const prevVal = prevKinds.get(idx);
       if (prevVal && options.some(o => o.v === prevVal)) {
         select.value = prevVal;
-      }      
+      }
 
       cell.appendChild(select);
       container.appendChild(cell);
@@ -866,7 +869,7 @@ function onLoadConfigFile(e){
     } else {
       currentCase = null; setCaseLabel(); buildEmptyCaseHint();
       toastr.info('No case model in file. Choose a case or start from scratch');
-      $('#open-case-modal').prop('disabled', false).trigger('click');     
+      $('#open-case-modal').prop('disabled', false).trigger('click');
     }
 
     $('#save-config,#reset-layout,#open-case-modal,#open-custom-case-modal').prop('disabled', false);

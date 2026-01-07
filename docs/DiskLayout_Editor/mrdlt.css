@@ -456,7 +456,7 @@ header.container.animate-in {
       transparent 6px,
       transparent 12px),
     #6A1B9A !important;
-  padding-top: 1.75rem;  
+  padding-top: 1.75rem;
 }
 
 .bay.slot-placeholder .ph-wrapper {
@@ -658,27 +658,27 @@ header.container.animate-in {
     /*display: none;
     transform: rotate(90deg) translate(160%, 400%);*/
     transform: translate(-380%, 220%);
-    font-size: .875em; 
+    font-size: .875em;
 }
 
 .bay-wide .fw-semibold {
     /*font-size:11px;*/
     transform: rotate(90deg) translate(0%, 100%);
-    transform-origin: top center;    
+    transform-origin: top center;
 }
 
 .bay-wide .fw-semibold .small {
   font-size: .675em;
 }
 
-.bay-wide .ph-input:hover {
+.bay-wide not(.slot-placeholder) .ph-input:hover {
   transform: scale(1.5);
   width: 200px;
   z-index: 9999;
 }
 
 .scroll-x {
-  overflow-x: auto;  
+  overflow-x: auto;
 }
 
 /* christimas time! */
@@ -716,7 +716,7 @@ header.container.animate-in {
 /* media query */
 
 /* breakpoint bs xs */
-@media (max-width: 576px) { 
+@media (max-width: 576px) {
   .mr-hide-mobile {
     display: none !important;
   }
@@ -727,7 +727,7 @@ header.container.animate-in {
 }
 
 /* breakpoint 360px */
-@media (max-width: 360px) { 
+@media (max-width: 360px) {
   #top-menu {
     font-size: 0.7rem;
   }
