@@ -697,6 +697,7 @@ def render_table_email_snippet(
             for c in range(cols):
                 pos = r * cols + c + 1
                 append_log(f">> {pos}")
+                
                 if pos not in active_set:
                     append_log("empty bay")
                     parts.append(
@@ -709,14 +710,15 @@ def render_table_email_snippet(
                 if pos in placeholder_map:
                     append_log("placeholder bay")
                     title = escape(placeholder_map[pos])
-                    if vertical_rotation:
-                        title = break_string(title)
+                    # if vertical_rotation:
+                    #    title = break_string(title)
                     bg = border = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
                     text_color = "#000000" if high_contrast_switch else "#FFFFFF"
                     parts.append(
                         f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px; min-height:{colsheight}px;'
                         f'border:1px solid {border};border-radius:8px;'
-                        f'background-color:{bg};padding:8px 12px;vertical-align:middle;">'
+                        f'background-color:{bg};padding:8px 12px;vertical-align:middle;"'
+                        f'colspan={cols}>'
                         f'<div style="font-weight:800;font-size:{"10" if vertical_rotation else "13"}px;'
                         f'color:{text_color};white-space:nowrap;overflow:hidden;'
                         f'text-overflow:ellipsis;">{title}</div>'
@@ -725,14 +727,9 @@ def render_table_email_snippet(
                     continue
 
                 if pos in sep_slots:
-                    append_log("separator bay")
-                    bg = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
-                    parts.append(
-                        f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px; min-height:{colsheight}px;'
-                        f'border:1px solid {bg};border-radius:8px;'
-                        f'background-color:{bg};">&nbsp;</td>'
-                    )
+                    append_log("separator bay spanned")
                     continue
+
                 append_log("active slot")
                 info = pos_to_info.get(pos)
                 serial = info.get("serial") if info else None
@@ -782,7 +779,7 @@ def render_table_email_snippet(
                     parts.append(
                         f'<td style="width:{colswidth}px;height:{colsheight}px;background:{__c_notfilled_slot__};'
                         'border:1px dashed #444444;border-radius:8px;'
-                        f'text-align:center;vertical-align:middle;">{"⭕" if high_contrast_switch else "&nbsp;"}</td>'
+                        f'text-align:center;vertical-align:middle;color:gray;">{"⭕" if high_contrast_switch else "Empty"}</td>'
                     )
                     append_log("drive not correctly generated or slot not filled")
             parts.append("</tr>")
