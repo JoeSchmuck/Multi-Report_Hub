@@ -694,6 +694,7 @@ def render_table_email_snippet(
         append_log("start cycling")
         for r in range(rows):
             parts.append("<tr>")
+            colspan = 0
             for c in range(cols):
                 pos = r * cols + c + 1
                 append_log(f">> {pos}")
@@ -718,25 +719,31 @@ def render_table_email_snippet(
                         test = r * cols + i + 1
                         if (
                             test in placeholder_map or
-                            test in active_set or
                             test not in sep_slots
                         ):
                             break
-                    span = i - c
+                    else:
+                        i += 1
+                    colspan = i - c
                     parts.append(
                         f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px; min-height:{colsheight}px;'
                         f'border:1px solid {border};border-radius:8px;'
                         f'background-color:{bg};padding:8px 12px;vertical-align:middle;"'
-                        f'colspan={span}>'
+                        f'colspan={colspan}>'
                         f'<div style="font-weight:800;font-size:{"10" if vertical_rotation else "13"}px;'
                         f'color:{text_color};white-space:nowrap;overflow:hidden;'
                         f'text-overflow:ellipsis;">{title}</div>'
                         '</td>'
                     )
-                    c += span - 1
+                    colspan -= 1    # We don't need to skip the existing cell
                     continue
 
                 if pos in sep_slots:
+                    if colspan:
+                        append_log("skipping spanned separator bay")
+                        colspan -= 1
+                        continue
+
                     append_log("separator bay")
                     bg = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
                     parts.append(
