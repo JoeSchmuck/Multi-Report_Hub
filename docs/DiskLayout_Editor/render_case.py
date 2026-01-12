@@ -2,10 +2,10 @@ import json, argparse, os, sys, stat
 from html import escape
 from typing import Tuple, Dict, List
 
-##### V 0.16
+##### V 0.17
 ##### Stand alone script to generate the html render for disklayout_config.json
 
-__version__ = "0.16"
+__version__ = "0.17"
 __script_directory__ = os.getcwd()
 __script_path__ = os.path.abspath(__file__)
 __script_name__ = os.path.basename(__script_path__)
@@ -18,7 +18,7 @@ __c_placeholder_slot__ = "#7E57C2"
 __c_placeholder_slot_2__ = "#4527A0"
 __c_HC_placeholder_slot__ = "#9FA6B2"
 __c_notfilled_slot__ = "#E8F5E9"
-__cols__ = 4 # just a fallback 
+__cols__ = 4 # just a fallback
 __cols_n_limit__ = 5 # used to determine the max limit to decrease cols width to 200
 __rows_n_limit__ = 10 # used to determine the max number to decrease gap
 __cols_breakout__ = 8 #8 used to determine the max limit to auto rotate the web rich version
@@ -29,20 +29,20 @@ __row_hR__ = 70 # increased rows height
 
 def assert_outputs_secure_or_abort() -> bool:
     """
-    Security check 
+    Security check
     """
     append_log("testing symlink - size on output files")
     max_output_size = 100 * 1024
     for out_path in (__output_render__, __output_render_snipplet__):
         if os.path.lexists(out_path) and os.path.islink(out_path):
             process_output(True, f"[SECURITY ERROR]: output file '{out_path}' is a symlink; refusing to write.", 1)
-        if os.path.exists(out_path):  
-            try:  
-                st = os.stat(out_path, follow_symlinks=False)       
+        if os.path.exists(out_path):
+            try:
+                st = os.stat(out_path, follow_symlinks=False)
             except Exception as e:
-                process_output(True, f"[ERROR]: cannot stat output file '{out_path}': {e}", 1)   
+                process_output(True, f"[ERROR]: cannot stat output file '{out_path}': {e}", 1)
             if st.st_size > max_output_size:
-                process_output( True, f"[SECURITY ERROR]: output file '{out_path}' is too large ({st.st_size} bytes > {max_output_size}); refusing to write.", 1, )  
+                process_output( True, f"[SECURITY ERROR]: output file '{out_path}' is too large ({st.st_size} bytes > {max_output_size}); refusing to write.", 1, )
     append_log("test pass, checking directory")
     dirs = {
         os.path.dirname(os.path.abspath(__output_render__)) or __script_directory__,
@@ -53,7 +53,7 @@ def assert_outputs_secure_or_abort() -> bool:
             st = os.stat(d, follow_symlinks=True)
         except Exception as e:
             process_output(True, f"[ERROR]: cannot stat directory '{d}': {e}", 1)
-            
+
         append_log("test pass, checking permission")
         if bool(st.st_mode & stat.S_IWOTH):
             print(f"[SECURITY ERROR]: directory '{d}' is writable by non-privileged users; operation will not be aborted, until script is in BETA test .")
@@ -63,17 +63,17 @@ def assert_outputs_secure_or_abort() -> bool:
 def append_log(content):
     if DEBUG_ENABLED:
         print(content)
-        
+
 def process_output(error, detail="", exit_code=None):
     """
-        Centralized output response 
+        Centralized output response
         - version str error bool detail string exit_code 0 (ok) 1 (ko) or None (ignore)
-    """                   
+    """
     response = json.dumps({"version": __version__,"error": error, "detail": detail}, ensure_ascii=False)
-    append_log(f"{detail}") 
+    append_log(f"{detail}")
     print(response)
     if exit_code is not None:
-        sys.exit(exit_code)             
+        sys.exit(exit_code)
 
 # ---------- IO ----------
 def load_json(path: str):
@@ -117,7 +117,7 @@ def handle_rotate_layout(case: dict) -> bool:
         cols = get_cols(case)
         return is_rotate_enabled or cols > __cols_breakout__
     except Exception:
-        return False    
+        return False
 
 def validate_case(original_case: dict | None) -> Tuple[dict, bool]:
     """
@@ -153,7 +153,7 @@ def build_pos_map_from_bays(bays_list: list) -> Tuple[Dict[int, dict], List[int]
             continue
         status = str(b.get("status", "")).strip().lower() # ?? TO ASK why empty bays?
         if status == "empty":
-            continue        
+            continue
         slot = b.get("slot", None)
         try:
             pos = int(slot)
@@ -175,7 +175,7 @@ def normalize_drives_from_bays(bays_list: list) -> Dict[str, dict]:
             continue
         status = str(b.get("status", "")).strip().lower()
         if status == "empty":
-            continue        
+            continue
         serial = (b.get("serial") or "").strip()
         if serial:
             lookup[serial] = b
@@ -215,13 +215,13 @@ def get_cols_width(cols: int) -> int:
     return __cols_w__ if cols <= __cols_n_limit__ else __cols_wR__
 
 def get_rows_height(vertical_rotation: bool) -> int:
-    """ centralize the calc of the rows height """  
-    return __row_h__ if not vertical_rotation else __row_hR__ 
+    """ centralize the calc of the rows height """
+    return __row_h__ if not vertical_rotation else __row_hR__
 
 def get_gap(cols: int, rows: int) -> int:
     """ centralize the calc of the gap width """
     return 22 if cols <= __cols_n_limit__ and rows <= __rows_n_limit__ else 10
-    
+
 def slot_rotation(vertical_rotation: bool):
     """ centralize the rotation of the active slot on hover """
     return " transform: rotate(-90deg) scale(1.50); transform-origin: center; z-index: 10; transition: transform 0.15s ease-in-out;" if vertical_rotation else ""
@@ -251,7 +251,7 @@ def drive_led_icon(color: str) -> tuple[str, str]:
         "green":  ("✅", "OK"),
         "yellow": ("⚠️", "WARNING"),
         "orange": ("⚠️", "WARNING"),
-        "red":    ("❌", "CRITICAL"),    
+        "red":    ("❌", "CRITICAL"),
     }
     return icons.get(color, ("❔", "UNKNOWN"))
 
@@ -283,7 +283,7 @@ def render_drive_line(d: dict, bay_idx, high_contrast_switch: bool = False) -> s
         ic, lb = drive_led_icon(led)
         led_render = f'  <div class="led-hc">{ic} {lb} </div>'
     did = escape(drive_id(d))
-    cap = escape(drive_capacity(d))   
+    cap = escape(drive_capacity(d))
     return (
         f'<div class="slot filled box-{led}" data-bay="{bay_idx}">'
         '  <div class="text">'
@@ -294,22 +294,22 @@ def render_drive_line(d: dict, bay_idx, high_contrast_switch: bool = False) -> s
         f'  {led_render}'
         '</div>'
     )
-    
+
 def render_placeholder_slot(title: str) -> str:
     t = escape(title)
     return (
         '<div class="slot placeholder box-blank">'
         f'  <div class="text"><div class="line-1">{t}</div></div>'
         '</div>'
-    ) 
-    
+    )
+
 def render_sep_slot() -> str:
     return (
         '<div class="slot separator box-blank">'
         '  <div class="text"><div class="line-1">&nbsp;</div></div>'
         '</div>'
-    ) 
-    
+    )
+
 def led_dot(color: str, high_contrast_switch: bool = False) -> str:
     """Return led element color or the icon if high_contrast switch is enabled"""
     if high_contrast_switch:
@@ -336,7 +336,7 @@ def led_background_color(color: str, high_contrast_switch: bool = False) -> str:
             "yellow": "#d6a31e",
             "red": "#b32121",
             "orange": "#D87904",
-            "blank": "#9e9e9e",            
+            "blank": "#9e9e9e",
         }
         c = colors.get(color, "#9e9e9e")
         return c
@@ -352,9 +352,9 @@ def render_row_break(pos: int, cols: int, total_slots: int) -> str:
 def break_string(val: str) -> str:
     if not val:
         return ""
-    return "<br/>".join(val)    
+    return "<br/>".join(val)
 
-# ------------------------------------------------------------------    
+# ------------------------------------------------------------------
 # ------------------------- HTML BUILDING --------------------------
 # ------------------------------------------------------------------
 
@@ -378,7 +378,7 @@ def render_web_html(
     append_log("getting bays")
     bays_json = json.dumps(bays_list, ensure_ascii=False)
     append_log("check for the case orientation")
-    vertical_rotation = handle_rotate_layout(case)    
+    vertical_rotation = handle_rotate_layout(case)
     append_log(f"need rotation? {vertical_rotation}")
     append_log("calculating css variables")
     gap = get_gap(cols, rows)
@@ -389,21 +389,21 @@ def render_web_html(
         append_log("swapping col-row")
         colswidth, rowsheight = rowsheight, colswidth
     rotate_slot = slot_rotation(vertical_rotation)
-    
+
     append_log("set main colors")
     colors_block = f"""
 .box-red{{background:linear-gradient(180deg,#b32121,#7a1414);border:1px solid #a32020}}
 .box-yellow{{background:linear-gradient(180deg,#d6a31e,#927213);border:1px solid #c59616}}
 .box-green{{background:linear-gradient(180deg,#3da94f,#237a33);border:1px solid #166b2d}}
 .box-orange{{background:linear-gradient(180deg,#e97822,#a34f0c);border:1px solid #d26510}}
-.box-blank{{background:linear-gradient(180deg,#7b7b7b,#4f4f4f);border:1px solid #5e5e5e}}   
+.box-blank{{background:linear-gradient(180deg,#7b7b7b,#4f4f4f);border:1px solid #5e5e5e}}
 .slot.placeholder.box-blank{{opacity:1; background: linear-gradient(180deg, {__c_placeholder_slot__}, {__c_placeholder_slot_2__});}}
-.slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, {__c_placeholder_slot__}, {__c_placeholder_slot_2__});}} 
+.slot.separator.box-blank{{opacity:1; background: linear-gradient(180deg, {__c_placeholder_slot__}, {__c_placeholder_slot_2__});}}
 .slot .line-1{{font-weight:800;color:#fff;font-size:13px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
 .slot .line-2{{font-weight:600;color:#cfe7ff;font-size:11px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
 .slot .line-3{{font-weight:600;color:#cccccc;font-size:9px;opacity:.9}}
     """
-    
+
     if high_contrast_switch:
         append_log("colors swapped for the high contrast version")
         colors_block = f"""
@@ -411,13 +411,13 @@ def render_web_html(
 .box-yellow{{background:#f0f0f0;border:1px solid #9A4F15}}
 .box-green{{background:#f0f0f0;border:1px solid #234F22}}
 .box-orange{{background:#f0f0f0;border:1px solid #802828}}
-.box-blank{{background:#f0f0f0;border:1px solid #4A4A4A}}  
+.box-blank{{background:#f0f0f0;border:1px solid #4A4A4A}}
 .slot.placeholder.box-blank{{opacity:1; background: {__c_HC_placeholder_slot__};}}
 .slot.separator.box-blank{{opacity:1; background: {__c_HC_placeholder_slot__};}}
 .slot .line-1{{font-weight:800;color:#000000;font-size:13px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
 .slot .line-2{{font-weight:600;color:#000000;font-size:11px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}}
 .slot .line-3{{font-weight:600;color:#000000;font-size:9px;opacity:.9}}
-        """        
+        """
     append_log("set the main structure")
     head = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>{escape(name)}</title>
@@ -531,18 +531,18 @@ color:#ddd;padding:6px 10px;cursor:pointer}}
             hide_empty_bay = ' style="display:none;"' if not has_real_case else ''
             parts.append(f'<div class="slot empty"{hide_empty_bay}></div>')
             continue
-        
+
         if pos in placeholder_map:
             append_log("placeholder bay")
             parts.append(render_placeholder_slot(placeholder_map[pos]))
             parts.append(render_row_break(pos, cols, total_slots))
-            continue    
-        
+            continue
+
         if pos in sep_slots:
             append_log("separator bay")
             parts.append(render_sep_slot())
             parts.append(render_row_break(pos, cols, total_slots))
-            continue            
+            continue
 
         append_log("active slot")
         info = pos_to_info.get(pos)
@@ -676,7 +676,7 @@ def render_table_email_snippet(
     unpl_colswidth, unpl_rowsheight = colswidth+30, colsheight
     if vertical_rotation:
         append_log("swapping col-row")
-        colswidth, colsheight = colsheight, colswidth    
+        colswidth, colsheight = colsheight, colswidth
 
     parts: list[str] = []
 
@@ -694,9 +694,11 @@ def render_table_email_snippet(
         append_log("start cycling")
         for r in range(rows):
             parts.append("<tr>")
+            colspan = 0
             for c in range(cols):
                 pos = r * cols + c + 1
                 append_log(f">> {pos}")
+
                 if pos not in active_set:
                     append_log("empty bay")
                     parts.append(
@@ -709,22 +711,40 @@ def render_table_email_snippet(
                 if pos in placeholder_map:
                     append_log("placeholder bay")
                     title = escape(placeholder_map[pos])
-                    if vertical_rotation:
-                        title = break_string(title)
+                    # if vertical_rotation:
+                    #    title = break_string(title)
                     bg = border = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
                     text_color = "#000000" if high_contrast_switch else "#FFFFFF"
+                    i = c
+                    for i in range(c+1, cols):
+                        test = r * cols + i + 1
+                        if (
+                            test in placeholder_map or
+                            test not in sep_slots
+                        ):
+                            break
+                    else:
+                        i += 1
+                    colspan = i - c
                     parts.append(
                         f'<td style="width:{colswidth}px; min-width:{colswidth}px; height:{colsheight}px; min-height:{colsheight}px;'
                         f'border:1px solid {border};border-radius:8px;'
-                        f'background-color:{bg};padding:8px 12px;vertical-align:middle;">'
+                        f'background-color:{bg};padding:8px 12px;vertical-align:middle;"'
+                        f'colspan={colspan}>'
                         f'<div style="font-weight:800;font-size:{"10" if vertical_rotation else "13"}px;'
                         f'color:{text_color};white-space:nowrap;overflow:hidden;'
                         f'text-overflow:ellipsis;">{title}</div>'
                         '</td>'
                     )
+                    colspan -= 1    # We don't need to skip the existing cell
                     continue
 
                 if pos in sep_slots:
+                    if colspan:
+                        append_log("skipping spanned separator bay")
+                        colspan -= 1
+                        continue
+
                     append_log("separator bay")
                     bg = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
                     parts.append(
@@ -733,6 +753,7 @@ def render_table_email_snippet(
                         f'background-color:{bg};">&nbsp;</td>'
                     )
                     continue
+
                 append_log("active slot")
                 info = pos_to_info.get(pos)
                 serial = info.get("serial") if info else None
@@ -782,7 +803,7 @@ def render_table_email_snippet(
                     parts.append(
                         f'<td style="width:{colswidth}px;height:{colsheight}px;background:{__c_notfilled_slot__};'
                         'border:1px dashed #444444;border-radius:8px;'
-                        f'text-align:center;vertical-align:middle;">{"⭕" if high_contrast_switch else "&nbsp;"}</td>'
+                        f'text-align:center;vertical-align:middle;color:gray;">{"⭕" if high_contrast_switch else "Empty"}</td>'
                     )
                     append_log("drive not correctly generated or slot not filled")
             parts.append("</tr>")
@@ -813,7 +834,7 @@ def render_table_email_snippet(
 
             bg = border = led_background_color(led_color, high_contrast_switch)
             text_color = "#000000" if high_contrast_switch else "#FFFFFF"
- 
+
             parts.append(
                 f'<td style="width:{unpl_colswidth}px;height:{unpl_rowsheight}px;'
                 f'border:1px solid {border};border-radius:8px;'
@@ -856,7 +877,7 @@ def main():
     args = parser.parse_args()
     global DEBUG_ENABLED
     DEBUG_ENABLED = args.debug_enabled
-    
+
     append_log(f"## script version {__version__} ##")
     append_log(f"start preliminary security check")
     assert_outputs_secure_or_abort()
@@ -878,12 +899,12 @@ def main():
 
     pos_to_info, unplaced_indices = build_pos_map_from_bays(bays_list)
     drive_lookup = normalize_drives_from_bays(bays_list)
-    
+
     if not has_real_case:
         unplaced_indices = [i for i, b in enumerate(bays_list) if is_real_drive(b)]
         pos_to_info = {}
 
-    # check for high contrast swtich - unused from case defintion bool(cfg.get("case", {}).get("high_contrast", False)) 
+    # check for high contrast swtich - unused from case defintion bool(cfg.get("case", {}).get("high_contrast", False))
     high_contrast_switch = str(cfg.get("high_contrast", "false")).lower() == "true"
 
     append_log(f"rendering rich text file")
@@ -893,16 +914,16 @@ def main():
         with open(__output_render__, "w", encoding="utf-8") as f:
             f.write(web_html)
     except Exception as e:
-        process_output(True, f"Something wrong on rendering richt text file {e}", 1)  
-    
+        process_output(True, f"Something wrong on rendering richt text file {e}", 1)
+
     append_log(f"rendering table-based email snipplet")
     try:
         table_email_html = render_table_email_snippet(
             case, rows, cols, pos_to_info, drive_lookup, bays_list, unplaced_indices, has_real_case, high_contrast_switch)
-        with open(__output_render_snipplet__, "w", encoding="utf-8") as f:    
+        with open(__output_render_snipplet__, "w", encoding="utf-8") as f:
             f.write(table_email_html)
     except Exception as e:
-        process_output(True, f"Something wrong on rendering table-based email snipplet file {e}", 1)     
+        process_output(True, f"Something wrong on rendering table-based email snipplet file {e}", 1)
 
     process_output(False, "Operation completed", 0)
 

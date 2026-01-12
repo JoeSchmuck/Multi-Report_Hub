@@ -71,12 +71,12 @@ function setCaseLabel(){
   const $label = $('#current-case-label');
   const $rot   = $('#rotate-layout-switch');
 
-  if (!currentCase) { 
+  if (!currentCase) {
     $label.val('No case');
     if ($rot.length)   $rot.prop('checked', false);
     return;
   }
-  $label.val(currentCase.name || currentCase.id); 
+  $label.val(currentCase.name || currentCase.id);
   if ($rot.length) {
     const rotateFlag = !!(currentCase.layout && currentCase.layout.rotate);
     $rot.prop('checked', rotateFlag);
@@ -139,7 +139,7 @@ function resetAllState(){
 }
 
 // --- Case building NEW ---
-function getColsFromModel(model){ 
+function getColsFromModel(model){
   const cols = parseInt(model?.layout?.cols, 10);
   return (Number.isInteger(cols) && cols > 0) ? cols : 4;
 }
@@ -155,14 +155,14 @@ function computeActivePositions(model){
   const cols = getColsFromModel(model);
   const positions = L.activeSlots.map(idx => idxToRowCol(idx, cols));
   const rows = L.rows || Math.max(...positions.map(p=>p.row));
-  return { rows, cols, active: positions }; 
+  return { rows, cols, active: positions };
 }
 
 // --- helper to better handle huge case and now vertical orientation
 // the render py can handle smoothly 8 orizontal cols, instead the GUI break at 6, the goal is to preserve consistent output for both
 function apply8colpatch(cols,rows) {
   const $rot = $('#rotate-layout-switch');
-  const rotateChecked = $rot.length ? $rot.is(':checked') : false;  
+  const rotateChecked = $rot.length ? $rot.is(':checked') : false;
   const isBreakout = cols > 8;
   var isWide = cols >= 6;
   if (isWide && isBreakout && !rotateChecked) {
@@ -170,7 +170,7 @@ function apply8colpatch(cols,rows) {
     if (currentCase && currentCase.layout) {
       currentCase.layout.rotate = true;
     }
-  }  
+  }
   if (!isWide && rotateChecked) {
     isWide = true;
   }  
@@ -195,13 +195,13 @@ function apply8colpatch(cols,rows) {
     toastr.info(
       'The layout was adjusted to allow dragging across all columns.',
       'Wide layout enabled',
-      { timeOut: 3500, positionClass: 'toast-top-right', preventDuplicates: true } );   
+      { timeOut: 3500, positionClass: 'toast-top-right', preventDuplicates: true } );
   }
   else {
     $left.addClass('col-lg-3');
     $right.addClass('col-lg-9');        
     setTimeout(() => { $('.bay').removeClass('bay-wide');}, 50);
-  } 
+  }
 
   $grid.css({
     'grid-template-columns': `repeat(${cols}, ${gridcols})`,
@@ -227,7 +227,7 @@ function buildCase(){
     : null;
   $case.removeClass('empty-hint').addClass('grid')
     //.css({'grid-template-columns': `repeat(${cols}, 1fr)`, //
-    //'grid-template-rows': `repeat(${rows}, 70px)`})  
+    //'grid-template-rows': `repeat(${rows}, 70px)`})
     .empty();
 
   let bayIndex = 0;
@@ -249,7 +249,7 @@ function buildCase(){
           const modelPH = getModelPlaceholderMap(currentCase);
           const filePH  = getFilePlaceholderMap();
           const ph = modelPH.get(slotIndex) || filePH.get(slotIndex);
-          if (ph){ 
+          if (ph){
             const val = getPlaceholderValue(slotIndex, modelPH, filePH);
             extra += ' has-input';
             bayHtml = `
@@ -317,7 +317,7 @@ function initSortableForBay(bayEl){
     emptyInsertThreshold: 30,
     scroll: true,
     scrollSensitivity: 25,
-    scrollSpeed: 15,  
+    scrollSpeed: 15,
     onMove(evt){
       const to = evt.to; if (to && to.classList.contains('bay')) to.classList.add('highlight');
       return true;
@@ -521,7 +521,7 @@ function renderCustomGrid(container, rows, cols){
       ]
       options.forEach(o=>{
         const opt = document.createElement('option');
-        opt.value = o.v; 
+        opt.value = o.v;
         opt.textContent = o.t;
         select.appendChild(opt);
       });
@@ -529,8 +529,7 @@ function renderCustomGrid(container, rows, cols){
       const prevVal = prevKinds.get(idx);
       if (prevVal && options.some(o => o.v === prevVal)) {
         select.value = prevVal;
-      }      
-
+      } 
       cell.appendChild(select);
       container.appendChild(cell);
     }
@@ -866,7 +865,7 @@ function onLoadConfigFile(e){
     } else {
       currentCase = null; setCaseLabel(); buildEmptyCaseHint();
       toastr.info('No case model in file. Choose a case or start from scratch');
-      $('#open-case-modal').prop('disabled', false).trigger('click');     
+      $('#open-case-modal').prop('disabled', false).trigger('click');
     }
 
     $('#save-config,#reset-layout,#open-case-modal,#open-custom-case-modal').prop('disabled', false);
