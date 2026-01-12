@@ -715,6 +715,7 @@ def render_table_email_snippet(
                     #    title = break_string(title)
                     bg = border = __c_HC_placeholder_slot__ if high_contrast_switch else __c_placeholder_slot__
                     text_color = "#000000" if high_contrast_switch else "#FFFFFF"
+                    i = c
                     for i in range(c+1, cols):
                         test = r * cols + i + 1
                         if (
